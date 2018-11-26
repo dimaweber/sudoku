@@ -1,4 +1,6 @@
 #include "field.h"
+#include "cellcolor.h"
+
 #include <QFile>
 #include <QTextStream>
 #include <iostream>
@@ -120,6 +122,7 @@ void Field::prepareHouses(quint8 n)
 void Field::process()
 {
     bool changed = false;
+/*
     do
     {
         changed = false;
@@ -144,7 +147,7 @@ void Field::process()
         reduceXWing();
 
     }while(changed);
-
+*/
     findLinks();
 }
 
@@ -200,30 +203,58 @@ void Field::findLinks()
     for (int i=1;i<=N;i++)
     {
         links[i] = findBiLocationLinks(i);
+        ColoredLinksVault vault(i);
         for (BiLocationLink& link: links[i])
         {
-            std::cout << i << "bi-location link: " << link.first()->coord() << link.second()->coord() << std::endl;
-/*
-            CellColor c1 = checkColoring(link.first());
-            CellColor c2 = checkColoring(link.second());
-            if (c1.isUnknown() && c2.isUnknown())
+            CellColor c1 = vault.getColor(link.first());
+            CellColor c2 = vault.getColor(link.second());
+
+            if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
             {
-                ColorPair cp = CellColor::newColorPair();
-                addColoredLink(link, cp);
+                ColorPair cp = ColorPair::newPair();
+                vault.addLink(link, cp);
             }
             else
             {
-                if (c1.isUnknown())
-                    addColoredCell(link.first(), c2.antiColor());
-                else if (c2.isUnknown())
-                    addColoredCell(link.second(), c1.antiColor());
-                else if (c1 != c2.antiColor())
+                if (c1 == ColorPair::UnknownColor)
+                    vault.addCell(link.first(), ColorPair::antiColor(c2));
+                else if (c2 == ColorPair::UnknownColor)
+                    vault.addCell(link.second(), ColorPair::antiColor(c1));
+                else if (c1 != ColorPair::antiColor(c2))
                 {
-                    recolor(c2.antiColor(), c1);
-                    recolor(c2, c1.antiColor());
+                    vault.recolor(ColorPair::antiColor(c2), c1);
+                    vault.recolor(c2, ColorPair::antiColor(c1));
+                }
+                else
+                {
+                    // loop
                 }
             }
-*/
+        }
+        for (BiLocationLink& link: links[i])
+        {
+            std::cout << i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
+                      << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
+        }
+        for(House* house: areas)
+        {
+            QVector<Cell*> cellsWithCandidate = house->cellsWithCandidate(i);
+            QMap<CellColor, int> presentColor;
+            for (Cell* cell: cellsWithCandidate)
+            {
+                CellColor color = vault.getColor(cell);
+                if (color != ColorPair::UnknownColor)
+                {
+                    presentColor[color]++;
+                    if (presentColor[color]>1)
+                    {
+                        // we've found house with 2 cells from same chain and same color
+                        // this mean -- all cells with this color in this chain are OFF
+                        std::cout << "two cells with same color in one house: this color is OFF" << std::endl;
+                        vault.removeCandidateForColor(color);
+                    }
+                }
+            }
         }
     }
 }
