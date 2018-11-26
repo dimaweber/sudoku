@@ -7,12 +7,16 @@ class Cell;
 
 class Set
 {
+    QString houseName;
 protected:
     QVector<Cell*> cells;
 public:
     void addCell(Cell* pCell);
 
-    void print();
+    void setName(const QString& name) {houseName = name;}
+    const QString& name() const { return houseName;}
+
+    void print() const;
 
     bool hasValue(quint8 val) const;
     int candidatesCount(quint8 val) const;
@@ -20,6 +24,8 @@ public:
     bool removeCandidate(quint8 val);
     int unresolvedCellsCount() const;
     bool hasCell(const Cell* p) const;
+
+    QVector<Cell*> cellsWithCandidate(quint8 val) const;
 
     bool isEmpty() const { return cells.isEmpty();}
     Set operator+ (const Set& a) const;
@@ -36,7 +42,6 @@ public:
     House();
     static void init(quint8 n);
 
-    void reducePossibilities();
     bool checkNakedCombinations(); // Naked Pair / Triple / Quad / ...
     bool checkHiddenCombinations(); // Hidden Pair / Triple / Quad / ...
     bool checkNakedSingle();

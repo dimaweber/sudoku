@@ -48,20 +48,6 @@ House::House()
     cells.reserve(House::N);
 }
 
-void House::reducePossibilities()
-{
-    for(int i=0; i<cells.size(); i++)
-    {
-        quint8 val = cells[i]->value();
-        if (val > 0)
-        {
-            for (int j=0; j < cells.size(); j++)
-                if (i!=j && !cells[j]->isResolved())
-                    cells[j]->removeCandidate(val);
-        }
-    }
-}
-
 bool House::checkNakedCombinations()
 {
     bool ret = false;
@@ -71,7 +57,7 @@ bool House::checkNakedCombinations()
             for(int i=0;i<cells.count();i++)
                 if (cells[i]->candidatesExactMatch(testMask) && !cells[i]->isResolved())
                     indices.append(i);
-            if (indices.count() == testMask.count(true))
+            if (indices.count() == testMask.count(true) && unresolvedCellsCount() > indices.count())
             {
                 std::cout << "Naked combination " << testMask << " found in ";
                 for (int i=0; i<indices.count();i++)
@@ -117,8 +103,9 @@ bool House::checkHiddenCombinations()
     return ret;
 }
 
-void Set::print()
+void Set::print() const
 {
+    std::cout << qPrintable(name()) << ": ";
     for (Cell* pCell: cells)
         pCell->print();
     std::cout << std::endl;
@@ -247,6 +234,15 @@ bool Set::hasCell(const Cell* p) const
         if (pCell->coord() == p->coord())
             return true;
     return false;
+}
+
+QVector<Cell*> Set::cellsWithCandidate(quint8 val) const
+{
+    QVector<Cell*> ret;
+    for(Cell* cell: cells)
+        if (cell->hasCandidate(val))
+                ret.append(cell);
+    return ret;
 }
 
 Set Set::operator+(const Set& a) const

@@ -3,6 +3,7 @@
 
 #include "cell.h"
 #include "house.h"
+#include "bilocationlink.h"
 #include <QVector>
 
 class Field
@@ -38,6 +39,8 @@ public:
     quint8 rowsCount() const;
 
 private:
+    void findLinks();
+    QVector<BiLocationLink> findBiLocationLinks(quint8 val) const;
     bool reduceIntersections();
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
     bool reduceXWing();

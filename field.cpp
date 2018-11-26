@@ -31,7 +31,7 @@ bool Field::readFromFormattedTextFile(const QString& filename)
     QFile inputFile(filename);
     if (!inputFile.open(QFile::ReadOnly))
     {
-        std::cout << "unable to open input file" << std::endl;
+        std::cerr << "unable to open input file" << std::endl;
         return false;
     }
     QTextStream stream(&inputFile);
@@ -46,7 +46,7 @@ bool Field::readFromFormattedTextFile(const QString& filename)
     {
         if (lines[row-1].length() != n)
         {
-            std::cout << "wrong input file line: " << qPrintable(lines[row-1]) << std::endl;
+            std::cerr << "wrong input file line: " << qPrintable(lines[row-1]) << std::endl;
             return false;
         }
         for(quint8 col=1; col<= n; col++)
@@ -63,7 +63,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
     QFile inputFile(filename);
     if (!inputFile.open(QFile::ReadOnly))
     {
-        std::cout << "unable to open input file" << std::endl;
+        std::cerr << "unable to open input file" << std::endl;
         return false;
     }
     QTextStream stream(&inputFile);
@@ -106,12 +106,16 @@ void Field::prepareHouses(quint8 n)
             c.registerInHouse(squares[coord.squareIdx()]);
     }
 
-    for (House& column: columns)
-        areas.append(&column);
-    for (House& row: rows)
-        areas.append(&row);
-    for (House& square: squares)
-        areas.append(&square);
+    for (int i=1; i<=n; i++)
+    {
+        columns[i-1].setName(QString("C%1").arg(i));
+        rows[i-1].setName(QString("R%1").arg(i));
+        squares[i-1].setName(QString("S%1").arg(i));
+
+        areas.append(&columns[i-1]);
+        areas.append(&rows[i-1]);
+        areas.append(&squares[i-1]);
+    }
 }
 
 void Field::process()
@@ -141,6 +145,8 @@ void Field::process()
         reduceXWing();
 
     }while(changed);
+
+    findLinks();
 }
 
 Cell& Field::cell(const Coord& coord)
@@ -157,11 +163,7 @@ void Field::print() const
 {
     for (quint8 row=1; row <= N; row ++)
     {
-        for (quint8 col=1; col<=N; col++)
-        {
-            cell(Coord(row,col)).print();
-        }
-        std::cout << std::endl;
+        rows[row-1].print();
     }
 }
 
@@ -193,6 +195,35 @@ quint8 Field::rowsCount() const
     return rows.count();
 }
 
+void Field::findLinks()
+{
+    QMap<int, QVector<BiLocationLink>> links;
+    for (int i=1;i<=N;i++)
+    {
+        links[i] = findBiLocationLinks(i);
+        for (BiLocationLink& link: links[i])
+        {
+            std::cout << i << "bi-location link: " << link.first()->coord() << link.second()->coord() << std::endl;
+        }
+    }
+}
+
+QVector<BiLocationLink> Field::findBiLocationLinks(quint8 val) const
+{
+    QVector<BiLocationLink> ret;
+    for(House* house: areas)
+    {
+        QVector<Cell*> lst = house->cellsWithCandidate(val);
+        if (lst.count() == 2)
+        {
+            BiLocationLink link(val, lst[0], lst[1]);
+            if (!ret.contains(link))
+                ret.append(link);
+        }
+    }
+    return ret;
+}
+
 bool Field::reduceIntersections()
 {
     bool changed = false;
@@ -218,12 +249,20 @@ bool Field::reduceIntersection(SquareHouse& square, LineHouse& area)
 
     for (quint8 v = 1; v < N; v++)
     {
-        if (inter.candidatesCount(v) > 0)
+        if (inter.candidatesCount(v) > 1)
         {
-            if (squareNoLine.candidatesCount(v) == 0)
+            if (squareNoLine.candidatesCount(v) == 0 && lineNoSquare.candidatesCount(v) != 0)
+            {
+                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
+                          << " intersection but no in any other cell of " << qPrintable(square.name()) << std::endl;
                 changed |= lineNoSquare.removeCandidate(v);
-            if (lineNoSquare.candidatesCount(v) == 0)
+            }
+            if (lineNoSquare.candidatesCount(v) == 0 && squareNoLine.candidatesCount(v) != 0)
+            {
+                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
+                          << " intersection but no in any other cell of " << qPrintable(area.name()) << std::endl;
                 changed |= squareNoLine.removeCandidate(v);
+            }
         }
     }
     return changed;

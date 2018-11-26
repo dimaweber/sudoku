@@ -4,7 +4,7 @@
 
 Cell::Cell()
     :val(0), initial_value(false)
-{    }
+{}
 
 Cell::Cell(quint8 val)
     :val(val), initial_value(true)
@@ -19,7 +19,7 @@ void Cell::setValue(quint8 val, bool init_value)
     candidateMask.fill(false);
     candidateMask.setBit(val-1, true);
     initial_value = init_value;
-    std::cout << "\tvalue " << (int)val << " set into " << coord() << std::endl;
+    std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
     for(House* pArea: houses)
     {
         pArea->removeCandidate(val);
@@ -28,7 +28,7 @@ void Cell::setValue(quint8 val, bool init_value)
 
 bool Cell::removeCandidate(quint8 guessVal)
 {
-    if (val > 0)
+    if (isResolved())
     {
         return false;
 //        throw std::runtime_error("removing guess from knonw value");
@@ -47,7 +47,7 @@ bool Cell::removeCandidate(quint8 guessVal)
 
 bool Cell::removeCandidate(const QBitArray& candidate)
 {
-    if (val > 0)
+    if (isResolved())
     {
         return false;
 //        throw std::runtime_error("removing guess from knonw value");
@@ -83,7 +83,7 @@ void Cell::print() const
         std::cout << candidateMask;
     }
     else
-        std::cout << static_cast<char>('0' + value());
+        std::cout << value();
 }
 
 void Cell::registerInHouse(House& area)
@@ -99,6 +99,11 @@ QBitArray Cell::commonCandidates(const Cell& a) const
     QBitArray ret(candidatesCapacity());
     ret = candidateMask & a.candidateMask;
     return ret;
+}
+
+bool Cell::operator ==(const Cell& other) const
+{
+    return coord() == other.coord();
 }
 
 std::ostream& operator <<(std::ostream& stream, const QBitArray& arr)

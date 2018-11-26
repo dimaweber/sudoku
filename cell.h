@@ -8,6 +8,21 @@
 
 class House;
 
+//class Value
+//{
+//    quint8 val;
+//public:
+//    bool isSet() const {return val > 0;}
+//    int toInt() const {return val;}
+//    char toChar() const {return static_cast<char>('0' + val);}
+//    QBitArray toBitMask() const { QBitArray bin(9); bin.setBit(val-1); return bin;}
+
+//    void set(int v) { val = v;}
+//    void reset() {val = 0;}
+
+//    bool presentInMask (const QBitArray& a) const { return a.testBit(val-1); }
+//};
+
 class Cell
 {
     quint8    val;
@@ -36,6 +51,8 @@ public:
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
 
     QBitArray commonCandidates(const Cell& a) const;
+
+    bool operator == (const Cell& other) const;
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);

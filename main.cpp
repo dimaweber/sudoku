@@ -64,6 +64,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QDialog diag;
     QGridLayout lay(&diag);
+
+    diag.setWindowTitle(QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum));
     lay.setMargin(0);
     lay.setSpacing(0);
     for (int i=1; i<=qSqrt(Coord::maxRawIndex()); i++)
@@ -85,8 +87,8 @@ int main(int argc, char *argv[])
         Cell& cell = array.cell(coord);
         int row = coord.row();
         int col = coord.col();
-        const int value = cell.value();
-        if (value != 0)
+        quint8 value = cell.value();
+        if (cell.isResolved())
         {
             QLabel* label = new QLabel(&diag);
             QFont font = label->font();

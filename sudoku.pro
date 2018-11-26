@@ -21,7 +21,8 @@ SOURCES += \
 	cell.cpp \
 	coord.cpp \
 	field.cpp \
-    house.cpp
+    house.cpp \
+    bilocationlink.cpp
 
 LIBS += -lgsl -lgslcblas
 # Default rules for deployment.
@@ -33,4 +34,5 @@ HEADERS += \
 	cell.h \
 	coord.h \
 	field.h \
-    house.h
+    house.h \
+    bilocationlink.h
