@@ -22,7 +22,8 @@ SOURCES += \
 	coord.cpp \
 	field.cpp \
     house.cpp \
-    bilocationlink.cpp
+    bilocationlink.cpp \
+    fieldgui.cpp
 
 LIBS += -lgsl -lgslcblas
 # Default rules for deployment.
@@ -35,4 +36,5 @@ HEADERS += \
 	coord.h \
 	field.h \
     house.h \
-    bilocationlink.h
+    bilocationlink.h \
+    fieldgui.h

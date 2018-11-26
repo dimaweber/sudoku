@@ -8,7 +8,6 @@ Field::Field()
     :N(0), cells(0)
 {
 }
-
 void Field::setN(quint8 n)
 {
     N = n;
@@ -204,6 +203,27 @@ void Field::findLinks()
         for (BiLocationLink& link: links[i])
         {
             std::cout << i << "bi-location link: " << link.first()->coord() << link.second()->coord() << std::endl;
+/*
+            CellColor c1 = checkColoring(link.first());
+            CellColor c2 = checkColoring(link.second());
+            if (c1.isUnknown() && c2.isUnknown())
+            {
+                ColorPair cp = CellColor::newColorPair();
+                addColoredLink(link, cp);
+            }
+            else
+            {
+                if (c1.isUnknown())
+                    addColoredCell(link.first(), c2.antiColor());
+                else if (c2.isUnknown())
+                    addColoredCell(link.second(), c1.antiColor());
+                else if (c1 != c2.antiColor())
+                {
+                    recolor(c2.antiColor(), c1);
+                    recolor(c2, c1.antiColor());
+                }
+            }
+*/
         }
     }
 }
