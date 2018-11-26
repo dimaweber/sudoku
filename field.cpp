@@ -122,7 +122,7 @@ void Field::prepareHouses(quint8 n)
 void Field::process()
 {
     bool changed = false;
-/*
+
     do
     {
         changed = false;
@@ -143,11 +143,15 @@ void Field::process()
                 changed |= reduceIntersection(sq, c);
         }
 
-        reduceIntersections();
-        reduceXWing();
+        changed |= reduceIntersections();
+        changed |= reduceXWing();
 
     }while(changed);
-*/
+
+//    cell(Coord(6,1)).removeCandidate(5);
+//    cell(Coord(9,6)).removeCandidate(5);
+//    cell(Coord(7,6)).removeCandidate(5);
+//    cell(Coord(6,9)).removeCandidate(5);
     findLinks();
 }
 
