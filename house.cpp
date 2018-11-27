@@ -176,7 +176,7 @@ bool Set::removeCandidate(quint8 val)
 
 int Set::unresolvedCellsCount() const
 {
-    int n;
+    int n=0;
     for(Cell* cell: cells)
         if (!cell->isResolved())
             n++;
