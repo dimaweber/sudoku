@@ -84,7 +84,7 @@ void Cell::print() const
         std::cout << candidateMask;
     }
     else
-        std::cout << value();
+        std::cout << (int)value();
 }
 
 void Cell::registerInHouse(House& area)

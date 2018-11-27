@@ -30,6 +30,10 @@ public:
     static Coord first();
     static Coord last();
 
+    QVector<Coord> sameColumnCoordinates() const;
+    QVector<Coord> sameRowCoordinates() const;
+    QVector<Coord> sameSquareCoordinates() const;
+
     bool operator < (const Coord& o) const;
     bool operator > (const Coord& o) const;
     bool operator == (const Coord& o)const;
