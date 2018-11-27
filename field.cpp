@@ -133,6 +133,7 @@ void Field::process()
             changed |= pArea->checkHiddenCombinations();
         }
 
+<<<<<<< HEAD
         for (SquareHouse& sq: squares)
         {
             for (LineHouse& r: rows)
@@ -143,6 +144,10 @@ void Field::process()
 
         reduceIntersections();
         reduceXWing();
+=======
+        changed |= reduceIntersections();
+        changed |= reduceXWing();
+>>>>>>> 0d8a623... remove double intersection check
 
     }while(changed);
 
