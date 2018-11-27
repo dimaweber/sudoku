@@ -135,14 +135,6 @@ void Field::process()
             changed |= pArea->checkHiddenCombinations();
         }
 
-        for (SquareHouse& sq: squares)
-        {
-            for (LineHouse& r: rows)
-                changed |= reduceIntersection(sq, r);
-            for (LineHouse& c: columns)
-                changed |= reduceIntersection(sq, c);
-        }
-
         changed |= reduceIntersections();
         changed |= reduceXWing();
 
