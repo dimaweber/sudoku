@@ -18,6 +18,11 @@ class Field
 public:
     Field();
 
+    enum SolvingTechnique {NakedSinge=0x0001, HiddenSingle=0x0002, NakedGroup=0x0004, HiddenGroup=0x0008, Intersections=0x000F, XWing=0x0010, BiLocationColoring=0x0020};
+
+    void enableTechnique(SolvingTechnique tech, bool enabled=true);
+
+
     void setN(quint8 n);
     void prepareHouses(quint8 n);
 
@@ -39,11 +44,14 @@ public:
     quint8 rowsCount() const;
 
 private:
+    quint32 enabledTechniques;
+
     void findLinks();
     QVector<BiLocationLink> findBiLocationLinks(quint8 val) const;
     bool reduceIntersections();
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
     bool reduceXWing();
+
 };
 
 #endif // FIELD_H

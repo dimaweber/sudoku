@@ -7,9 +7,18 @@
 #include <QtMath>
 
 Field::Field()
-    :N(0), cells(0)
+    :N(0), cells(0),enabledTechniques(0xFFFF)
 {
 }
+
+void Field::enableTechnique(Field::SolvingTechnique tech, bool enabled)
+{
+    if (enabled)
+        enabledTechniques |= tech;
+    else
+        enabledTechniques &= ~tech;
+}
+
 void Field::setN(quint8 n)
 {
     N = n;
@@ -129,18 +138,36 @@ void Field::process()
 
         for(House* pArea: areas)
         {
-            changed |= pArea->checkNakedSingle();
-            changed |= pArea->checkHiddenSingle();
-            changed |= pArea->checkNakedCombinations();
-            changed |= pArea->checkHiddenCombinations();
+            if (enabledTechniques & NakedSinge || true) // always enabled
+                changed |= pArea->checkNakedSingle();
+            if (changed)  continue;
+
+            if (enabledTechniques & HiddenSingle)
+                changed |= pArea->checkHiddenSingle();
+            if (changed) continue;
+
+            if (enabledTechniques & NakedGroup)
+                changed |= pArea->checkNakedCombinations();
+            if (changed) continue;
+
+            if (enabledTechniques & HiddenGroup)
+                changed |= pArea->checkHiddenCombinations();
+            if (changed) continue;
         }
 
-        changed |= reduceIntersections();
-        changed |= reduceXWing();
+        if (enabledTechniques & Intersections)
+            changed |= reduceIntersections();
+        if (changed) continue;
+
+        if (enabledTechniques & XWing)
+            changed |= reduceXWing();
+        if (changed) continue;
+
+        if (enabledTechniques & BiLocationColoring)
+            findLinks();
 
     }while(changed);
 
-    findLinks();
 }
 
 Cell& Field::cell(const Coord& coord)
@@ -155,6 +182,14 @@ const Cell& Field::cell(const Coord& coord) const
 
 void Field::print() const
 {
+    std::cout << " C: ";
+    for (int col=1; col<=N;col++)
+	    std::cout << col;
+    std::cout <<std::endl;
+    std::cout << "    ";
+    for (int i=0; i<N; i++)
+	    std::cout <<".";
+    std::cout << std::endl;
     for (quint8 row=1; row <= N; row ++)
     {
         rows[row-1].print();
