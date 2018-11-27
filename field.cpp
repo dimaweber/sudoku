@@ -140,10 +140,6 @@ void Field::process()
 
     }while(changed);
 
-//    cell(Coord(6,1)).removeCandidate(5);
-//    cell(Coord(9,6)).removeCandidate(5);
-//    cell(Coord(7,6)).removeCandidate(5);
-//    cell(Coord(6,9)).removeCandidate(5);
     findLinks();
 }
 

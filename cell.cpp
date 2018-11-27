@@ -50,7 +50,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     if (isResolved())
     {
         return false;
-//        throw std::runtime_error("removing guess from knonw value");
+//        throw std::runtime_error("trying to remove candaidate from resolved cell");
     }
     QBitArray a = candidateMask & candidate;
     if ((candidateMask & candidate).count(true) == 0)
