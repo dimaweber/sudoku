@@ -30,6 +30,8 @@ class Cell
     bool initial_value;
     Coord coordinate;
     QVector<House*> houses;
+    Cell& operator = (const Cell& );
+
 public:
     Cell();
     Cell (quint8 val);
