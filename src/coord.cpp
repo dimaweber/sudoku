@@ -92,7 +92,7 @@ void Coord::setRowCol(quint8 row, quint8 col)
 
 quint16 Coord::maxRawIndex()
 {
-    return N*N;
+    return N*N-1;
 }
 
 bool Coord::isValid() const
