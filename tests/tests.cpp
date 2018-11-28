@@ -43,13 +43,7 @@ void CommonTest::init()
 
 void CommonTest::Coord_initialization_tests()
 {
-	// This test checks internal class members, not class interface
-	// So it can fail in case internal representation changes
 	Coord coord(5,7);
-	QVERIFY(Coord::N == 9);
-	QVERIFY(coord.rowIdx == 5);
-	QVERIFY(coord.colIdx == 7);
-	QVERIFY(coord.rawIdx == 42);
 	QVERIFY(coord.isValid());
 	
 	Coord coord_wrong_row(0,1);
@@ -61,9 +55,6 @@ void CommonTest::Coord_initialization_tests()
 
 void CommonTest::Coord_getters_tests()
 {
-	// This test checks internal class representation througth the API.
-	// This test should pass even when previous fails
-	
 	Coord coord(5,7);
 	QVERIFY(coord.row() == 5);
 	QVERIFY(coord.col() == 7);
@@ -78,6 +69,10 @@ void CommonTest::Coord_getters_tests()
 	QVERIFY(coord.col() == 6);
 	QVERIFY(coord.rawIndex() != rawIdx);
 	
+	coord.setRawIndex(24);
+	QVERIFY(coord.col() == 7);
+	QVERIFY(coord.row() == 3);
+
 	QVERIFY(Coord::last().rawIndex() == Coord::maxRawIndex());
 }
 
@@ -116,9 +111,9 @@ void CommonTest::benchmark()
 	bool isValid = false;
 	QBENCHMARK{
 		array.process();
-		isResolved = array.isResolved();
-		isValid = array.isValid();
 	}
+	isValid = array.isValid();
+	isResolved = array.isResolved();
 	QVERIFY(isValid);
 	QVERIFY(isResolved);
 }
