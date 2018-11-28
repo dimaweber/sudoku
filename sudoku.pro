@@ -40,3 +40,9 @@ HEADERS += \
     bilocationlink.h \
     fieldgui.h \
     cellcolor.h
+
+OBJECTS_DIR = .obj
+UI_DIR = .ui
+MOC_DIR = .moc
+
+DESTDIR=bin
