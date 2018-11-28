@@ -27,5 +27,3 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 LIBS += -lgsl -lgslcblas
 
 INCLUDEPATH += ../src 
-
-DESTDIR =../bin
