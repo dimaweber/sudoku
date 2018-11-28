@@ -71,6 +71,8 @@ Thumbs.db
 *.dll
 *.exe
 
-sudoku
+bin/
+.obj/
+.moc/
 
 moc_*.h
