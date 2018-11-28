@@ -27,3 +27,8 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 LIBS += -lgsl -lgslcblas
 
 INCLUDEPATH += ../src 
+
+OBJECTS_DIR=.obj
+MOC_DIR=.moc
+
+DESTDIR=../bin
