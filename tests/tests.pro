@@ -20,7 +20,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DESTDIR = ../bin
 
 SOURCES += \
-    tests.cpp
+	unit_tests.cpp \
+    test_cell.cpp \
+    test_coord.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
