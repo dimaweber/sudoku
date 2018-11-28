@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "coord.h"
+#include "field.h"
 
 class CommonTest : public QObject
 {
@@ -15,8 +16,11 @@ private slots:
     void init();
 
     void Coord_initialization_tests();
-	void Coord_getters_tests();
-	void Coord_operation_tests();
+    void Coord_getters_tests();
+    void Coord_operation_tests();
+
+    void benchmark();
+
 private:
 };
 
@@ -102,6 +106,21 @@ void CommonTest::Coord_operation_tests()
 	QVERIFY(coordA != coordB);
 	
 	
+}
+
+void CommonTest::benchmark()
+{
+	Field array;
+	array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0);
+	bool isResolved = false;
+	bool isValid = false;
+	QBENCHMARK{
+		array.process();
+		isResolved = array.isResolved();
+		isValid = array.isValid();
+	}
+	QVERIFY(isValid);
+	QVERIFY(isResolved);
 }
 
 QTEST_APPLESS_MAIN(CommonTest)

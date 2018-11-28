@@ -21,7 +21,12 @@ DESTDIR = ../bin
 
 SOURCES += \
 	tests.cpp \
-        ../src/coord.cpp	
+        ../src/coord.cpp \
+	../src/cell.cpp \
+	../src/house.cpp \
+	../src/cellcolor.cpp \
+	../src/field.cpp \
+	../src/bilocationlink.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
