@@ -213,6 +213,8 @@ bool House::isValid() const
     QBitArray mask(cells.count());
     for (const Cell* pCell: cells)
     {
+        if (!pCell->isValid())
+            return false;
         if (!pCell->isResolved())
             continue;
         quint8 bit = pCell->value()-1;

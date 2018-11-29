@@ -2,15 +2,11 @@
 #include "house.h"
 #include <iostream>
 
-Cell::Cell()
+Cell::Cell(quint8 n)
     :val(0), initial_value(false)
-{}
-
-Cell::Cell(quint8 val)
-    :val(val), initial_value(true)
 {
-    candidateMask.fill(false);
-    candidateMask.setBit(val-1);
+    if (n>0)
+        resetCandidates(n);
 }
 
 void Cell::setValue(quint8 val, bool init_value)
@@ -69,6 +65,11 @@ bool Cell::candidatesExactMatch(const QBitArray& mask) const
 
 bool Cell::hasCandidate(quint8 guessVal) const
 {
+    if (guessVal > candidateMask.count() || guessVal < 1)
+    {
+        throw std::out_of_range("candidate is out of range");
+        return false;
+    }
     return candidateMask.testBit(guessVal-1);
 }
 
@@ -93,6 +94,12 @@ void Cell::registerInHouse(House& area)
     area.addCell(this);
 //    if (value > 0)
     //        area.removeGuess(value);
+}
+
+bool Cell::isValid() const
+{
+    return     (isResolved() && candidateMask.count(true) == 1 && candidateMask.at(value()-1) == true)
+            || (!isResolved() && candidateMask.count(true) > 1);
 }
 
 QBitArray Cell::commonCandidates(const Cell& a) const

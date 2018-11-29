@@ -12,6 +12,7 @@ class House;
 //{
 //    quint8 val;
 //public:
+//    explicit Value(quint8 v) :val(v){}
 //    bool isSet() const {return val > 0;}
 //    int toInt() const {return val;}
 //    char toChar() const {return static_cast<char>('0' + val);}
@@ -23,9 +24,11 @@ class House;
 //    bool presentInMask (const QBitArray& a) const { return a.testBit(val-1); }
 //};
 
+typedef quint8 CellValue;
+
 class Cell
 {
-    quint8    val;
+    CellValue    val;
     QBitArray candidateMask;
     bool initial_value;
     Coord coordinate;
@@ -33,11 +36,10 @@ class Cell
     Cell& operator = (const Cell& );
 
 public:
-    Cell();
-    Cell (quint8 val);
-    quint8 value() const {return val;}
+    Cell(quint8 n = 0);
+    CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
-    void setValue(quint8 val, bool init_value = false);
+    void setValue(CellValue val, bool init_value = false);
     bool removeCandidate(quint8 val);
     bool removeCandidate(const QBitArray& candidate);
     int candidatesCapacity() const {return candidateMask.count();}
@@ -51,7 +53,7 @@ public:
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
-
+    bool isValid() const;
     QBitArray commonCandidates(const Cell& a) const;
 
     bool operator == (const Cell& other) const;
