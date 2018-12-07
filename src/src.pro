@@ -27,6 +27,7 @@ SOURCES += \
 		fieldgui.cpp
 
 LIBS += -L../bin -lsudoku
+unix:QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
