@@ -1,4 +1,4 @@
-QT       += testlib sql
+QT       += testlib
 QT       -= gui
 
 TARGET = unit_tests
@@ -19,20 +19,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 DESTDIR = ../bin
 
+HEADERS += ../libsudoku/cell.h
+
 SOURCES += \
-	tests.cpp \
-        ../src/coord.cpp \
-	../src/cell.cpp \
-	../src/house.cpp \
-	../src/cellcolor.cpp \
-	../src/field.cpp \
-	../src/bilocationlink.cpp
+	tests.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 LIBS += -lgsl -lgslcblas
 
-INCLUDEPATH += ../src 
+LIBS += -L../bin -lsudoku
+
+INCLUDEPATH += ../libsudoku
 
 OBJECTS_DIR=.obj
 MOC_DIR=.moc

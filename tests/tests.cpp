@@ -18,6 +18,7 @@ private slots:
     void Coord_initialization_tests();
     void Coord_getters_tests();
     void Coord_operation_tests();
+    void Coord_same_house_tests();
 
     void Cell_test_candidates();
 //    void Cell_test_removeCandidate();
@@ -101,8 +102,28 @@ void CommonTest::Coord_operation_tests()
 	Coord coordB(2,1);
 	QVERIFY(coordA < coordB);
 	QVERIFY(coordB > coordA);
-	QVERIFY(coordA != coordB);
-	
+    QVERIFY(coordA != coordB);
+}
+
+void CommonTest::Coord_same_house_tests()
+{
+    Coord c;
+
+    c.setRowCol(1,1);
+
+    QVector<Coord> sameHouse = c.sameColumnCoordinates();
+    for(int i=1;i<=9;i++)
+        if (i!=c.row())
+            QVERIFY(sameHouse.contains(Coord(i,c.col())));
+        else
+            QVERIFY(!sameHouse.contains(Coord(i, c.col())));
+
+    sameHouse = c.sameRowCoordinates();
+    for(int i=1;i<=9;i++)
+        if (i!=c.col())
+            QVERIFY(sameHouse.contains(Coord(c.row(), i)));
+        else
+            QVERIFY(!sameHouse.contains(Coord(c.row(), i)));
 
 }
 
@@ -135,7 +156,7 @@ void CommonTest::Cell_test_candidates()
 void CommonTest::benchmark()
 {
 	Field array;
-	array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0);
+    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0));
 	bool isResolved = false;
 	bool isValid = false;
 	QBENCHMARK{

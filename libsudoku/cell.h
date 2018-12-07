@@ -5,6 +5,7 @@
 #include <iostream>
 #include <QBitArray>
 #include <QVector>
+#include <QObject>
 
 class House;
 
@@ -26,8 +27,10 @@ class House;
 
 typedef quint8 CellValue;
 
-class Cell
+class Cell: public QObject
 {
+    Q_OBJECT
+
     CellValue    val;
     QBitArray candidateMask;
     bool initial_value;
@@ -36,27 +39,33 @@ class Cell
     Cell& operator = (const Cell& );
 
 public:
-    Cell(quint8 n = 0);
+    Cell(quint8 n = 0, QObject* parent = nullptr);
+
     CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
     bool removeCandidate(quint8 val);
-    bool removeCandidate(const QBitArray& candidate);
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
-    bool candidatesExactMatch(const QBitArray& mask) const;
     bool isResolved() const {return value() != 0;}
     bool hasCandidate(quint8 val) const;
-    int hasAnyOfCandidates(const QBitArray& mask) const;
     void print() const;
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
     bool isValid() const;
+
+    bool removeCandidate(const QBitArray& candidate);
+    bool candidatesExactMatch(const QBitArray& mask) const;
+    int hasAnyOfCandidates(const QBitArray& mask) const;
     QBitArray commonCandidates(const Cell& a) const;
 
     bool operator == (const Cell& other) const;
+signals:
+    void valueSet(CellValue v);
+    void candidateRemoved(CellValue v);
+    void candidatesRemoved(QBitArray v);
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);

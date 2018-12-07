@@ -1,6 +1,7 @@
 #include "coord.h"
 #include <stdexcept>
 #include <QtMath>
+#include <QVector>
 
 quint8 Coord::N = 0;
 
@@ -117,6 +118,37 @@ Coord Coord::last()
     if (N<4)
         throw std::runtime_error("Coord::N not set");
     return Coord(N, N);
+}
+
+QVector<Coord> Coord::sameColumnCoordinates() const
+{
+    QVector<Coord> ret;
+    for(int r=1; r<=Coord::N; r++)
+        if (r != row())
+        ret.append(Coord(r, col()));
+    return ret;
+}
+
+QVector<Coord> Coord::sameRowCoordinates() const
+{
+    QVector<Coord> ret;
+    for(int c=1; c<=Coord::N; c++)
+        if (c != col())
+        ret.append(Coord(row(), c));
+    return ret;
+}
+
+QVector<Coord> Coord::sameSquareCoordinates() const
+{
+    QVector<Coord> ret;
+    int sq_N = qSqrt(Coord::N);
+    int sR = row() / sq_N * sq_N;
+    int sC = col() / sq_N * sq_N;
+    for (int r=sR; r <= sR + sq_N; r++)
+        for (int c=sC; c <= sC + sq_N; c++)
+            if(c!=col() || r!=row())
+                ret.append(Coord(r,c));
+    return ret;
 }
 
 bool Coord::operator <(const Coord& o) const

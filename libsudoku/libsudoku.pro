@@ -1,21 +1,21 @@
-QT += gui widgets
+#-------------------------------------------------
+#
+# Project created by QtCreator 2018-12-07T16:05:40
+#
+#-------------------------------------------------
 
-CONFIG += c++14 console
-CONFIG -= app_bundle
+QT       -= gui
 
 TARGET = sudoku
-TEMPLATE = app
+TEMPLATE = lib
+
+DEFINES += SUDOKU_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked deprecated (the exact warnings
+# any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-
-DEFINES += INVALID_COORD_EXCEPTION
-
-
-QMAKE_CXXFLAGS += -Wall -Wpedantic
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -23,23 +23,31 @@ QMAKE_CXXFLAGS += -Wall -Wpedantic
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-		main.cpp \
-		fieldgui.cpp
-
-LIBS += -L../bin -lsudoku
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
-INCLUDEPATH += ../libsudoku
+		coord.cpp \
+		cell.cpp \
+		house.cpp \
+		bilocationlink.cpp \
+		cellcolor.cpp \
+		field.cpp
 
 HEADERS += \
-	fieldgui.h
+		coord.h \
+		cell.h \
+		cellcolor.h \
+		house.h \
+		bilocationlink.h \
+		field.h \
+		libsudoku_global.h
+
+unix {
+    target.path = /usr/lib
+    INSTALLS += target
+}
+
+LIBS += -lgsl -lgslcblas
+
+DESTDIR=../bin
 
 OBJECTS_DIR = .obj
 UI_DIR = .ui
 MOC_DIR = .moc
-
-DESTDIR=../bin

@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
         plainTextInputFileLineNum = QString(argv[2]).toInt();
 
     Field array;
-    array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
+    if (!array.readFromPlainTextFile(filename, plainTextInputFileLineNum))
+        return 2;
 
     if (!array.isValid())
     {

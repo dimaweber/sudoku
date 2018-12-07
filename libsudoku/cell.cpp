@@ -2,8 +2,8 @@
 #include "house.h"
 #include <iostream>
 
-Cell::Cell(quint8 n)
-    :val(0), initial_value(false)
+Cell::Cell(quint8 n, QObject* parent)
+    :QObject(parent), val(0), initial_value(false)
 {
     if (n>0)
         resetCandidates(n);
@@ -16,6 +16,8 @@ void Cell::setValue(quint8 val, bool init_value)
     candidateMask.setBit(val-1, true);
     initial_value = init_value;
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
+    emit valueSet(val);
+
     for(House* pArea: houses)
     {
         pArea->removeCandidate(val);
@@ -38,6 +40,7 @@ bool Cell::removeCandidate(quint8 guessVal)
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
+    emit candidateRemoved(guessVal);
     return true;
 }
 
@@ -55,6 +58,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
+    emit candidatesRemoved(candidate);
     return true;
 }
 
