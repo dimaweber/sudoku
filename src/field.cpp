@@ -164,7 +164,7 @@ void Field::process()
         if (changed) continue;
 
         if (enabledTechniques & BiLocationColoring)
-            findLinks();
+            changed |= findLinks();
 
     }while(changed);
 
@@ -180,15 +180,44 @@ const Cell& Field::cell(const Coord& coord) const
     return cells[coord.rawIndex()];
 }
 
+QVector<Cell*> Field::allCellsVisibleFromCell(const Cell& c)
+{
+    QVector<Cell*> visibleCells;
+    QVector<Coord> coords = c.coord().sameColumnCoordinates();
+    for (const Coord& co: coords)
+    {
+        Cell* cellToAdd = &cell(co);
+        visibleCells.append( cellToAdd );
+    }
+
+    coords = c.coord().sameRowCoordinates();
+    for (const Coord& co: coords)
+    {
+        Cell* cellToAdd = &cell(co);
+        if (!visibleCells.contains(cellToAdd))
+            visibleCells.append(cellToAdd);
+    }
+
+    coords = c.coord().sameSquareCoordinates();
+    for (const Coord& co: coords)
+    {
+        Cell* cellToAdd = &cell(co);
+        if (!visibleCells.contains(cellToAdd))
+            visibleCells.append(cellToAdd);
+    }
+
+    return visibleCells;
+}
+
 void Field::print() const
 {
     std::cout << " C: ";
     for (int col=1; col<=N;col++)
-	    std::cout << col;
+        std::cout << col;
     std::cout <<std::endl;
     std::cout << "    ";
     for (int i=0; i<N; i++)
-	    std::cout <<".";
+        std::cout <<".";
     std::cout << std::endl;
     for (quint8 row=1; row <= N; row ++)
     {
@@ -224,8 +253,9 @@ quint8 Field::rowsCount() const
     return rows.count();
 }
 
-void Field::findLinks()
+bool Field::findLinks()
 {
+    bool changed = false;
     QMap<int, QVector<BiLocationLink>> links;
     for (int i=1;i<=N;i++)
     {
@@ -265,6 +295,7 @@ void Field::findLinks()
         }
         for(House* house: areas)
         {
+            // check for houses with 2 cells of same color
             QVector<Cell*> cellsWithCandidate = house->cellsWithCandidate(i);
             QMap<CellColor, int> presentColor;
             for (Cell* cell: cellsWithCandidate)
@@ -278,12 +309,46 @@ void Field::findLinks()
                         // we've found house with 2 cells from same chain and same color
                         // this mean -- all cells with this color in this chain are OFF
                         std::cout << "two cells with same color in one house: this color is OFF" << std::endl;
-                        vault.removeCandidateForColor(color);
+                        changed |= vault.removeCandidateForColor(color);
                     }
                 }
             }
         }
+        for(Cell& c: cells)
+        {
+            if (!c.hasCandidate(i))
+                continue;
+
+            CellColor clr = vault.getColor(&c);
+            if (clr != ColorPair::UnknownColor)
+                continue;
+
+            QVector<CellColor> visibleColors;
+            QVector<Cell*> visibleCells = allCellsVisibleFromCell(c);
+            for (Cell* pCell: visibleCells)
+            {
+                CellColor color = vault.getColor(pCell);
+                if (color == ColorPair::UnknownColor)
+                    continue;
+                CellColor acolor = ColorPair::antiColor(color);
+            /*    if (visibleColors.contains(color))
+                {
+                    std::cout << "Non-colored cell " << c.coord() << " can see 2 candidates with same color " << color << ": this color is OFF" << std::endl;
+                    changed |= vault.removeCandidateForColor(color);
+                }
+                else*/ if (visibleColors.contains(acolor))
+                {
+                    std::cout << "Non-colored cell " << c.coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
+                    changed |= c.removeCandidate(i);
+                    break;
+                }
+                else
+                    visibleColors.append(color);
+            }
+        }
     }
+
+    return changed;
 }
 
 QVector<BiLocationLink> Field::findBiLocationLinks(quint8 val) const

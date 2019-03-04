@@ -34,7 +34,7 @@ public:
     void addCell(Cell* cell, CellColor color);
     void recolor(CellColor from, CellColor to);
 
-    void removeCandidateForColor(CellColor color);
+    bool removeCandidateForColor(CellColor color);
 };
 
 #endif // CELLCOLOR_H
