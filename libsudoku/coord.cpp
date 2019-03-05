@@ -143,7 +143,7 @@ QVector<Coord> Coord::sameSquareCoordinates() const
     QVector<Coord> ret;
     int sq_N = qSqrt(Coord::N);
     int sR = row() / sq_N * sq_N;
-    int sC = col() / sq_N * sq_N;
+    int sC = col() % sq_N * sq_N;
     for (int r=sR; r <= sR + sq_N; r++)
         for (int c=sC; c <= sC + sq_N; c++)
             if(c!=col() || r!=row())
