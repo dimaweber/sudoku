@@ -321,17 +321,17 @@ bool Field::findLinks()
                 }
             }
         }
-        for(Cell& c: cells)
+        for(Cell* c: cells)
         {
-            if (!c.hasCandidate(i))
+            if (!c->hasCandidate(i))
                 continue;
 
-            CellColor clr = vault.getColor(&c);
+            CellColor clr = vault.getColor(c);
             if (clr != ColorPair::UnknownColor)
                 continue;
 
             QVector<CellColor> visibleColors;
-            QVector<Cell*> visibleCells = allCellsVisibleFromCell(c);
+            QVector<Cell*> visibleCells = allCellsVisibleFromCell(*c);
             for (Cell* pCell: visibleCells)
             {
                 CellColor color = vault.getColor(pCell);
@@ -345,8 +345,8 @@ bool Field::findLinks()
                 }
                 else*/ if (visibleColors.contains(acolor))
                 {
-                    std::cout << "Non-colored cell " << c.coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
-                    changed |= c.removeCandidate(i);
+                    std::cout << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
+                    changed |= c->removeCandidate(i);
                     break;
                 }
                 else

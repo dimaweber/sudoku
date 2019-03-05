@@ -38,15 +38,14 @@ int main(int argc, char *argv[])
         plainTextInputFileLineNum = QString(argv[2]).toInt();
 
     Field array;
-    if (!array.readFromPlainTextFile(filename, plainTextInputFileLineNum))
-        return 2;
+    array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
 
     if (!array.isValid())
     {
         std::cout << "Invalid sudoku read" << std::endl;
         return 1;
     }
-    
+
     bool noGui = false;
     if (argc > 3)
     {
@@ -72,7 +71,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    
+
     FieldGui fgui_before(array, &diag);
     layout.addWidget(&fgui_before);
 
@@ -100,11 +99,11 @@ int main(int argc, char *argv[])
 
     if (noGui)
     {
-	    array.print();
-	    return 0;
+        array.print();
+        return 0;
     }
     else
-	    diag.show();
+        diag.show();
 
     return app.exec();
 }
