@@ -35,6 +35,8 @@ public:
     Cell& cell(const Coord& coord);
     const Cell& cell(const Coord& coord) const;
 
+    QVector<Cell*> allCellsVisibleFromCell(const Cell& cell);
+
     void print() const;
 
     bool isResolved() const;
@@ -47,7 +49,7 @@ public:
 private:
     quint32 enabledTechniques;
 
-    void findLinks();
+    bool findLinks();
     QVector<BiLocationLink> findBiLocationLinks(quint8 val) const;
     bool reduceIntersections();
     bool reduceIntersection(SquareHouse& square, LineHouse& area);

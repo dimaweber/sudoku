@@ -31,10 +31,15 @@ void ColoredLinksVault::recolor(CellColor from, CellColor to)
     map.remove(from);
 }
 
-void ColoredLinksVault::removeCandidateForColor(CellColor color)
+bool ColoredLinksVault::removeCandidateForColor(CellColor color)
 {
+    bool changed = false;
+    CellColor acolor = ColorPair::antiColor(color);
     for(Cell* cell: map[color])
-        cell->removeCandidate(candidateValue);
+        changed |= cell->removeCandidate(candidateValue);
+    for(Cell* cell: map[acolor])
+        cell->setValue(candidateValue);
+    return changed;
 }
 
 CellColor ColorPair::antiColor(const CellColor& color)
