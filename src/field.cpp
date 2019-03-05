@@ -390,7 +390,7 @@ bool Field::reduceIntersection(SquareHouse& square, LineHouse& area)
     if (inter.isEmpty())
         return false;
 
-    for (quint8 v = 1; v < N; v++)
+    for (quint8 v = 1; v <= N; v++)
     {
         if (inter.candidatesCount(v) > 1)
         {
