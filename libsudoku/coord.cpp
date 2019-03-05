@@ -141,13 +141,18 @@ QVector<Coord> Coord::sameRowCoordinates() const
 QVector<Coord> Coord::sameSquareCoordinates() const
 {
     QVector<Coord> ret;
-    int sq_N = qSqrt(Coord::N);
-    int sR = row() / sq_N * sq_N;
-    int sC = col() % sq_N * sq_N;
-    for (int r=sR; r <= sR + sq_N; r++)
-        for (int c=sC; c <= sC + sq_N; c++)
-            if(c!=col() || r!=row())
-                ret.append(Coord(r,c));
+    quint8 s_n = static_cast<quint8>(qSqrt(Coord::N));
+    quint8 s_row = squareIdx() / s_n;
+    quint8 s_col = squareIdx() % s_n;
+    Coord co;
+    for (int r = s_row * s_n; r < (s_row+1) * s_n; r++)
+        for (int c = s_col * s_n; c < (s_col+1) * s_n; c++)
+        {
+            co = Coord(r+1,c+1);
+            if (*this == co)
+                continue;
+            ret.append(co);
+        }
     return ret;
 }
 
