@@ -13,10 +13,11 @@ class Field
     QVector<RowHouse> rows;
     QVector<SquareHouse> squares;
     QVector<House*> areas;
-    QVector<Cell> cells;
+    QVector<Cell*> cells;
 
 public:
     Field();
+    ~Field();
 
     enum SolvingTechnique {NakedSinge=0x0001,
                            HiddenSingle=0x0002,

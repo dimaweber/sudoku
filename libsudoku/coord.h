@@ -11,12 +11,12 @@ class Coord
     quint8  colIdx;
     quint16 rawIdx;
 public:
-    Coord();
+    static void init(quint16 n);
 
+	Coord();
     Coord(quint8 row, quint8 col);
-
-    Coord& operator++(int);
-
+    
+	Coord& operator++(int);
 
     quint8 row() const;
     quint8 col() const;
@@ -26,7 +26,6 @@ public:
     void setRowCol(quint8 row, quint8 col);
     static quint16 maxRawIndex();
     bool isValid() const;
-    static void init(quint16 n);
     static Coord first();
     static Coord last();
 
@@ -38,6 +37,8 @@ public:
     bool operator > (const Coord& o) const;
     bool operator == (const Coord& o)const;
     bool operator != (const Coord& o) const;
+	
+	friend class CommonTest;
 };
 
 std::ostream& operator << (std::ostream& stream, const Coord& coord);

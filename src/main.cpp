@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         std::cout << "Invalid sudoku read" << std::endl;
         return 1;
     }
-    
+
     bool noGui = false;
     if (argc > 3)
     {
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    
+
     FieldGui fgui_before(array, &diag);
     layout.addWidget(&fgui_before);
 
@@ -99,11 +99,11 @@ int main(int argc, char *argv[])
 
     if (noGui)
     {
-	    array.print();
-	    return 0;
+        array.print();
+        return 0;
     }
     else
-	    diag.show();
+        diag.show();
 
     return app.exec();
 }

@@ -93,7 +93,7 @@ void Coord::setRowCol(quint8 row, quint8 col)
 
 quint16 Coord::maxRawIndex()
 {
-    return N*N;
+    return N*N-1;
 }
 
 bool Coord::isValid() const
@@ -123,18 +123,18 @@ Coord Coord::last()
 QVector<Coord> Coord::sameColumnCoordinates() const
 {
     QVector<Coord> ret;
-    for (int i=1;i<=Coord::N; i++)
-        if (i!=row())
-            ret.append(Coord(i, col()));
+    for(int r=1; r<=Coord::N; r++)
+        if (r != row())
+        ret.append(Coord(r, col()));
     return ret;
 }
 
 QVector<Coord> Coord::sameRowCoordinates() const
 {
     QVector<Coord> ret;
-    for (int i=1;i<=Coord::N; i++)
-        if (i!=col())
-            ret.append(Coord(row(), i));
+    for(int c=1; c<=Coord::N; c++)
+        if (c != col())
+        ret.append(Coord(row(), c));
     return ret;
 }
 

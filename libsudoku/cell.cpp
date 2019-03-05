@@ -2,15 +2,11 @@
 #include "house.h"
 #include <iostream>
 
-Cell::Cell()
-    :val(0), initial_value(false)
-{}
-
-Cell::Cell(quint8 val)
-    :val(val), initial_value(true)
+Cell::Cell(quint8 n, QObject* parent)
+    :QObject(parent), val(0), initial_value(false)
 {
-    candidateMask.fill(false);
-    candidateMask.setBit(val-1);
+    if (n>0)
+        resetCandidates(n);
 }
 
 void Cell::setValue(quint8 val, bool init_value)
@@ -20,6 +16,8 @@ void Cell::setValue(quint8 val, bool init_value)
     candidateMask.setBit(val-1, true);
     initial_value = init_value;
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
+    emit valueSet(val);
+
     for(House* pArea: houses)
     {
         pArea->removeCandidate(val);
@@ -42,6 +40,7 @@ bool Cell::removeCandidate(quint8 guessVal)
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
+    emit candidateRemoved(guessVal);
     return true;
 }
 
@@ -59,6 +58,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
+    emit candidatesRemoved(candidate);
     return true;
 }
 
@@ -69,6 +69,11 @@ bool Cell::candidatesExactMatch(const QBitArray& mask) const
 
 bool Cell::hasCandidate(quint8 guessVal) const
 {
+    if (guessVal > candidateMask.count() || guessVal < 1)
+    {
+        throw std::out_of_range("candidate is out of range");
+        return false;
+    }
     return candidateMask.testBit(guessVal-1);
 }
 
@@ -93,6 +98,12 @@ void Cell::registerInHouse(House& area)
     area.addCell(this);
 //    if (value > 0)
     //        area.removeGuess(value);
+}
+
+bool Cell::isValid() const
+{
+    return     (isResolved() && candidateMask.count(true) == 1 && candidateMask.at(value()-1) == true)
+            || (!isResolved() && candidateMask.count(true) > 1);
 }
 
 QBitArray Cell::commonCandidates(const Cell& a) const

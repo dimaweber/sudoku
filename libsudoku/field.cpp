@@ -11,6 +11,12 @@ Field::Field()
 {
 }
 
+Field::~Field()
+{
+    for(Cell* cell: cells)
+        cell->deleteLater();
+}
+
 void Field::enableTechnique(Field::SolvingTechnique tech, bool enabled)
 {
     if (enabled)
@@ -28,7 +34,8 @@ void Field::setN(quint8 n)
 
     for (quint16 idx=0; idx<n*n; idx++)
     {
-        Cell& cell = cells[idx];
+        cells[idx] = new Cell(n);
+        Cell& cell = *cells[idx];
         cell.coord().setRawIndex(idx);
         cell.resetCandidates(n);
     }
@@ -172,12 +179,12 @@ void Field::process()
 
 Cell& Field::cell(const Coord& coord)
 {
-    return cells[coord.rawIndex()];
+    return *cells[coord.rawIndex()];
 }
 
 const Cell& Field::cell(const Coord& coord) const
 {
-    return cells[coord.rawIndex()];
+    return *cells[coord.rawIndex()];
 }
 
 QVector<Cell*> Field::allCellsVisibleFromCell(const Cell& c)
@@ -227,8 +234,8 @@ void Field::print() const
 
 bool Field::hasEmptyValues() const
 {
-    for (const Cell& cell: cells)
-        if (!cell.isResolved())
+    for (const Cell* cell: cells)
+        if (!cell->isResolved())
             return true;
     return false;
 }
@@ -314,17 +321,17 @@ bool Field::findLinks()
                 }
             }
         }
-        for(Cell& c: cells)
+        for(Cell* c: cells)
         {
-            if (!c.hasCandidate(i))
+            if (!c->hasCandidate(i))
                 continue;
 
-            CellColor clr = vault.getColor(&c);
+            CellColor clr = vault.getColor(c);
             if (clr != ColorPair::UnknownColor)
                 continue;
 
             QVector<CellColor> visibleColors;
-            QVector<Cell*> visibleCells = allCellsVisibleFromCell(c);
+            QVector<Cell*> visibleCells = allCellsVisibleFromCell(*c);
             for (Cell* pCell: visibleCells)
             {
                 CellColor color = vault.getColor(pCell);
@@ -338,8 +345,8 @@ bool Field::findLinks()
                 }
                 else*/ if (visibleColors.contains(acolor))
                 {
-                    std::cout << "Non-colored cell " << c.coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
-                    changed |= c.removeCandidate(i);
+                    std::cout << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
+                    changed |= c->removeCandidate(i);
                     break;
                 }
                 else
@@ -426,10 +433,10 @@ bool Field::reduceXWing()
                     Coord B1(row1_idx, colB_idx);
                     Coord B2(row2_idx, colB_idx);
 
-                    Cell& cA1 = cells[A1.rawIndex()];
-                    Cell& cA2 = cells[A2.rawIndex()];
-                    Cell& cB1 = cells[B1.rawIndex()];
-                    Cell& cB2 = cells[B2.rawIndex()];
+                    Cell& cA1 = cell(A1);
+                    Cell& cA2 = cell(A2);
+                    Cell& cB1 = cell(B1);
+                    Cell& cB2 = cell(B2);
 
                     if (cA1.isResolved() || cA2.isResolved() || cB1.isResolved() || cB2.isResolved())
                         continue;
@@ -451,9 +458,9 @@ bool Field::reduceXWing()
                                 if (col == colA_idx || col==colB_idx)
                                     continue;
                                 Coord c1(row1_idx, col);
-                                changed |= cells[c1.rawIndex()].removeCandidate(value);
+                                changed |= cell(c1).removeCandidate(value);
                                 Coord c2(row2_idx, col);
-                                changed |= cells[c2.rawIndex()].removeCandidate(value);
+                                changed |= cell(c2).removeCandidate(value);
                             }
                         }
                         if (rows[row1_idx-1].candidatesCount(value) == 2 && rows[row2_idx-1].candidatesCount(value) == 2
@@ -465,9 +472,9 @@ bool Field::reduceXWing()
                                 if (row == row1_idx || row==row2_idx)
                                     continue;
                                 Coord c1(row, colA_idx);
-                                changed |= cells[c1.rawIndex()].removeCandidate(value);
+                                changed |= cell(c1).removeCandidate(value);
                                 Coord c2(row, colB_idx);
-                                changed |= cells[c2.rawIndex()].removeCandidate(value);
+                                changed |= cell(c2).removeCandidate(value);
                             }
                         }
                     }

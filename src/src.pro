@@ -1,6 +1,6 @@
 QT += gui widgets
 
-CONFIG += c++11 console
+CONFIG += c++14 console
 CONFIG -= app_bundle
 
 TARGET = sudoku
@@ -14,6 +14,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 DEFINES += INVALID_COORD_EXCEPTION
 
+
+QMAKE_CXXFLAGS += -Wall -Wpedantic
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -21,28 +24,20 @@ DEFINES += INVALID_COORD_EXCEPTION
 
 SOURCES += \
 		main.cpp \
-	cell.cpp \
-	coord.cpp \
-	field.cpp \
-    house.cpp \
-    bilocationlink.cpp \
-    fieldgui.cpp \
-    cellcolor.cpp
+		fieldgui.cpp
 
-LIBS += -lgsl -lgslcblas
+LIBS += -L../bin -lsudoku
+unix:QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+INCLUDEPATH += ../libsudoku
+
 HEADERS += \
-	cell.h \
-	coord.h \
-	field.h \
-    house.h \
-    bilocationlink.h \
-    fieldgui.h \
-    cellcolor.h
+	fieldgui.h
 
 OBJECTS_DIR = .obj
 UI_DIR = .ui

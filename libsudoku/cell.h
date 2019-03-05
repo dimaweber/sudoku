@@ -5,6 +5,7 @@
 #include <iostream>
 #include <QBitArray>
 #include <QVector>
+#include <QObject>
 
 class House;
 
@@ -12,6 +13,7 @@ class House;
 //{
 //    quint8 val;
 //public:
+//    explicit Value(quint8 v) :val(v){}
 //    bool isSet() const {return val > 0;}
 //    int toInt() const {return val;}
 //    char toChar() const {return static_cast<char>('0' + val);}
@@ -23,9 +25,13 @@ class House;
 //    bool presentInMask (const QBitArray& a) const { return a.testBit(val-1); }
 //};
 
-class Cell
+typedef quint8 CellValue;
+
+class Cell: public QObject
 {
-    quint8    val;
+    Q_OBJECT
+
+    CellValue    val;
     QBitArray candidateMask;
     bool initial_value;
     Coord coordinate;
@@ -33,28 +39,33 @@ class Cell
     Cell& operator = (const Cell& );
 
 public:
-    Cell();
-    Cell (quint8 val);
-    quint8 value() const {return val;}
+    Cell(quint8 n = 0, QObject* parent = nullptr);
+
+    CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
-    void setValue(quint8 val, bool init_value = false);
+    void setValue(CellValue val, bool init_value = false);
     bool removeCandidate(quint8 val);
-    bool removeCandidate(const QBitArray& candidate);
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
-    bool candidatesExactMatch(const QBitArray& mask) const;
     bool isResolved() const {return value() != 0;}
     bool hasCandidate(quint8 val) const;
-    int hasAnyOfCandidates(const QBitArray& mask) const;
     void print() const;
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
+    bool isValid() const;
 
+    bool removeCandidate(const QBitArray& candidate);
+    bool candidatesExactMatch(const QBitArray& mask) const;
+    int hasAnyOfCandidates(const QBitArray& mask) const;
     QBitArray commonCandidates(const Cell& a) const;
 
     bool operator == (const Cell& other) const;
+signals:
+    void valueSet(CellValue v);
+    void candidateRemoved(CellValue v);
+    void candidatesRemoved(QBitArray v);
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);
