@@ -12,9 +12,15 @@ void House::init(quint8 n)
     N = n;
 }
 
-void Set::addCell(Cell* pCell)
+void CellSet::addCell(Cell* pCell)
 {
     cells.append(pCell);
+}
+
+void CellSet::removeCell(Cell* pCell)
+{
+    if (cells.contains(pCell))
+        cells.removeOne(pCell);
 }
 
 void House::fillCandidatesCombinationsMasks()
@@ -103,7 +109,7 @@ bool House::checkHiddenCombinations()
     return ret;
 }
 
-void Set::print() const
+void CellSet::print() const
 {
     std::cout << qPrintable(name()) << ": ";
     for (Cell* pCell: cells)
@@ -164,7 +170,7 @@ bool House::checkHiddenSingle()
     return newValuesSet;
 }
 
-bool Set::removeCandidate(quint8 val)
+bool CellSet::removeCandidate(quint8 val)
 {
     bool ret = false;
     for (Cell* pCell: cells)
@@ -174,7 +180,7 @@ bool Set::removeCandidate(quint8 val)
     return ret;
 }
 
-int Set::unresolvedCellsCount() const
+int CellSet::unresolvedCellsCount() const
 {
     int n=0;
     for(Cell* cell: cells)
@@ -183,7 +189,7 @@ int Set::unresolvedCellsCount() const
     return n;
 }
 
-bool Set::hasValue(quint8 val) const
+bool CellSet::hasValue(quint8 val) const
 {
     for (const Cell* pCell: cells)
         if (pCell->value() == val)
@@ -191,7 +197,7 @@ bool Set::hasValue(quint8 val) const
     return false;
 }
 
-int Set::candidatesCount(quint8 val) const
+int CellSet::candidatesCount(quint8 val) const
 {
     int cnt=0;
     for (const Cell* pCell: cells)
@@ -200,7 +206,7 @@ int Set::candidatesCount(quint8 val) const
     return cnt;
 }
 
-bool Set::hasEmptyValues() const
+bool CellSet::hasEmptyValues() const
 {
     for (const Cell* pCell: cells)
         if (!pCell->isResolved())
@@ -230,7 +236,7 @@ bool House::isResolved() const
     return isValid() && !hasEmptyValues();
 }
 
-bool Set::hasCell(const Cell* p) const
+bool CellSet::hasCell(const Cell* p) const
 {
     for(const Cell* pCell: cells)
         if (pCell->coord() == p->coord())
@@ -238,7 +244,7 @@ bool Set::hasCell(const Cell* p) const
     return false;
 }
 
-QVector<Cell*> Set::cellsWithCandidate(quint8 val) const
+QVector<Cell*> CellSet::cellsWithCandidate(quint8 val) const
 {
     QVector<Cell*> ret;
     for(Cell* cell: cells)
@@ -247,9 +253,9 @@ QVector<Cell*> Set::cellsWithCandidate(quint8 val) const
     return ret;
 }
 
-Set Set::operator+(const Set& a) const
+CellSet CellSet::operator+(const CellSet& a) const
 {
-    Set ret;
+    CellSet ret;
     for (Cell* cell: cells)
         ret.addCell(cell);
     for (Cell* cell: a.cells)
@@ -258,18 +264,18 @@ Set Set::operator+(const Set& a) const
     return ret;
 }
 
-Set Set::operator-(const Set& a) const
+CellSet CellSet::operator-(const CellSet& a) const
 {
-    Set ret;
+    CellSet ret;
     for(Cell* cell: cells)
         if (!a.cells.contains(cell))
             ret.addCell(cell);
     return ret;
 }
 
-Set Set::operator/(const Set& a) const
+CellSet CellSet::operator/(const CellSet& a) const
 {
-    Set ret;
+    CellSet ret;
     for(Cell* cell: cells)
         if (a.cells.contains(cell))
             ret.addCell(cell);

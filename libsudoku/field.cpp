@@ -173,6 +173,9 @@ void Field::process()
         if (enabledTechniques & BiLocationColoring)
             changed |= findLinks();
 
+        if (enabledTechniques & YWing)
+            changed |= reduceYWing();
+
     }while(changed);
 
 }
@@ -187,33 +190,41 @@ const Cell& Field::cell(const Coord& coord) const
     return *cells[coord.rawIndex()];
 }
 
-QVector<Cell*> Field::allCellsVisibleFromCell(const Cell& c)
+CellSet Field::allCellsVisibleFromCell(const Cell* c)
 {
-    QVector<Cell*> visibleCells;
-    QVector<Coord> coords = c.coord().sameColumnCoordinates();
+    CellSet visibleCells;
+    QVector<Coord> coords = c->coord().sameColumnCoordinates();
     for (const Coord& co: coords)
     {
         Cell* cellToAdd = &cell(co);
-        visibleCells.append( cellToAdd );
+        visibleCells.addCell(cellToAdd );
     }
 
-    coords = c.coord().sameRowCoordinates();
+    coords = c->coord().sameRowCoordinates();
     for (const Coord& co: coords)
     {
         Cell* cellToAdd = &cell(co);
-        if (!visibleCells.contains(cellToAdd))
-            visibleCells.append(cellToAdd);
+        if (!visibleCells.hasCell(cellToAdd))
+            visibleCells.addCell(cellToAdd);
     }
 
-    coords = c.coord().sameSquareCoordinates();
+    coords = c->coord().sameSquareCoordinates();
     for (const Coord& co: coords)
     {
         Cell* cellToAdd = &cell(co);
-        if (!visibleCells.contains(cellToAdd))
-            visibleCells.append(cellToAdd);
+        if (!visibleCells.hasCell(cellToAdd))
+            visibleCells.addCell(cellToAdd);
     }
 
     return visibleCells;
+}
+
+CellSet Field::allCellsVisibleFromBothCell(const Cell* c1, const Cell* c2)
+{
+    CellSet vis1 = allCellsVisibleFromCell(c1);
+    CellSet vis2 = allCellsVisibleFromCell(c2);
+
+    return vis1 / vis2;
 }
 
 void Field::print() const
@@ -264,7 +275,7 @@ bool Field::findLinks()
 {
     bool changed = false;
     QMap<int, QVector<BiLocationLink>> links;
-    for (int i=1;i<=N;i++)
+    for (CellValue i=1;i<=N;i++)
     {
         links[i] = findBiLocationLinks(i);
         ColoredLinksVault vault(i);
@@ -331,19 +342,14 @@ bool Field::findLinks()
                 continue;
 
             QVector<CellColor> visibleColors;
-            QVector<Cell*> visibleCells = allCellsVisibleFromCell(*c);
+            CellSet visibleCells = allCellsVisibleFromCell(c);
             for (Cell* pCell: visibleCells)
             {
                 CellColor color = vault.getColor(pCell);
                 if (color == ColorPair::UnknownColor)
                     continue;
                 CellColor acolor = ColorPair::antiColor(color);
-            /*    if (visibleColors.contains(color))
-                {
-                    std::cout << "Non-colored cell " << c.coord() << " can see 2 candidates with same color " << color << ": this color is OFF" << std::endl;
-                    changed |= vault.removeCandidateForColor(color);
-                }
-                else*/ if (visibleColors.contains(acolor))
+                if (visibleColors.contains(acolor))
                 {
                     std::cout << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
                     changed |= c->removeCandidate(i);
@@ -390,9 +396,9 @@ bool Field::reduceIntersections()
 bool Field::reduceIntersection(SquareHouse& square, LineHouse& area)
 {
     bool changed = false;
-    Set inter = square / area;
-    Set squareNoLine = square - area;
-    Set lineNoSquare = area - square;
+    CellSet inter = square / area;
+    CellSet squareNoLine = square - area;
+    CellSet lineNoSquare = area - square;
 
     if (inter.isEmpty())
         return false;
@@ -480,6 +486,55 @@ bool Field::reduceXWing()
                     }
                 }
     return changed;
+}
+
+bool Field::reduceYWing()
+{
+    bool ret = false;
+
+    for (Cell* cellAB: cells)
+    {
+        if (cellAB->candidatesCount() != 2)
+            continue;
+
+        QVector<CellValue> candidates = cellAB->candidates();
+        CellValue A = candidates[0];
+        CellValue B = candidates[1];
+
+        CellSet visibleFromAB = allCellsVisibleFromCell(cellAB);
+        CellSet biValueCellsVisibleFromAB;
+        for(Cell* c: visibleFromAB)
+            if (c->candidatesCount() == 2)
+                biValueCellsVisibleFromAB.addCell(c);
+
+
+        for(CellValue C=1; C<=N; C++)
+        {
+            if(A == C || B == C)
+                continue;
+
+            CellSet cellsAC;
+            CellSet cellsBC;
+
+            for (Cell* c: biValueCellsVisibleFromAB)
+            {
+                if (c->hasCandidate(C) && c->hasCandidate(A))
+                    cellsAC.addCell(c);
+                if (c->hasCandidate(C) && c->hasCandidate(B))
+                    cellsBC.addCell(c);
+            }
+
+            for (Cell* ac: cellsAC)
+                for(Cell* bc: cellsBC)
+                {
+                    std::cout << "Y-Wing found: " << cellAB->coord() << " " << ac->coord() << " " << bc->coord() << std::endl;
+                    CellSet visibleFromBoth = allCellsVisibleFromBothCell(ac, bc);
+                    ret |= visibleFromBoth.removeCandidate(C);
+                }
+        }
+    }
+
+    return ret;
 }
 
 

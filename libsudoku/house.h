@@ -5,13 +5,14 @@
 
 class Cell;
 
-class Set
+class CellSet
 {
     QString houseName;
 protected:
     QVector<Cell*> cells;
 public:
     void addCell(Cell* pCell);
+    void removeCell(Cell* pCell);
 
     void setName(const QString& name) {houseName = name;}
     const QString& name() const { return houseName;}
@@ -28,12 +29,24 @@ public:
     QVector<Cell*> cellsWithCandidate(quint8 val) const;
 
     bool isEmpty() const { return cells.isEmpty();}
-    Set operator+ (const Set& a) const;
-    Set operator- (const Set& a) const;
-    Set operator/ (const Set& a) const;
+    CellSet operator+ (const CellSet& a) const;
+    CellSet operator- (const CellSet& a) const;
+    CellSet operator/ (const CellSet& a) const;
+
+    typedef typename QVector<Cell*>::iterator iterator;
+    typedef typename QVector<Cell*>::const_iterator const_iterator;
+    inline iterator begin() { return cells.begin(); }
+    inline const_iterator begin() const { return cells.constBegin(); }
+    inline const_iterator cbegin() const { return cells.constBegin(); }
+    inline const_iterator constBegin() const { return cells.constBegin(); }
+    inline iterator end() { return cells.end(); }
+    inline const_iterator end() const { return cells.constEnd(); }
+    inline const_iterator cend() const { return cells.constEnd(); }
+    inline const_iterator constEnd() const { return cells.constEnd(); }
+
 };
 
-class House : public Set
+class House : public CellSet
 {
     static quint8 N;
     static QVector<QBitArray> allCandidatesCombinationsMasks;

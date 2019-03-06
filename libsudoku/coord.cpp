@@ -125,7 +125,7 @@ QVector<Coord> Coord::sameColumnCoordinates() const
     QVector<Coord> ret;
     for(int r=1; r<=Coord::N; r++)
         if (r != row())
-        ret.append(Coord(r, col()));
+            ret.append(Coord(r, col()));
     return ret;
 }
 
@@ -134,7 +134,7 @@ QVector<Coord> Coord::sameRowCoordinates() const
     QVector<Coord> ret;
     for(int c=1; c<=Coord::N; c++)
         if (c != col())
-        ret.append(Coord(row(), c));
+            ret.append(Coord(row(), c));
     return ret;
 }
 

@@ -42,7 +42,8 @@ public:
     Cell& cell(const Coord& coord);
     const Cell& cell(const Coord& coord) const;
 
-    QVector<Cell*> allCellsVisibleFromCell(const Cell& cell);
+    CellSet allCellsVisibleFromCell(const Cell* c) ;
+    CellSet allCellsVisibleFromBothCell(const Cell* c1, const Cell* c2);
 
     void print() const;
 
@@ -61,6 +62,7 @@ private:
     bool reduceIntersections();
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
     bool reduceXWing();
+    bool reduceYWing();
 
 };
 

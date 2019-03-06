@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
                 array.enableTechnique(Field::XWing, false);
             if (arg == "-no-bi-location-coloring")
                 array.enableTechnique(Field::BiLocationColoring, false);
+            if (arg == "-no-ywing")
+                array.enableTechnique(Field::YWing, false);
         }
     }
 

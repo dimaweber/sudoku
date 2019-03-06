@@ -55,6 +55,7 @@ public:
     const Coord& coord() const { return coordinate;}
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
     bool isValid() const;
+    QVector<CellValue> candidates() const;
 
     bool removeCandidate(const QBitArray& candidate);
     bool candidatesExactMatch(const QBitArray& mask) const;

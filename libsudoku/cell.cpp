@@ -106,6 +106,15 @@ bool Cell::isValid() const
             || (!isResolved() && candidateMask.count(true) > 1);
 }
 
+QVector<CellValue> Cell::candidates() const
+{
+    QVector<CellValue> ret;
+    for (int i=1; i<=candidatesCapacity(); i++)
+        if (hasCandidate(i))
+            ret.append(i);
+    return ret;
+}
+
 QBitArray Cell::commonCandidates(const Cell& a) const
 {
     QBitArray ret(candidatesCapacity());
