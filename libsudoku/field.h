@@ -23,10 +23,11 @@ public:
                            HiddenSingle=0x0002,
                            NakedGroup=0x0004,
                            HiddenGroup=0x0008,
-                           Intersections=0x000F,
-                           XWing=0x0010,
-                           BiLocationColoring=0x0020,
-                           YWing=0x0040};
+                           Intersections=0x0010,
+                           XWing=0x0020,
+                           BiLocationColoring=0x0040,
+                           YWing=0x0100,
+                           XYZWing = 0x0200};
 
     void enableTechnique(SolvingTechnique tech, bool enabled=true);
 
@@ -63,6 +64,7 @@ private:
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
     bool reduceXWing();
     bool reduceYWing();
+    bool reduceXYZWing();
 
 };
 

@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
                 array.enableTechnique(Field::BiLocationColoring, false);
             if (arg == "-no-ywing")
                 array.enableTechnique(Field::YWing, false);
+            if (arg == "-no-xyzwing")
+                array.enableTechnique(Field::XYZWing, false);
         }
     }
 
