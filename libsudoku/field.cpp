@@ -57,7 +57,7 @@ bool Field::readFromFormattedTextFile(const QString& filename)
     {
         lines.append(stream.readLine());
     }
-    quint8 n = lines.count();
+    quint8 n = static_cast<quint8>(lines.count());
     setN(n);
     for(quint8 row=1;row <= n; row++)
     {
@@ -69,7 +69,10 @@ bool Field::readFromFormattedTextFile(const QString& filename)
         for(quint8 col=1; col<= n; col++)
         {
             if (lines[row-1][col-1]!= '.')
-                cell(Coord(row,col)).setValue(lines[row-1][col-1].toLatin1()-'0', true);
+            {
+                CellValue v = static_cast<CellValue>(lines[row-1][col-1].digitValue());
+                cell(Coord(row,col)).setValue(v, true);
+            }
         }
     }
     return true;
@@ -93,12 +96,13 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
             lines.append(line);
     }while(!stream.atEnd());
     QString line = lines.at(qMin(num, lines.count()));
-    quint8 n = qSqrt(line.count());
+    quint8 n = static_cast<quint8>(qSqrt(line.count()));
     setN(n);
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
-        if (line[coord.rawIndex()].toLatin1() != '.' && line[coord.rawIndex()].toLatin1() != '0')
-            cell(coord).setValue(line[coord.rawIndex()].toLatin1()-'0', true);
+        QChar symbol = line[coord.rawIndex()];
+        if (symbol.isDigit() && symbol.toLatin1() != '0')
+            cell(coord).setValue(static_cast<CellValue>(symbol.digitValue()), true);
     }
     return true;
 }
@@ -269,12 +273,12 @@ bool Field::isValid() const
 
 quint8 Field::columnCount() const
 {
-    return  columns.count();
+    return  static_cast<quint8>(columns.count());
 }
 
 quint8 Field::rowsCount() const
 {
-    return rows.count();
+    return static_cast<quint8>(rows.count());
 }
 
 bool Field::findLinks()
@@ -320,7 +324,7 @@ bool Field::findLinks()
         for(House* house: areas)
         {
             // check for houses with 2 cells of same color
-            QVector<Cell*> cellsWithCandidate = house->cellsWithCandidate(i);
+            CellSet cellsWithCandidate = house->cellsWithCandidate(i);
             QMap<CellColor, int> presentColor;
             for (Cell* cell: cellsWithCandidate)
             {
@@ -375,7 +379,7 @@ QVector<BiLocationLink> Field::findBiLocationLinks(quint8 val) const
     QVector<BiLocationLink> ret;
     for(House* house: areas)
     {
-        QVector<Cell*> lst = house->cellsWithCandidate(val);
+        CellSet lst = house->cellsWithCandidate(val);
         if (lst.count() == 2)
         {
             BiLocationLink link(val, lst[0], lst[1]);
@@ -409,7 +413,7 @@ bool Field::reduceIntersection(SquareHouse& square, LineHouse& area)
     if (inter.isEmpty())
         return false;
 
-    for (quint8 v = 1; v <= N; v++)
+    for (CellValue v = 1; v <= N; v++)
     {
         if (inter.candidatesCount(v) > 1)
         {

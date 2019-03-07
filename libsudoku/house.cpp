@@ -170,7 +170,7 @@ bool House::checkHiddenSingle()
     return newValuesSet;
 }
 
-bool CellSet::removeCandidate(quint8 val)
+bool CellSet::removeCandidate(CellValue val)
 {
     bool ret = false;
     for (Cell* pCell: cells)
@@ -189,7 +189,7 @@ int CellSet::unresolvedCellsCount() const
     return n;
 }
 
-bool CellSet::hasValue(quint8 val) const
+bool CellSet::hasValue(CellValue val) const
 {
     for (const Cell* pCell: cells)
         if (pCell->value() == val)
@@ -197,7 +197,7 @@ bool CellSet::hasValue(quint8 val) const
     return false;
 }
 
-int CellSet::candidatesCount(quint8 val) const
+int CellSet::candidatesCount(CellValue val) const
 {
     int cnt=0;
     for (const Cell* pCell: cells)
@@ -244,12 +244,12 @@ bool CellSet::hasCell(const Cell* p) const
     return false;
 }
 
-QVector<Cell*> CellSet::cellsWithCandidate(quint8 val) const
+CellSet CellSet::cellsWithCandidate(CellValue val) const
 {
-    QVector<Cell*> ret;
+    CellSet ret;
     for(Cell* cell: cells)
         if (cell->hasCandidate(val))
-                ret.append(cell);
+                ret.addCell(cell);
     return ret;
 }
 

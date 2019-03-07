@@ -72,10 +72,8 @@ void Coord::setRawIndex(quint16 idx)
         throw std::out_of_range("coord rawIndex is out of range");
 #endif
     rawIdx = idx;
-    colIdx = idx % Coord::N;
-    rowIdx = idx / Coord::N;
-    colIdx++;
-    rowIdx++;
+    colIdx = idx % Coord::N + 1;
+    rowIdx = idx / Coord::N + 1;
 }
 
 void Coord::setRowCol(quint8 row, quint8 col)
@@ -101,7 +99,7 @@ bool Coord::isValid() const
     return rowIdx > 0 && rowIdx <= N && colIdx > 0 && colIdx <= N && rawIdx <= maxRawIndex();
 }
 
-void Coord::init(quint16 n)
+void Coord::init(quint8 n)
 {
     Coord::N = n;
 }
@@ -123,7 +121,7 @@ Coord Coord::last()
 QVector<Coord> Coord::sameColumnCoordinates() const
 {
     QVector<Coord> ret;
-    for(int r=1; r<=Coord::N; r++)
+    for(quint8 r=1; r<=Coord::N; r++)
         if (r != row())
             ret.append(Coord(r, col()));
     return ret;
@@ -132,7 +130,7 @@ QVector<Coord> Coord::sameColumnCoordinates() const
 QVector<Coord> Coord::sameRowCoordinates() const
 {
     QVector<Coord> ret;
-    for(int c=1; c<=Coord::N; c++)
+    for(quint8 c=1; c<=Coord::N; c++)
         if (c != col())
             ret.append(Coord(row(), c));
     return ret;
@@ -145,8 +143,8 @@ QVector<Coord> Coord::sameSquareCoordinates() const
     quint8 s_row = squareIdx() / s_n;
     quint8 s_col = squareIdx() % s_n;
     Coord co;
-    for (int r = s_row * s_n; r < (s_row+1) * s_n; r++)
-        for (int c = s_col * s_n; c < (s_col+1) * s_n; c++)
+    for (quint8 r = s_row * s_n; r < (s_row+1) * s_n; r++)
+        for (quint8 c = s_col * s_n; c < (s_col+1) * s_n; c++)
         {
             co = Coord(r+1,c+1);
             if (*this == co)
@@ -179,8 +177,8 @@ bool Coord::operator !=(const Coord& o) const
 std::ostream& operator <<(std::ostream& stream, const Coord& coord)
 {
     stream << '['
-           << 'R' << (int)coord.row()
-           << 'C' << (int)coord.col()
+           << 'R' << static_cast<int>(coord.row())
+           << 'C' << static_cast<int>((int)coord.col())
            << ']';
     return stream;
 }

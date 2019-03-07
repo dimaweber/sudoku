@@ -2,8 +2,7 @@
 #define AREA_H
 
 #include <QVector>
-
-class Cell;
+#include "cell.h"
 
 class CellSet
 {
@@ -19,16 +18,20 @@ public:
 
     void print() const;
 
-    bool hasValue(quint8 val) const;
-    int candidatesCount(quint8 val) const;
+    bool hasValue(CellValue val) const;
+    int candidatesCount(CellValue val) const;
     bool hasEmptyValues() const;
-    bool removeCandidate(quint8 val);
+    bool removeCandidate(CellValue val);
     int unresolvedCellsCount() const;
     bool hasCell(const Cell* p) const;
 
-    QVector<Cell*> cellsWithCandidate(quint8 val) const;
+    CellSet cellsWithCandidate(CellValue val) const;
 
+    int count() const { return cells.count();}
     bool isEmpty() const { return cells.isEmpty();}
+    Cell* const & operator[](int index) const {return cells[index];}
+    Cell* &       operator[](int index)       {return cells[index];}
+
     CellSet operator+ (const CellSet& a) const;
     CellSet operator- (const CellSet& a) const;
     CellSet operator/ (const CellSet& a) const;
