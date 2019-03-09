@@ -187,7 +187,6 @@ void Field::process()
         if (changed) continue;
 
     }while(changed);
-
 }
 
 Cell& Field::cell(const Coord& coord)
@@ -285,7 +284,7 @@ bool Field::findLinks()
 {
     bool changed = false;
     QMap<int, QVector<BiLocationLink>> links;
-    for (CellValue i=1;i<=N;i++)
+    for (CellValue i=1; i<=N; i++)
     {
         links[i] = findBiLocationLinks(i);
         ColoredLinksVault vault(i);
@@ -374,7 +373,7 @@ bool Field::findLinks()
     return changed;
 }
 
-QVector<BiLocationLink> Field::findBiLocationLinks(quint8 val) const
+QVector<BiLocationLink> Field::findBiLocationLinks(CellValue val) const
 {
     QVector<BiLocationLink> ret;
     for(House* house: areas)

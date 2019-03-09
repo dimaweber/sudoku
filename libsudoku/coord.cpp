@@ -178,7 +178,7 @@ std::ostream& operator <<(std::ostream& stream, const Coord& coord)
 {
     stream << '['
            << 'R' << static_cast<int>(coord.row())
-           << 'C' << static_cast<int>((int)coord.col())
+           << 'C' << static_cast<int>(coord.col())
            << ']';
     return stream;
 }

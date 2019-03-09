@@ -59,7 +59,7 @@ private:
     quint32 enabledTechniques;
 
     bool findLinks();
-    QVector<BiLocationLink> findBiLocationLinks(quint8 val) const;
+    QVector<BiLocationLink> findBiLocationLinks(CellValue val) const;
     bool reduceIntersections();
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
     bool reduceXWing();
