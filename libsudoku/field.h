@@ -8,6 +8,20 @@
 #include <QThread>
 #include <QElapsedTimer>
 
+
+class Technique
+{
+    bool enabled;
+    ~Technique();
+public:
+    virtual const QString name() const =0;
+    void setEnabled(bool enabled = true)
+    {
+        this->enabled = enabled;
+    }
+
+};
+
 class Field
 {
     quint8 N;
@@ -21,15 +35,15 @@ public:
     Field();
     ~Field();
 
-    enum SolvingTechnique {NakedSinge=0x0001,
+    enum SolvingTechnique {NakedSingle=0x0001,
                            HiddenSingle=0x0002,
                            NakedGroup=0x0004,
                            HiddenGroup=0x0008,
                            Intersections=0x0010,
                            XWing=0x0020,
                            BiLocationColoring=0x0040,
-                           YWing=0x0100,
-                           XYZWing = 0x0200};
+                           YWing=0x0080,
+                           XYZWing = 0x0100};
 
     void enableTechnique(SolvingTechnique tech, bool enabled=true);
 
@@ -57,6 +71,8 @@ public:
     quint8 columnCount() const;
     quint8 rowsCount() const;
 
+    bool isTechEnabled (Field::SolvingTechnique t)
+    { return enabledTechniques & t;}
 private:
     quint32 enabledTechniques;
 

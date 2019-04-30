@@ -151,7 +151,7 @@ bool House::checkHiddenSingle()
                     valuesCount[bit-1]++;
         }
     }
-    for(int bit=1; bit <= valuesCount.count(); bit++)
+    for(CellValue bit=1; bit <= valuesCount.count(); bit++)
     {
         if (valuesCount[bit-1] == 1)
         {
@@ -182,11 +182,9 @@ bool CellSet::removeCandidate(CellValue val)
 
 int CellSet::unresolvedCellsCount() const
 {
-    int n=0;
-    for(Cell* cell: cells)
-        if (!cell->isResolved())
-            n++;
-    return n;
+    return std::count_if(cells.begin(), cells.end(), [](const Cell* p)
+        {return !p->isResolved();}
+    );
 }
 
 bool CellSet::hasValue(CellValue val) const
@@ -199,11 +197,9 @@ bool CellSet::hasValue(CellValue val) const
 
 int CellSet::candidatesCount(CellValue val) const
 {
-    int cnt=0;
-    for (const Cell* pCell: cells)
-        if (pCell->hasCandidate(val))
-            cnt++;
-    return cnt;
+    return std::count_if(cells.begin(), cells.end(), [val](const Cell* p)
+        {return p->hasCandidate(val);}
+    );
 }
 
 bool CellSet::hasEmptyValues() const
@@ -219,8 +215,8 @@ bool House::isValid() const
     QBitArray mask(cells.count());
     for (const Cell* pCell: cells)
     {
-//        if (!pCell->isValid())
-//            return false;
+        if (!pCell->isValid())
+            return false;
         if (!pCell->isResolved())
             continue;
         quint8 bit = pCell->value()-1;

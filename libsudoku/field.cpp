@@ -34,7 +34,8 @@ void Field::setN(quint8 n)
 
     for (quint16 idx=0; idx<n*n; idx++)
     {
-        cells[idx] = new Cell(n);
+        if (!cells[idx])
+            cells[idx] = new Cell(n);
         Cell& cell = *cells[idx];
         cell.coord().setRawIndex(idx);
         cell.resetCandidates(n);
@@ -149,7 +150,7 @@ void Field::process()
 
         for(House* pArea: areas)
         {
-            if (enabledTechniques & NakedSinge || true) // always enabled
+            if (enabledTechniques & NakedSingle || true) // always enabled
                 changed |= pArea->checkNakedSingle();
             if (changed)  continue;
 

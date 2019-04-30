@@ -14,7 +14,8 @@
 #include <QDialog>
 #include <QBoxLayout>
 #include <QPushButton>
-
+#include <QGroupBox>
+#include <QCheckBox>
 #include <iostream>
 
 
@@ -22,8 +23,6 @@ int main(int argc, char *argv[])
 {
 qRegisterMetaType<CellValue>("CellValue");
     QApplication app(argc, argv);
-    QDialog diag;
-    QHBoxLayout layout(&diag);
 
     if (argc<2)
     {
@@ -100,18 +99,87 @@ qRegisterMetaType<CellValue>("CellValue");
     }
     else
     {
+        QDialog diag;
         FieldGui fgui_before(array, &diag);
-        layout.addWidget(&fgui_before);
-
+        QPushButton goButton("Go", &diag);
         QString windowTitle = QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum);
+        QGroupBox box;
+        QCheckBox* pNakedSingleCheck = new QCheckBox("Naked Single", &box);
+        QCheckBox* pHiddenSingleCheck = new QCheckBox("Hidden Single", &box);
+        QCheckBox* pNakedGroupCheck = new QCheckBox("Naked Group", &box);
+        QCheckBox* pHiddenGroupCheck = new QCheckBox("Hidden Group", &box);
+        QCheckBox* pIntersectionCheck = new QCheckBox("Intersection", &box);
+        QCheckBox* pXWingCheck = new QCheckBox("X-Wing", &box);
+        QCheckBox* pYWingCheck = new QCheckBox("Y-Wing", &box);
+
+        QHBoxLayout layout(&diag);
+        QVBoxLayout controlsLayout(&diag);
+        QVBoxLayout boxLayout(&box);
+
+        layout.addWidget(&fgui_before);
+        layout.addLayout(&controlsLayout);
+        controlsLayout.addWidget(&box);
+        controlsLayout.addWidget(&goButton);
+        controlsLayout.addStretch();
+
+        boxLayout.addWidget(pNakedSingleCheck);
+        boxLayout.addWidget(pHiddenSingleCheck);
+        boxLayout.addWidget(pNakedGroupCheck);
+        boxLayout.addWidget(pHiddenGroupCheck);
+        boxLayout.addWidget(pIntersectionCheck);
+        boxLayout.addWidget(pXWingCheck);
+        boxLayout.addWidget(pYWingCheck);
+
         diag.setWindowTitle(windowTitle);
-        QPushButton arrow("-->", &diag);
-        arrow.connect(&arrow, SIGNAL(pressed()), &resolver, SLOT(start()));
+        box.setLayout(&boxLayout);
+
+        box.setTitle("Techniques");
+
+        pNakedSingleCheck->setChecked( array.isTechEnabled(Field::NakedSingle));
+        pHiddenSingleCheck->setChecked( array.isTechEnabled(Field::HiddenSingle));
+        pNakedGroupCheck->setChecked( array.isTechEnabled(Field::NakedGroup));
+        pHiddenGroupCheck->setChecked( array.isTechEnabled(Field::HiddenGroup));
+        pIntersectionCheck->setChecked(array.isTechEnabled(Field::Intersections));
+        pXWingCheck->setChecked(array.isTechEnabled(Field::XWing));
+        pYWingCheck->setChecked(array.isTechEnabled(Field::YWing));
+
+        pNakedSingleCheck->setEnabled(false);
+
+        app.connect(pNakedSingleCheck, &QCheckBox::clicked, [&array, pNakedSingleCheck]()
+        {
+            array.enableTechnique(Field::NakedSingle, pNakedSingleCheck->isChecked());
+        });
+        app.connect(pHiddenSingleCheck, &QCheckBox::clicked, [&array, pHiddenSingleCheck]()
+        {
+            array.enableTechnique(Field::HiddenSingle, pHiddenSingleCheck->isChecked());
+        });
+        app.connect(pNakedGroupCheck, &QCheckBox::clicked, [&array, pNakedGroupCheck]()
+        {
+            array.enableTechnique(Field::NakedGroup, pNakedGroupCheck->isChecked());
+        });
+        app.connect(pHiddenGroupCheck, &QCheckBox::clicked, [&array, pHiddenGroupCheck]()
+        {
+            array.enableTechnique(Field::HiddenGroup, pHiddenGroupCheck->isChecked());
+        });
+        app.connect(pIntersectionCheck, &QCheckBox::clicked, [&array, pIntersectionCheck]()
+        {
+           array.enableTechnique(Field::Intersections, pIntersectionCheck->isChecked());
+        });
+        app.connect(pXWingCheck, &QCheckBox::clicked, [&array, pXWingCheck]()
+        {
+            array.enableTechnique(Field::XWing, pXWingCheck->isChecked());
+        });
+        app.connect(pYWingCheck, &QCheckBox::clicked, [&array, pYWingCheck]()
+        {
+            array.enableTechnique(Field::YWing, pYWingCheck->isChecked());
+        });
+
+        goButton.connect(&goButton, SIGNAL(pressed()), &resolver, SLOT(start()));
         app.connect(&resolver, &Resolver::done, [&windowTitle, &diag, &resolver]()
         {
             diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(resolver.resolveTime()));
         });
-        layout.addWidget(&arrow);
+
 
         diag.show();
         app.exec();
