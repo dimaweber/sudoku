@@ -56,6 +56,7 @@ qRegisterMetaType<CellValue>("CellValue");
                 noGui = true;
             if (arg == "-gui")
                 noGui = false;
+            /*
             if (arg == "-no-hidden-single")
                 array.enableTechnique(Field::HiddenSingle, false);
             if (arg == "-no-naked-group")
@@ -72,17 +73,23 @@ qRegisterMetaType<CellValue>("CellValue");
                 array.enableTechnique(Field::YWing, false);
             if (arg == "-no-xyzwing")
                 array.enableTechnique(Field::XYZWing, false);
+            */
         }
     }
 
-
     Resolver resolver(array);
+    resolver.registerTechnique(new NakedSingleTechnique(array));
+    resolver.registerTechnique(new HiddenSingleTechnique(array));
+    resolver.registerTechnique(new NakedGroupTechnique(array));
+    resolver.registerTechnique(new HiddenGroupTechnique(array));
+    resolver.registerTechnique(new IntersectionsTechnique(array));
+
     if (noGui)
     {
         qint64 elaps;
         QElapsedTimer timer;
         timer.start();
-        array.process();
+        resolver.process();
         elaps = timer.elapsed();
 
         array.print();
@@ -104,17 +111,21 @@ qRegisterMetaType<CellValue>("CellValue");
         QPushButton goButton("Go", &diag);
         QString windowTitle = QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum);
         QGroupBox box;
-        QCheckBox* pNakedSingleCheck = new QCheckBox("Naked Single", &box);
-        QCheckBox* pHiddenSingleCheck = new QCheckBox("Hidden Single", &box);
-        QCheckBox* pNakedGroupCheck = new QCheckBox("Naked Group", &box);
-        QCheckBox* pHiddenGroupCheck = new QCheckBox("Hidden Group", &box);
-        QCheckBox* pIntersectionCheck = new QCheckBox("Intersection", &box);
-        QCheckBox* pXWingCheck = new QCheckBox("X-Wing", &box);
-        QCheckBox* pYWingCheck = new QCheckBox("Y-Wing", &box);
 
         QHBoxLayout layout(&diag);
         QVBoxLayout controlsLayout(&diag);
         QVBoxLayout boxLayout(&box);
+
+        for (Technique* tech: resolver.techniques)
+        {
+            QCheckBox* pCheck = new QCheckBox(tech->name(), &box);
+            boxLayout.addWidget(pCheck);
+            pCheck->setChecked(tech->isEnabled());
+            app.connect(pCheck, &QCheckBox::clicked, [tech, pCheck]()
+            {
+                tech->setEnabled( pCheck->isChecked());
+            });
+        }
 
         layout.addWidget(&fgui_before);
         layout.addLayout(&controlsLayout);
@@ -122,57 +133,12 @@ qRegisterMetaType<CellValue>("CellValue");
         controlsLayout.addWidget(&goButton);
         controlsLayout.addStretch();
 
-        boxLayout.addWidget(pNakedSingleCheck);
-        boxLayout.addWidget(pHiddenSingleCheck);
-        boxLayout.addWidget(pNakedGroupCheck);
-        boxLayout.addWidget(pHiddenGroupCheck);
-        boxLayout.addWidget(pIntersectionCheck);
-        boxLayout.addWidget(pXWingCheck);
-        boxLayout.addWidget(pYWingCheck);
-
         diag.setWindowTitle(windowTitle);
         box.setLayout(&boxLayout);
 
         box.setTitle("Techniques");
 
-        pNakedSingleCheck->setChecked( array.isTechEnabled(Field::NakedSingle));
-        pHiddenSingleCheck->setChecked( array.isTechEnabled(Field::HiddenSingle));
-        pNakedGroupCheck->setChecked( array.isTechEnabled(Field::NakedGroup));
-        pHiddenGroupCheck->setChecked( array.isTechEnabled(Field::HiddenGroup));
-        pIntersectionCheck->setChecked(array.isTechEnabled(Field::Intersections));
-        pXWingCheck->setChecked(array.isTechEnabled(Field::XWing));
-        pYWingCheck->setChecked(array.isTechEnabled(Field::YWing));
-
-        pNakedSingleCheck->setEnabled(false);
-
-        app.connect(pNakedSingleCheck, &QCheckBox::clicked, [&array, pNakedSingleCheck]()
-        {
-            array.enableTechnique(Field::NakedSingle, pNakedSingleCheck->isChecked());
-        });
-        app.connect(pHiddenSingleCheck, &QCheckBox::clicked, [&array, pHiddenSingleCheck]()
-        {
-            array.enableTechnique(Field::HiddenSingle, pHiddenSingleCheck->isChecked());
-        });
-        app.connect(pNakedGroupCheck, &QCheckBox::clicked, [&array, pNakedGroupCheck]()
-        {
-            array.enableTechnique(Field::NakedGroup, pNakedGroupCheck->isChecked());
-        });
-        app.connect(pHiddenGroupCheck, &QCheckBox::clicked, [&array, pHiddenGroupCheck]()
-        {
-            array.enableTechnique(Field::HiddenGroup, pHiddenGroupCheck->isChecked());
-        });
-        app.connect(pIntersectionCheck, &QCheckBox::clicked, [&array, pIntersectionCheck]()
-        {
-           array.enableTechnique(Field::Intersections, pIntersectionCheck->isChecked());
-        });
-        app.connect(pXWingCheck, &QCheckBox::clicked, [&array, pXWingCheck]()
-        {
-            array.enableTechnique(Field::XWing, pXWingCheck->isChecked());
-        });
-        app.connect(pYWingCheck, &QCheckBox::clicked, [&array, pYWingCheck]()
-        {
-            array.enableTechnique(Field::YWing, pYWingCheck->isChecked());
-        });
+//        pNakedSingleCheck->setEnabled(false);
 
         goButton.connect(&goButton, SIGNAL(pressed()), &resolver, SLOT(start()));
         app.connect(&resolver, &Resolver::done, [&windowTitle, &diag, &resolver]()

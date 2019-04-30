@@ -28,7 +28,8 @@ SOURCES += \
 		house.cpp \
 		bilocationlink.cpp \
 		cellcolor.cpp \
-		field.cpp
+		field.cpp \
+		technique.cpp
 
 HEADERS += \
 		coord.h \
@@ -37,7 +38,8 @@ HEADERS += \
 		house.h \
 		bilocationlink.h \
 		field.h \
-		libsudoku_global.h
+		libsudoku_global.h \
+		technique.h
 
 unix {
     target.path = /usr/lib

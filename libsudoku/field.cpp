@@ -7,7 +7,7 @@
 #include <QtMath>
 
 Field::Field()
-    :N(0), cells(0),enabledTechniques(0xFFFF)
+    :N(0), cells(0)
 {
 }
 
@@ -15,14 +15,6 @@ Field::~Field()
 {
     for(Cell* cell: cells)
         cell->deleteLater();
-}
-
-void Field::enableTechnique(Field::SolvingTechnique tech, bool enabled)
-{
-    if (enabled)
-        enabledTechniques |= tech;
-    else
-        enabledTechniques &= ~tech;
 }
 
 void Field::setN(quint8 n)
@@ -140,7 +132,7 @@ void Field::prepareHouses(quint8 n)
     }
 }
 
-void Field::process()
+void Resolver::process()
 {
     bool changed = false;
 
@@ -148,25 +140,14 @@ void Field::process()
     {
         changed = false;
 
-        for(House* pArea: areas)
+        for(Technique* tech: techniques)
         {
-            if (enabledTechniques & NakedSingle || true) // always enabled
-                changed |= pArea->checkNakedSingle();
-            if (changed)  continue;
-
-            if (enabledTechniques & HiddenSingle)
-                changed |= pArea->checkHiddenSingle();
-            if (changed) continue;
-
-            if (enabledTechniques & NakedGroup)
-                changed |= pArea->checkNakedCombinations();
-            if (changed) continue;
-
-            if (enabledTechniques & HiddenGroup)
-                changed |= pArea->checkHiddenCombinations();
-            if (changed) continue;
+            changed = tech->perform();
+            if (changed)
+                break;
         }
 
+        /*
         if (enabledTechniques & Intersections)
             changed |= reduceIntersections();
         if (changed) continue;
@@ -186,6 +167,7 @@ void Field::process()
         if (enabledTechniques & XYZWing)
             changed |= reduceXYZWing();
         if (changed) continue;
+        */
 
     }while(changed);
 }
@@ -390,49 +372,6 @@ QVector<BiLocationLink> Field::findBiLocationLinks(CellValue val) const
     return ret;
 }
 
-bool Field::reduceIntersections()
-{
-    bool changed = false;
-    for (SquareHouse& sq: squares)
-    {
-        for (LineHouse& r: rows)
-            changed |= reduceIntersection(sq, r);
-        for (LineHouse& c: columns)
-            changed |= reduceIntersection(sq, c);
-    }
-    return changed;
-}
-
-bool Field::reduceIntersection(SquareHouse& square, LineHouse& area)
-{
-    bool changed = false;
-    CellSet inter = square / area;
-    CellSet squareNoLine = square - area;
-    CellSet lineNoSquare = area - square;
-
-    if (inter.isEmpty())
-        return false;
-
-    for (CellValue v = 1; v <= N; v++)
-    {
-        if (inter.candidatesCount(v) > 1)
-        {
-            if (squareNoLine.candidatesCount(v) == 0 && lineNoSquare.candidatesCount(v) != 0)
-            {
-                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
-                          << " intersection but no in any other cell of " << qPrintable(square.name()) << std::endl;
-                changed |= lineNoSquare.removeCandidate(v);
-            }
-            if (lineNoSquare.candidatesCount(v) == 0 && squareNoLine.candidatesCount(v) != 0)
-            {
-                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
-                          << " intersection but no in any other cell of " << qPrintable(area.name()) << std::endl;
-                changed |= squareNoLine.removeCandidate(v);
-            }
-        }
-    }
-    return changed;
-}
 
 bool Field::reduceXWing()
 {
@@ -652,3 +591,4 @@ bool Field::isResolved() const
 {
     return isValid() && !hasEmptyValues();
 }
+

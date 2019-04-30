@@ -159,8 +159,9 @@ void CommonTest::benchmark()
     QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0));
     bool isResolved = false;
     bool isValid = false;
+    Resolver resolver(array, nullptr);
     QBENCHMARK{
-        array.process();
+        resolver.process();
     }
     isValid = array.isValid();
     isResolved = array.isResolved();

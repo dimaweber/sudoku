@@ -52,16 +52,9 @@ public:
 class House : public CellSet
 {
     static quint8 N;
-    static QVector<QBitArray> allCandidatesCombinationsMasks;
-    static void fillCandidatesCombinationsMasks();
 public:
     House();
     static void init(quint8 n);
-
-    bool checkNakedCombinations(); // Naked Pair / Triple / Quad / ...
-    bool checkHiddenCombinations(); // Hidden Pair / Triple / Quad / ...
-    bool checkNakedSingle();
-    bool checkHiddenSingle();
 
     bool isValid() const;
     bool isResolved() const;
