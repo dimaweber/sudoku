@@ -19,7 +19,7 @@ void Cell::setValue(quint8 val, bool init_value)
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
     emit valueSet(val);
     if(useDelay)
-        usleep(100000);
+        usleep(10000);
 
     for(House* pArea: houses)
     {
@@ -45,7 +45,7 @@ bool Cell::removeCandidate(quint8 guessVal)
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
     if (useDelay)
-    usleep(50000);
+    usleep(5000);
     return true;
 }
 

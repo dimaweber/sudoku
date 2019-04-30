@@ -80,13 +80,21 @@ qRegisterMetaType<CellValue>("CellValue");
     Resolver resolver(array);
     if (noGui)
     {
-        quint64 elaps;
+        qint64 elaps;
         QElapsedTimer timer;
         timer.start();
         array.process();
         elaps = timer.elapsed();
 
         array.print();
+
+        std::cout << qPrintable(filename) << "[" << plainTextInputFileLineNum << "] Done in " << elaps << " ms and is ";
+        if (array.isResolved())
+            std::cout << "resolved" << std::endl;
+        else if (!array.isValid())
+            std::cout << "is INVALID" << std::endl;
+        else if (array.hasEmptyValues())
+            std::cout << "NOT resolved" << std::endl;
 
         return 0;
     }
@@ -95,9 +103,14 @@ qRegisterMetaType<CellValue>("CellValue");
         FieldGui fgui_before(array, &diag);
         layout.addWidget(&fgui_before);
 
-        diag.setWindowTitle(QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum));
+        QString windowTitle = QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum);
+        diag.setWindowTitle(windowTitle);
         QPushButton arrow("-->", &diag);
         arrow.connect(&arrow, SIGNAL(pressed()), &resolver, SLOT(start()));
+        app.connect(&resolver, &Resolver::done, [&windowTitle, &diag, &resolver]()
+        {
+            diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(resolver.resolveTime()));
+        });
         layout.addWidget(&arrow);
 
         diag.show();
