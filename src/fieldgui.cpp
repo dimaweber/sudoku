@@ -36,6 +36,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
         CellGui* widget = new CellGui(cell, this);
         cellWidgets[&cell] = widget;
         layout->addWidget(widget, coord.row(), coord.col(), Qt::AlignCenter);
+        cell.setDelay(true);
     }
 }
 
@@ -56,7 +57,10 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
     else
         pal.setColor(QPalette::Window, QColor("wheat"));
     setAutoFillBackground(true);
+    setAlignment(Qt::AlignCenter);
     setMinimumSize(QSize(FONT_SIZE,FONT_SIZE));
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setFrameStyle(QFrame::Box);
 
     setPalette(pal);
 

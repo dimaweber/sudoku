@@ -38,7 +38,7 @@ class Cell: public QObject
     Coord coordinate;
     QVector<House*> houses;
     Cell& operator = (const Cell& );
-
+    bool useDelay;
 public:
     Cell(quint8 n = 0, QObject* parent = nullptr);
 
@@ -57,7 +57,7 @@ public:
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
     bool isValid() const;
     QVector<CellValue> candidates() const;
-
+    void setDelay(bool use = true);
     bool removeCandidate(const QBitArray& candidate);
     bool candidatesExactMatch(const QBitArray& mask) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;

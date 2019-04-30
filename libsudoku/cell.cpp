@@ -3,7 +3,7 @@
 #include <iostream>
 
 Cell::Cell(quint8 n, QObject* parent)
-    :QObject(parent), val(0), initial_value(false)
+    :QObject(parent), val(0), initial_value(false), useDelay(false)
 {
     if (n>0)
         resetCandidates(n);
@@ -18,7 +18,8 @@ void Cell::setValue(quint8 val, bool init_value)
     initial_value = init_value;
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
     emit valueSet(val);
-    usleep(100000);
+    if(useDelay)
+        usleep(100000);
 
     for(House* pArea: houses)
     {
@@ -43,6 +44,7 @@ bool Cell::removeCandidate(quint8 guessVal)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
+    if (useDelay)
     usleep(50000);
     return true;
 }
@@ -116,6 +118,11 @@ QVector<CellValue> Cell::candidates() const
         if (hasCandidate(i))
             ret.append(i);
     return ret;
+}
+
+void Cell::setDelay(bool use)
+{
+    useDelay =  use;
 }
 
 QBitArray Cell::commonCandidates(const Cell& a) const

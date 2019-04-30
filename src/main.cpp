@@ -77,41 +77,32 @@ qRegisterMetaType<CellValue>("CellValue");
     }
 
 
-    FieldGui fgui_before(array, &diag);
-    layout.addWidget(&fgui_before);
-
-/*    QElapsedTimer timer;
-    timer.start();
-    array.process();
-    qint64 elaps = timer.elapsed();
-
-    std::cout << qPrintable(filename) << "[" << plainTextInputFileLineNum << "] Done in " << elaps << " ms and is ";
-    if (array.isResolved())
-        std::cout << "resolved" << std::endl;
-    else if (!array.isValid())
-        std::cout << "is INVALID" << std::endl;
-    else if (array.hasEmptyValues())
-        std::cout << "NOT resolved" << std::endl;
-*/
-
     Resolver resolver(array);
-    diag.setWindowTitle(QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum));
-//    FieldGui fgui_after(array, &diag);
-    QPushButton arrow("-->", &diag);
-    //arrow.connect (&arrow, SIGNAL(pressed()), &fgui_after, SLOT(show()));
-    arrow.connect(&arrow, SIGNAL(pressed()), &resolver, SLOT(start()));
-//    resolver.connect(&resolver, SIGNAL(done(quint64)), &fgui_after, SLOT(show()));
-//    layout.addWidget(&arrow);
-//    layout.addWidget(&fgui_after);
-//    fgui_after.hide();
-
     if (noGui)
     {
+        quint64 elaps;
+        QElapsedTimer timer;
+        timer.start();
+        array.process();
+        elaps = timer.elapsed();
+
         array.print();
+
         return 0;
     }
     else
-        diag.show();
+    {
+        FieldGui fgui_before(array, &diag);
+        layout.addWidget(&fgui_before);
 
-    return app.exec();
+        diag.setWindowTitle(QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum));
+        QPushButton arrow("-->", &diag);
+        arrow.connect(&arrow, SIGNAL(pressed()), &resolver, SLOT(start()));
+        layout.addWidget(&arrow);
+
+        diag.show();
+        app.exec();
+    }
+
+    return 0;
 }
