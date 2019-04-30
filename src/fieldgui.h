@@ -7,20 +7,40 @@
 #else
 #include <QtGui/QWidget>
 #endif
+#include <QMap>
+#include <QLabel>
+#include "cell.h"
 
+class QWidget;
 class Field;
 class QGridLayout;
+
+class CellGui : public QLabel
+{
+    Q_OBJECT
+    const Cell& cell;
+    QLayout* candidatesLayout;
+    QMap<int, QLabel*> candidateLabel;
+public:
+    CellGui(const Cell& cell, QWidget* parent = nullptr);
+public slots:
+    void setValue(CellValue );
+    void removeCandidate(CellValue bit);
+
+};
 
 class FieldGui : public QWidget
 {
     Q_OBJECT
     QGridLayout* layout;
+
+    QMap<Cell*, QWidget*> cellWidgets;
 public:
     explicit FieldGui(Field& field, QWidget *parent = nullptr);
 
 signals:
-
-public slots:
+private:
+    void setCellWidgetValue(const Cell& cell);
 };
 
 #endif // FIELDGUI_H

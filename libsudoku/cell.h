@@ -26,6 +26,7 @@ class House;
 //};
 
 typedef quint8 CellValue;
+Q_DECLARE_METATYPE(CellValue)
 
 class Cell: public QObject
 {

@@ -10,7 +10,6 @@
 #include "fieldgui.h"
 
 #include <QApplication>
-#include <QElapsedTimer>
 
 #include <QDialog>
 #include <QBoxLayout>
@@ -18,8 +17,10 @@
 
 #include <iostream>
 
+
 int main(int argc, char *argv[])
 {
+qRegisterMetaType<CellValue>("CellValue");
     QApplication app(argc, argv);
     QDialog diag;
     QHBoxLayout layout(&diag);
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
     FieldGui fgui_before(array, &diag);
     layout.addWidget(&fgui_before);
 
-    QElapsedTimer timer;
+/*    QElapsedTimer timer;
     timer.start();
     array.process();
     qint64 elaps = timer.elapsed();
@@ -91,15 +92,18 @@ int main(int argc, char *argv[])
         std::cout << "is INVALID" << std::endl;
     else if (array.hasEmptyValues())
         std::cout << "NOT resolved" << std::endl;
+*/
 
-
+    Resolver resolver(array);
     diag.setWindowTitle(QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum));
-    FieldGui fgui_after(array, &diag);
+//    FieldGui fgui_after(array, &diag);
     QPushButton arrow("-->", &diag);
-    arrow.connect (&arrow, SIGNAL(pressed()), &fgui_after, SLOT(show()));
-    layout.addWidget(&arrow);
-    layout.addWidget(&fgui_after);
-    fgui_after.hide();
+    //arrow.connect (&arrow, SIGNAL(pressed()), &fgui_after, SLOT(show()));
+    arrow.connect(&arrow, SIGNAL(pressed()), &resolver, SLOT(start()));
+//    resolver.connect(&resolver, SIGNAL(done(quint64)), &fgui_after, SLOT(show()));
+//    layout.addWidget(&arrow);
+//    layout.addWidget(&fgui_after);
+//    fgui_after.hide();
 
     if (noGui)
     {

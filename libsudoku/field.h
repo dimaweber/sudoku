@@ -5,6 +5,8 @@
 #include "house.h"
 #include "bilocationlink.h"
 #include <QVector>
+#include <QThread>
+#include <QElapsedTimer>
 
 class Field
 {
@@ -68,4 +70,50 @@ private:
 
 };
 
+class Resolver : public QThread
+{
+    Q_OBJECT
+    Field& field;
+    quint64 elaps;
+public:
+    Resolver(Field& field, QObject* parent = nullptr)
+        :QThread(parent), field(field), elaps(0)
+    {}
+    quint64 resolveTime() const
+    {
+        return elaps;
+    }
+protected:
+    void run()
+    {
+        QElapsedTimer timer;
+        timer.start();
+        field.process();
+        elaps = timer.elapsed();
+
+        if (field.isResolved())
+        {
+            emit done(elaps);
+            emit resolved(elaps);
+            std::cout << "resolved" << std::endl;
+        }
+        else if (!field.isValid())
+        {
+            emit done(elaps);
+            emit failed(elaps);
+            std::cout << "is INVALID" << std::endl;
+        }
+        else if (field.hasEmptyValues())
+        {
+            emit done(elaps);
+            emit unresolved(elaps);
+            std::cout << "NOT resolved" << std::endl;
+        }
+    }
+signals:
+    void done(quint64);
+    void resolved(quint64);
+    void unresolved(quint64);
+    void failed(quint64);
+};
 #endif // FIELD_H

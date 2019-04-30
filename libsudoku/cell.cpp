@@ -9,6 +9,7 @@ Cell::Cell(quint8 n, QObject* parent)
         resetCandidates(n);
 }
 
+#include <unistd.h>
 void Cell::setValue(quint8 val, bool init_value)
 {
     this->val = val;
@@ -17,6 +18,7 @@ void Cell::setValue(quint8 val, bool init_value)
     initial_value = init_value;
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
     emit valueSet(val);
+    usleep(100000);
 
     for(House* pArea: houses)
     {
@@ -41,6 +43,7 @@ bool Cell::removeCandidate(quint8 guessVal)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
+    usleep(50000);
     return true;
 }
 
