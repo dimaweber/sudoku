@@ -83,6 +83,7 @@ qRegisterMetaType<CellValue>("CellValue");
     resolver.registerTechnique(new NakedGroupTechnique(array));
     resolver.registerTechnique(new HiddenGroupTechnique(array));
     resolver.registerTechnique(new IntersectionsTechnique(array));
+    resolver.registerTechnique(new BiLocationColoringTechnique(array));
 
     if (noGui)
     {
@@ -121,6 +122,7 @@ qRegisterMetaType<CellValue>("CellValue");
             QCheckBox* pCheck = new QCheckBox(tech->name(), &box);
             boxLayout.addWidget(pCheck);
             pCheck->setChecked(tech->isEnabled());
+            pCheck->setEnabled(tech->canBeDisabled());
             app.connect(pCheck, &QCheckBox::clicked, [tech, pCheck]()
             {
                 tech->setEnabled( pCheck->isChecked());
@@ -145,6 +147,8 @@ qRegisterMetaType<CellValue>("CellValue");
         {
             diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(resolver.resolveTime()));
         });
+        app.connect(&resolver, &Resolver::started, [&goButton](){goButton.setEnabled(false);});
+        app.connect(&resolver, &Resolver::done, [&goButton](){goButton.setEnabled(true);});
 
 
         diag.show();

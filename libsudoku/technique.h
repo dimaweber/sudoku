@@ -2,6 +2,7 @@
 #define TECHNIQUE_H
 
 #include "house.h"
+#include "bilocationlink.h"
 
 #include <QtCore/qglobal.h>
 #include <QString>
@@ -20,6 +21,7 @@ public:
     {}
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
+    virtual bool canBeDisabled() const { return true;}
     bool isEnabled() const {return enabled;}
     bool perform()
     {
@@ -33,6 +35,8 @@ protected:
     QVector<SquareHouse> squares();
     QVector<RowHouse> rows();
     QVector<ColumnHouse> columns();
+    QVector<Cell*> cells();
+
     virtual bool run() = 0;
     Field& field;
     int N;
@@ -43,6 +47,7 @@ class NakedSingleTechnique : public Technique
 public:
     NakedSingleTechnique(Field& field);
     virtual void setEnabled(bool enabled = true) override;
+    virtual bool canBeDisabled() const override { return false;}
 protected:
     virtual bool run() override;
 };
@@ -91,6 +96,16 @@ public:
     IntersectionsTechnique(Field& field);
 protected:
     virtual bool run() override;
+};
+
+class BiLocationColoringTechnique: public Technique
+{
+public:
+    BiLocationColoringTechnique(Field& field);
+protected:
+    bool run() override;
+    QVector<BiLocationLink> findBiLocationLinks(CellValue val);
+
 };
 
 #endif // TECHNIQUE_H

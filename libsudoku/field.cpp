@@ -1,5 +1,4 @@
 #include "field.h"
-#include "cellcolor.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -148,10 +147,6 @@ void Resolver::process()
         }
 
         /*
-        if (enabledTechniques & Intersections)
-            changed |= reduceIntersections();
-        if (changed) continue;
-
         if (enabledTechniques & XWing)
             changed |= reduceXWing();
         if (changed) continue;
@@ -263,114 +258,6 @@ quint8 Field::rowsCount() const
     return static_cast<quint8>(rows.count());
 }
 
-bool Field::findLinks()
-{
-    bool changed = false;
-    QMap<int, QVector<BiLocationLink>> links;
-    for (CellValue i=1; i<=N; i++)
-    {
-        links[i] = findBiLocationLinks(i);
-        ColoredLinksVault vault(i);
-        for (BiLocationLink& link: links[i])
-        {
-            CellColor c1 = vault.getColor(link.first());
-            CellColor c2 = vault.getColor(link.second());
-
-            if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
-            {
-                ColorPair cp = ColorPair::newPair();
-                vault.addLink(link, cp);
-            }
-            else
-            {
-                if (c1 == ColorPair::UnknownColor)
-                    vault.addCell(link.first(), ColorPair::antiColor(c2));
-                else if (c2 == ColorPair::UnknownColor)
-                    vault.addCell(link.second(), ColorPair::antiColor(c1));
-                else if (c1 != ColorPair::antiColor(c2))
-                {
-                    vault.recolor(ColorPair::antiColor(c2), c1);
-                    vault.recolor(c2, ColorPair::antiColor(c1));
-                }
-                else
-                {
-                    // loop
-                }
-            }
-        }
-        for (BiLocationLink& link: links[i])
-        {
-            std::cout << i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
-                      << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
-        }
-        for(House* house: areas)
-        {
-            // check for houses with 2 cells of same color
-            CellSet cellsWithCandidate = house->cellsWithCandidate(i);
-            QMap<CellColor, int> presentColor;
-            for (Cell* cell: cellsWithCandidate)
-            {
-                CellColor color = vault.getColor(cell);
-                if (color != ColorPair::UnknownColor)
-                {
-                    presentColor[color]++;
-                    if (presentColor[color]>1)
-                    {
-                        // we've found house with 2 cells from same chain and same color
-                        // this mean -- all cells with this color in this chain are OFF
-                        std::cout << "two cells with same color in one house: this color is OFF" << std::endl;
-                        changed |= vault.removeCandidateForColor(color);
-                    }
-                }
-            }
-        }
-        for(Cell* c: cells)
-        {
-            if (!c->hasCandidate(i))
-                continue;
-
-            CellColor clr = vault.getColor(c);
-            if (clr != ColorPair::UnknownColor)
-                continue;
-
-            QVector<CellColor> visibleColors;
-            CellSet visibleCells = allCellsVisibleFromCell(c);
-            for (Cell* pCell: visibleCells)
-            {
-                CellColor color = vault.getColor(pCell);
-                if (color == ColorPair::UnknownColor)
-                    continue;
-                CellColor acolor = ColorPair::antiColor(color);
-                if (visibleColors.contains(acolor))
-                {
-                    std::cout << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
-                    changed |= c->removeCandidate(i);
-                    break;
-                }
-                else
-                    visibleColors.append(color);
-            }
-        }
-    }
-
-    return changed;
-}
-
-QVector<BiLocationLink> Field::findBiLocationLinks(CellValue val) const
-{
-    QVector<BiLocationLink> ret;
-    for(House* house: areas)
-    {
-        CellSet lst = house->cellsWithCandidate(val);
-        if (lst.count() == 2)
-        {
-            BiLocationLink link(val, lst[0], lst[1]);
-            if (!ret.contains(link))
-                ret.append(link);
-        }
-    }
-    return ret;
-}
 
 
 bool Field::reduceXWing()
