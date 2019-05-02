@@ -119,4 +119,20 @@ protected:
     bool run() override;
 };
 
+class YWingTechnique : public Technique
+{
+public:
+    YWingTechnique(Field& field);
+protected:
+    bool run() override;
+};
+
+class XYZWingTechnique: public Technique
+{
+public:
+    XYZWingTechnique(Field& field);
+protected:
+    bool run() override;
+};
+
 #endif // TECHNIQUE_H

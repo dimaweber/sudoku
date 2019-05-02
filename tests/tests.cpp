@@ -2,6 +2,7 @@
 
 #include "coord.h"
 #include "field.h"
+#include "resolver.h"
 
 class CommonTest : public QObject
 {

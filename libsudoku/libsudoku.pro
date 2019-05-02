@@ -31,6 +31,7 @@ SOURCES += \
 		bilocationlink.cpp \
 		cellcolor.cpp \
 		field.cpp \
+		resolver.cpp \
 		technique.cpp
 
 HEADERS += \
@@ -41,13 +42,12 @@ HEADERS += \
 		bilocationlink.h \
 		field.h \
 		libsudoku_global.h \
+		resolver.h \
 		technique.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
-
-    LIBS += -lgsl -lgslcblas
 }
 
 

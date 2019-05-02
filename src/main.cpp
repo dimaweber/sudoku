@@ -8,8 +8,10 @@
 
 #include "field.h"
 #include "fieldgui.h"
+#include "resolver.h"
 
 #include <QApplication>
+#include <QElapsedTimer>
 
 #include <QDialog>
 #include <QBoxLayout>
@@ -85,6 +87,8 @@ int main(int argc, char *argv[])
     resolver.registerTechnique(new IntersectionsTechnique(array));
     resolver.registerTechnique(new BiLocationColoringTechnique(array));
     resolver.registerTechnique(new XWingTechnique(array));
+    resolver.registerTechnique(new YWingTechnique(array));
+    resolver.registerTechnique(new XYZWingTechnique(array));
 
     if (noGui)
     {
