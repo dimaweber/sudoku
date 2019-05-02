@@ -80,15 +80,15 @@ int main(int argc, char *argv[])
     }
 
     Resolver resolver(array);
-    resolver.registerTechnique(new NakedSingleTechnique(array));
-    resolver.registerTechnique(new HiddenSingleTechnique(array));
-    resolver.registerTechnique(new NakedGroupTechnique(array));
-    resolver.registerTechnique(new HiddenGroupTechnique(array));
-    resolver.registerTechnique(new IntersectionsTechnique(array));
-    resolver.registerTechnique(new BiLocationColoringTechnique(array));
-    resolver.registerTechnique(new XWingTechnique(array));
-    resolver.registerTechnique(new YWingTechnique(array));
-    resolver.registerTechnique(new XYZWingTechnique(array));
+    resolver.registerTechnique<NakedSingleTechnique>();
+    resolver.registerTechnique<HiddenSingleTechnique>();
+    resolver.registerTechnique<NakedGroupTechnique>();
+    resolver.registerTechnique<HiddenGroupTechnique>();
+    resolver.registerTechnique<IntersectionsTechnique>();
+    resolver.registerTechnique<BiLocationColoringTechnique>();
+    resolver.registerTechnique<XWingTechnique>();
+    resolver.registerTechnique<YWingTechnique>();
+    resolver.registerTechnique<XYZWingTechnique>();
 
     if (noGui)
     {

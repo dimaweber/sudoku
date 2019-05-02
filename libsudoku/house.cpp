@@ -10,12 +10,12 @@ void House::init(quint8 n)
     N = n;
 }
 
-void CellSet::addCell(Cell* pCell)
+void CellSet::addCell(Cell::Ptr pCell)
 {
     cells.append(pCell);
 }
 
-void CellSet::removeCell(Cell* pCell)
+void CellSet::removeCell(Cell::Ptr pCell)
 {
     if (cells.contains(pCell))
         cells.removeOne(pCell);
@@ -55,7 +55,7 @@ int CellSet::unresolvedCellsCount() const
 
 bool CellSet::hasValue(CellValue val) const
 {
-    for (const Cell* pCell: cells)
+    for (Cell::CPtr pCell: cells)
         if (pCell->value() == val)
             return true;
     return false;
@@ -63,14 +63,14 @@ bool CellSet::hasValue(CellValue val) const
 
 int CellSet::candidatesCount(CellValue val) const
 {
-    return std::count_if(begin(), end(), [val](const Cell* p)
+    return std::count_if(begin(), end(), [val](Cell::CPtr p)
         {return p->hasCandidate(val);}
     );
 }
 
 bool CellSet::hasEmptyValues() const
 {
-    for (const Cell* pCell: cells)
+    for (Cell::CPtr pCell: cells)
         if (!pCell->isResolved())
             return true;
     return  false;
@@ -79,7 +79,7 @@ bool CellSet::hasEmptyValues() const
 bool House::isValid() const
 {
     QBitArray mask(cells.count());
-    for (const Cell* pCell: cells)
+    for ( Cell::CPtr pCell: cells)
     {
 //        if (!pCell->isValid())
 //            return false; /// TODO: this check fails when reading from file since value might no be set yet and only 1 variant left
@@ -98,7 +98,7 @@ bool House::isResolved() const
     return isValid() && !hasEmptyValues();
 }
 
-bool CellSet::hasCell(const Cell* p) const
+bool CellSet::hasCell(Cell::CPtr p) const
 {
     for(const Cell* pCell: cells)
         if (pCell->coord() == p->coord())
@@ -118,9 +118,9 @@ CellSet CellSet::cellsWithCandidate(CellValue val) const
 CellSet CellSet::operator+(const CellSet& a) const
 {
     CellSet ret;
-    for (Cell* cell: cells)
+    for (Cell::Ptr cell: cells)
         ret.addCell(cell);
-    for (Cell* cell: a.cells)
+    for (Cell::Ptr cell: a.cells)
         if (!ret.cells.contains(cell))
             ret.addCell(cell);
     return ret;
@@ -129,7 +129,7 @@ CellSet CellSet::operator+(const CellSet& a) const
 CellSet CellSet::operator-(const CellSet& a) const
 {
     CellSet ret;
-    for(Cell* cell: cells)
+    for(Cell::Ptr cell: cells)
         if (!a.cells.contains(cell))
             ret.addCell(cell);
     return ret;
@@ -138,7 +138,7 @@ CellSet CellSet::operator-(const CellSet& a) const
 CellSet CellSet::operator/(const CellSet& a) const
 {
     CellSet ret;
-    for(Cell* cell: cells)
+    for(Cell::Ptr cell: cells)
         if (a.cells.contains(cell))
             ret.addCell(cell);
     return ret;

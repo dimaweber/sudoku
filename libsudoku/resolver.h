@@ -17,8 +17,9 @@ class Resolver : public QThread
 public:
     QVector<Technique*> techniques; /// TODO: make in private
     Resolver(Field& field, QObject* parent = nullptr);
+    ~Resolver();
     quint64 resolveTime() const;
-    void registerTechnique(Technique* tech);
+    template<class TECH> void registerTechnique() { techniques.append(new TECH(field, this)); }
     void process();
 protected:
     void run();

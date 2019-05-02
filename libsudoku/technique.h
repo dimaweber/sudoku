@@ -30,7 +30,7 @@ public:
     bool perform();
 protected:
     static QSet<QBitArray> allCandidatesCombinationsMasks;
-    QVector<House*>& areas();
+    QVector<House::Ptr>& areas();
     QVector<SquareHouse>& squares();
     QVector<RowHouse>& rows();
     QVector<ColumnHouse>& columns();

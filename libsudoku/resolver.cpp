@@ -10,14 +10,15 @@ Resolver::Resolver(Field &field, QObject *parent)
     :QThread(parent), field(field), elaps(0), enabledTechniques(0xffff)
 {}
 
+Resolver::~Resolver()
+{
+    for(Technique* tech: techniques)
+        tech->deleteLater();
+}
+
 quint64 Resolver::resolveTime() const
 {
     return elaps;
-}
-
-void Resolver::registerTechnique(Technique *tech)
-{
-    techniques.append(tech);
 }
 
 void Resolver::run()

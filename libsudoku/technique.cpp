@@ -45,7 +45,6 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 #else
 #include <gsl/gsl_combination.h>
 
-
 void Technique::fillCandidatesCombinationsMasks(quint8 n)
 {
     allCandidatesCombinationsMasks.clear();
@@ -70,6 +69,69 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 }
 #endif
 
+Technique::Technique(Field& field, const QString name, QObject *parent)
+    :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
+{
+    if (Technique::allCandidatesCombinationsMasks.isEmpty())
+        fillCandidatesCombinationsMasks(N);
+}
+
+Technique::~Technique()
+{}
+
+void Technique::setEnabled(bool enabled)
+{
+    this->enabled = enabled;
+}
+
+bool Technique::perform()
+{
+    if (!enabled)
+        return false;
+    emit started();
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 100ms;
+        std::this_thread::sleep_until (t0);
+    }
+    bool res = run();
+    if (res)
+        emit applied();
+    else
+        emit done();
+    return res;
+}
+
+QVector<House::Ptr>& Technique::areas()
+{
+    return field.areas;
+}
+
+QVector<SquareHouse>& Technique::squares()
+{
+    return field.squares;
+}
+
+QVector<RowHouse>& Technique::rows()
+{
+    return field.rows;
+}
+
+QVector<ColumnHouse>& Technique::columns()
+{
+    return field.columns;
+}
+
+QVector<Cell::Ptr>& Technique::cells()
+{
+    return field.cells;
+}
+
+Cell::Ptr Technique::cell(const Coord& c)
+{
+    return field.cell(c);
+}
+
 NakedSingleTechnique::NakedSingleTechnique(Field& field, QObject *parent)
     :Technique(field, "Naked Single", parent)
 {}
@@ -79,16 +141,16 @@ bool NakedSingleTechnique::run()
     bool changed = false;
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
-        Cell::Ptr cell = field.cell(coord);
-        if (!cell->isResolved() && cell->candidatesCount() == 1)
+        Cell::Ptr pCell = cell(coord);
+        if (!pCell->isResolved() && pCell->candidatesCount() == 1)
         {
-            for (quint8 j=1;j<=cell->candidatesCapacity(); j++)
-                if (cell->hasCandidate(j))
+            for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
+                if (pCell->hasCandidate(j))
                 {
                     changed = true;
-                    std::cout << "Naked single " << (int)j << " found in " << cell->coord()
+                    std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
                               << std::endl;
-                    cell->setValue(j);
+                    pCell->setValue(j);
                 }
         }
     }
@@ -137,69 +199,6 @@ HiddenSingleTechnique::HiddenSingleTechnique(Field& field, QObject* parent)
     :PerHouseTechnique(field, "Hidden Single", parent)
 {
 
-}
-
-Technique::Technique(Field& field, const QString name, QObject *parent)
-    :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
-{
-    if (Technique::allCandidatesCombinationsMasks.isEmpty())
-        fillCandidatesCombinationsMasks(N);
-}
-
-Technique::~Technique()
-{}
-
-void Technique::setEnabled(bool enabled)
-{
-    this->enabled = enabled;
-}
-
-bool Technique::perform()
-{
-    if (!enabled)
-        return false;
-    emit started();
-    {
-        using namespace  std::chrono_literals;
-        auto t0 = std::chrono::steady_clock::now() + 100ms;
-        std::this_thread::sleep_until (t0);
-    }
-    bool res = run();
-    if (res)
-        emit applied();
-    else
-        emit done();
-    return res;
-}
-
-QVector<House*>& Technique::areas()
-{
-    return field.areas;
-}
-
-QVector<SquareHouse>& Technique::squares()
-{
-    return field.squares;
-}
-
-QVector<RowHouse>& Technique::rows()
-{
-    return field.rows;
-}
-
-QVector<ColumnHouse>& Technique::columns()
-{
-    return field.columns;
-}
-
-QVector<Cell::Ptr>& Technique::cells()
-{
-    return field.cells;
-}
-
-Cell::Ptr Technique::cell(const Coord& c)
-{
-    return field.cell(c);
 }
 
 bool NakedGroupTechnique::runPerHouse(House *house)

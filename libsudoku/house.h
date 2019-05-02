@@ -8,10 +8,10 @@ class CellSet
 {
     QString houseName;
 protected:
-    QVector<Cell*> cells;
+    QVector<Cell::Ptr> cells;
 public:
-    void addCell(Cell* pCell);
-    void removeCell(Cell* pCell);
+    void addCell(Cell::Ptr pCell);
+    void removeCell(Cell::Ptr pCell);
 
     void setName(const QString& name) {houseName = name;}
     const QString& name() const { return houseName;}
@@ -23,21 +23,21 @@ public:
     bool hasEmptyValues() const;
     bool removeCandidate(CellValue val);
     int unresolvedCellsCount() const;
-    bool hasCell(const Cell* p) const;
+    bool hasCell(Cell::CPtr p) const;
 
     CellSet cellsWithCandidate(CellValue val) const;
 
     int count() const { return cells.count();}
     bool isEmpty() const { return cells.isEmpty();}
-    Cell* const & operator[](int index) const {return cells[index];}
-    Cell* &       operator[](int index)       {return cells[index];}
+    Cell::Ptr const & operator[](int index) const {return cells[index];}
+    Cell::Ptr &       operator[](int index)       {return cells[index];}
 
     CellSet operator+ (const CellSet& a) const;
     CellSet operator- (const CellSet& a) const;
     CellSet operator/ (const CellSet& a) const;
 
-    typedef typename QVector<Cell*>::iterator iterator;
-    typedef typename QVector<Cell*>::const_iterator const_iterator;
+    typedef typename QVector<Cell::Ptr>::iterator iterator;
+    typedef typename QVector<Cell::Ptr>::const_iterator const_iterator;
     inline iterator begin() { return cells.begin(); }
     inline const_iterator begin() const { return cells.constBegin(); }
     inline const_iterator cbegin() const { return cells.constBegin(); }
@@ -46,7 +46,6 @@ public:
     inline const_iterator end() const { return cells.constEnd(); }
     inline const_iterator cend() const { return cells.constEnd(); }
     inline const_iterator constEnd() const { return cells.constEnd(); }
-
 };
 
 class House : public CellSet
