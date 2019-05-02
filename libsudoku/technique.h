@@ -7,6 +7,7 @@
 #include <QtCore/qglobal.h>
 #include <QString>
 #include <QBitArray>
+#include <QSet>
 
 class Field;
 
@@ -14,7 +15,7 @@ class Technique
 {
     bool enabled;
     const QString techniqueName;
-    static void fillCandidatesCombinationsMasks(size_t n);
+    static void fillCandidatesCombinationsMasks(quint8 n);
 public:
     Technique (Field& field, const QString name);
     virtual ~Technique()
@@ -30,12 +31,13 @@ public:
         return run();
     }
 protected:
-    static QVector<QBitArray> allCandidatesCombinationsMasks;
-    QVector<House*> areas();
-    QVector<SquareHouse> squares();
-    QVector<RowHouse> rows();
-    QVector<ColumnHouse> columns();
-    QVector<Cell*> cells();
+    static QSet<QBitArray> allCandidatesCombinationsMasks;
+    QVector<House*>& areas();
+    QVector<SquareHouse>& squares();
+    QVector<RowHouse>& rows();
+    QVector<ColumnHouse>& columns();
+    QVector<Cell*>& cells();
+    Cell& cell(const Coord& c);
 
     virtual bool run() = 0;
     Field& field;
@@ -106,6 +108,15 @@ protected:
     bool run() override;
     QVector<BiLocationLink> findBiLocationLinks(CellValue val);
 
+};
+
+
+class XWingTechnique : public Technique
+{
+public:
+    XWingTechnique(Field& field);
+protected:
+    bool run() override;
 };
 
 #endif // TECHNIQUE_H

@@ -9,6 +9,8 @@ QT       -= gui
 TARGET = sudoku
 TEMPLATE = lib
 
+CONFIG += c++14 staticlib
+
 DEFINES += SUDOKU_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
@@ -44,9 +46,11 @@ HEADERS += \
 unix {
     target.path = /usr/lib
     INSTALLS += target
+
+    LIBS += -lgsl -lgslcblas
 }
 
-LIBS += -lgsl -lgslcblas
+
 
 DESTDIR=../bin
 

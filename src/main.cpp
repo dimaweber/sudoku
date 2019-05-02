@@ -21,7 +21,7 @@
 
 int main(int argc, char *argv[])
 {
-qRegisterMetaType<CellValue>("CellValue");
+    qRegisterMetaType<CellValue>("CellValue");
     QApplication app(argc, argv);
 
     if (argc<2)
@@ -84,6 +84,7 @@ qRegisterMetaType<CellValue>("CellValue");
     resolver.registerTechnique(new HiddenGroupTechnique(array));
     resolver.registerTechnique(new IntersectionsTechnique(array));
     resolver.registerTechnique(new BiLocationColoringTechnique(array));
+    resolver.registerTechnique(new XWingTechnique(array));
 
     if (noGui)
     {
@@ -140,15 +141,13 @@ qRegisterMetaType<CellValue>("CellValue");
 
         box.setTitle("Techniques");
 
-//        pNakedSingleCheck->setEnabled(false);
-
         goButton.connect(&goButton, SIGNAL(pressed()), &resolver, SLOT(start()));
-        app.connect(&resolver, &Resolver::done, [&windowTitle, &diag, &resolver]()
+        app.connect(&resolver, &Resolver::done, &diag, [&windowTitle, &diag](quint64 e)
         {
-            diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(resolver.resolveTime()));
-        });
-        app.connect(&resolver, &Resolver::started, [&goButton](){goButton.setEnabled(false);});
-        app.connect(&resolver, &Resolver::done, [&goButton](){goButton.setEnabled(true);});
+            diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(e));
+        }, Qt::QueuedConnection);
+        app.connect(&resolver, &Resolver::started, &goButton, [&goButton](){goButton.setEnabled(false);}, Qt::QueuedConnection);
+        app.connect(&resolver, &Resolver::done, &goButton, [&goButton](){goButton.setEnabled(true);}, Qt::QueuedConnection);
 
 
         diag.show();

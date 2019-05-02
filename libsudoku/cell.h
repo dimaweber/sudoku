@@ -45,7 +45,7 @@ public:
     CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
-    bool removeCandidate(quint8 val);
+    bool removeCandidate(CellValue val);
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
     bool isResolved() const {return value() != 0;}

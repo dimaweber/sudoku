@@ -48,7 +48,7 @@ bool CellSet::removeCandidate(CellValue val)
 
 int CellSet::unresolvedCellsCount() const
 {
-    return std::count_if(cells.begin(), cells.end(), [](const Cell* p)
+    return std::count_if(begin(), end(), [](const Cell* p)
         {return !p->isResolved();}
     );
 }
@@ -63,7 +63,7 @@ bool CellSet::hasValue(CellValue val) const
 
 int CellSet::candidatesCount(CellValue val) const
 {
-    return std::count_if(cells.begin(), cells.end(), [val](const Cell* p)
+    return std::count_if(begin(), end(), [val](const Cell* p)
         {return p->hasCandidate(val);}
     );
 }

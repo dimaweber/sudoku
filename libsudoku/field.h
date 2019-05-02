@@ -45,7 +45,6 @@ public:
     quint8 rowsCount() const;
 
 private:
-    bool reduceXWing();
     bool reduceYWing();
     bool reduceXYZWing();
 

@@ -7,11 +7,46 @@
 
 #include <QVector>
 #include <QMap>
+#include <QSet>
+
+QSet<QBitArray> Technique::allCandidatesCombinationsMasks;
+
+#ifdef Q_OS_WIN
+void Technique::fillCandidatesCombinationsMasks(quint8 n)
+{
+    allCandidatesCombinationsMasks.clear();
+    QSet<QBitArray> array;
+
+    for (quint8 bit=0; bit<n-1; bit++)
+        for (quint8 bit2=bit+1; bit2<n; bit2++)
+        {
+            QBitArray a(n);
+            a.setBit(bit);
+            a.setBit(bit2);
+            array.insert(a);
+        }
+
+    for (size_t k=3; k<=n/2; k++)
+    {
+        QSet<QBitArray> b_array;
+        for(const QBitArray& a: array)
+        {
+            for (quint8 bit=0; bit<n; bit++)
+            {
+                QBitArray b = a;
+                b.setBit(bit);
+                b_array.insert(b);
+            }
+        }
+        array = b_array;
+    }
+    allCandidatesCombinationsMasks = array;
+}
+#else
 #include <gsl/gsl_combination.h>
 
-QVector<QBitArray> Technique::allCandidatesCombinationsMasks;
 
-void Technique::fillCandidatesCombinationsMasks(size_t n)
+void Technique::fillCandidatesCombinationsMasks(quint8 n)
 {
     allCandidatesCombinationsMasks.clear();
     gsl_combination* c = nullptr;
@@ -33,7 +68,7 @@ void Technique::fillCandidatesCombinationsMasks(size_t n)
         gsl_combination_free(c);
     }
 }
-
+#endif
 
 NakedSingleTechnique::NakedSingleTechnique(Field& field)
     :Technique(field, "Naked Single")
@@ -116,29 +151,34 @@ void Technique::setEnabled(bool enabled)
     this->enabled = enabled;
 }
 
-QVector<House*> Technique::areas()
+QVector<House*>& Technique::areas()
 {
     return field.areas;
 }
 
-QVector<SquareHouse> Technique::squares()
+QVector<SquareHouse>& Technique::squares()
 {
     return field.squares;
 }
 
-QVector<RowHouse> Technique::rows()
+QVector<RowHouse>& Technique::rows()
 {
     return field.rows;
 }
 
-QVector<ColumnHouse> Technique::columns()
+QVector<ColumnHouse>& Technique::columns()
 {
     return field.columns;
 }
 
-QVector<Cell*> Technique::cells()
+QVector<Cell*>& Technique::cells()
 {
     return field.cells;
+}
+
+Cell& Technique::cell(const Coord& c)
+{
+    return field.cell(c);
 }
 
 bool NakedGroupTechnique::runPerHouse(House *house)
@@ -383,4 +423,85 @@ QVector<BiLocationLink> BiLocationColoringTechnique::findBiLocationLinks(CellVal
         }
     }
     return ret;
+}
+
+XWingTechnique::XWingTechnique(Field& field)
+    :Technique(field, "X-Wing")
+{
+
+}
+
+bool XWingTechnique::run()
+{
+    bool changed = false;
+
+    for (quint8 colA_idx = 1; colA_idx <= columns().count()-1; colA_idx++)
+    {
+        ColumnHouse& columnA = columns()[colA_idx-1];
+        for(quint8 colB_idx=colA_idx+1; colB_idx <= columns().count(); colB_idx++ )
+        {
+            ColumnHouse& columnB = columns()[colB_idx-1];
+            for (quint8 row1_idx=1; row1_idx <= rows().count()-1; row1_idx++)
+            {
+                RowHouse& row1 = rows()[row1_idx-1];
+                for (quint8 row2_idx=row1_idx+1; row2_idx <= rows().count(); row2_idx++)
+                {
+                    RowHouse& row2 = rows()[row2_idx-1];
+
+                    QBitArray mask(N);
+                    Coord A1(row1_idx, colA_idx);
+                    Coord A2(row2_idx, colA_idx);
+                    Coord B1(row1_idx, colB_idx);
+                    Coord B2(row2_idx, colB_idx);
+
+                    Cell& cA1 = cell(A1);
+                    Cell& cA2 = cell(A2);
+                    Cell& cB1 = cell(B1);
+                    Cell& cB2 = cell(B2);
+
+                    if (cA1.isResolved() || cA2.isResolved() || cB1.isResolved() || cB2.isResolved())
+                        continue;
+
+                    mask  = cA1.commonCandidates(cA2);
+                    mask &= cB1.commonCandidates(cB2);
+
+                    for (quint8 bit=0; bit < mask.count(); bit++)
+                    {
+                        CellValue value = bit+1;
+                        if (!mask.testBit(bit))
+                            continue;
+                        if (columnA.candidatesCount(value) == 2 && columnB.candidatesCount(value) == 2
+                                && (row1.candidatesCount(value) > 2 || row2.candidatesCount(value) > 2))
+                        {
+                            std::cout << "columns x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            for (quint8 col=1; col <= columns().count(); col++)
+                            {
+                                if (col == colA_idx || col==colB_idx)
+                                    continue;
+                                Coord c1(row1_idx, col);
+                                changed |= cell(c1).removeCandidate(value);
+                                Coord c2(row2_idx, col);
+                                changed |= cell(c2).removeCandidate(value);
+                            }
+                        }
+                        if (row1.candidatesCount(value) == 2 && row2.candidatesCount(value) == 2
+                                && (columnA.candidatesCount(value)>2 || columnB.candidatesCount(value)>2))
+                        {
+                            std::cout << "rows x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            for (quint8 row=1; row <= rows().count(); row++)
+                            {
+                                if (row == row1_idx || row==row2_idx)
+                                    continue;
+                                Coord c1(row, colA_idx);
+                                changed |= cell(c1).removeCandidate(value);
+                                Coord c2(row, colB_idx);
+                                changed |= cell(c2).removeCandidate(value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return changed;
 }

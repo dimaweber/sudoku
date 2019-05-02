@@ -2,10 +2,10 @@ TEMPLATE=subdirs
 
 SUBDIRS += src \
 		   libsudoku \
-		   tests
+#		   tests
 
 src.depends   = libsudoku
-tests.depends = libsudoku
+#tests.depends = libsudoku
 
 OTHER_FILES += \
 			   puzzles/*.sdm

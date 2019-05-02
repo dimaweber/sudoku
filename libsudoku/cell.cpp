@@ -1,6 +1,8 @@
 #include "cell.h"
 #include "house.h"
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 Cell::Cell(quint8 n, QObject* parent)
     :QObject(parent), val(0), initial_value(false), useDelay(false)
@@ -9,7 +11,6 @@ Cell::Cell(quint8 n, QObject* parent)
         resetCandidates(n);
 }
 
-#include <unistd.h>
 void Cell::setValue(quint8 val, bool init_value)
 {
     this->val = val;
@@ -19,7 +20,11 @@ void Cell::setValue(quint8 val, bool init_value)
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
     emit valueSet(val);
     if(useDelay)
-        usleep(10000);
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 100ms;
+        std::this_thread::sleep_until (t0);
+    }
 
     for(House* pArea: houses)
     {
@@ -27,7 +32,7 @@ void Cell::setValue(quint8 val, bool init_value)
     }
 }
 
-bool Cell::removeCandidate(quint8 guessVal)
+bool Cell::removeCandidate(CellValue guessVal)
 {
     if (isResolved())
     {
@@ -45,7 +50,11 @@ bool Cell::removeCandidate(quint8 guessVal)
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
     if (useDelay)
-    usleep(5000);
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 50ms;
+        std::this_thread::sleep_until (t0);
+    }
     return true;
 }
 
