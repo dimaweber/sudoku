@@ -48,6 +48,8 @@ HEADERS += \
 unix {
     target.path = /usr/lib
     INSTALLS += target
+
+	LIBS += -lgsl -lgslcblas
 }
 
 

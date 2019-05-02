@@ -113,14 +113,14 @@ void CommonTest::Coord_same_house_tests()
     c.setRowCol(1,1);
 
     QVector<Coord> sameHouse = c.sameColumnCoordinates();
-    for(int i=1;i<=9;i++)
+    for(quint8 i=1;i<=9;i++)
         if (i!=c.row())
             QVERIFY(sameHouse.contains(Coord(i,c.col())));
         else
             QVERIFY(!sameHouse.contains(Coord(i, c.col())));
 
     sameHouse = c.sameRowCoordinates();
-    for(int i=1;i<=9;i++)
+    for(quint8 i=1;i<=9;i++)
         if (i!=c.col())
             QVERIFY(sameHouse.contains(Coord(c.row(), i)));
         else
@@ -157,10 +157,19 @@ void CommonTest::Cell_test_candidates()
 void CommonTest::benchmark()
 {
     Field array;
-    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0));
+    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 1));
     bool isResolved = false;
     bool isValid = false;
     Resolver resolver(array, nullptr);
+    resolver.registerTechnique(new NakedSingleTechnique(array));
+    resolver.registerTechnique(new HiddenSingleTechnique(array));
+    resolver.registerTechnique(new NakedGroupTechnique(array));
+    resolver.registerTechnique(new HiddenGroupTechnique(array));
+    resolver.registerTechnique(new IntersectionsTechnique(array));
+    resolver.registerTechnique(new BiLocationColoringTechnique(array));
+    resolver.registerTechnique(new XWingTechnique(array));
+    resolver.registerTechnique(new YWingTechnique(array));
+    resolver.registerTechnique(new XYZWingTechnique(array));
     QBENCHMARK{
         resolver.process();
     }
