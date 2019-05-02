@@ -33,15 +33,15 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     }
     for (Coord coord=Coord::first(); coord.isValid(); coord++)
     {
-        Cell& cell = field.cell(coord);
+        Cell::Ptr cell = field.cell(coord);
         CellGui* widget = new CellGui(cell, this);
-        cellWidgets[&cell] = widget;
+        cellWidgets[cell] = widget;
         layout->addWidget(widget, coord.row(), coord.col(), Qt::AlignCenter);
-        cell.setDelay(true);
+        cell->setDelay(true);
     }
 }
 
-CellGui::CellGui(const Cell& cell, QWidget* parent)
+CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     :QLabel(parent), cell(cell), candidatesLayout(nullptr)
 {
     QFont fnt = font();
@@ -49,11 +49,11 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
     fnt.setBold(true);
     setFont(fnt);
     QPalette pal = palette();
-    if (cell.isInitialValue())
+    if (cell->isInitialValue())
         pal.setColor(foregroundRole(), QColor("black"));
     else
         pal.setColor(foregroundRole(), QColor("blue"));
-    if (cell.coord().squareIdx() % 2)
+    if (cell->coord().squareIdx() % 2)
         pal.setColor(QPalette::Window, QColor("pale green"));
     else
         pal.setColor(QPalette::Window, QColor("wheat"));
@@ -69,8 +69,8 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
     sublay->setMargin(0);
     sublay->setSpacing(0);
     setLayout(sublay);
-    int s_n = static_cast<int>(qSqrt(cell.candidatesCapacity()));
-    for (int bit = 1; bit <= cell.candidatesCapacity(); bit++)
+    int s_n = static_cast<int>(qSqrt(cell->candidatesCapacity()));
+    for (int bit = 1; bit <= cell->candidatesCapacity(); bit++)
     {
         QLabel* label = new QLabel(this);
         QString text = QString("%1").arg(bit);
@@ -90,18 +90,18 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
     }
     candidatesLayout = sublay;
 
-    if (cell.isResolved())
-        setValue(cell.value());
+    if (cell->isResolved())
+        setValue(cell->value());
     else
     {
-        for (int bit = 1; bit <= cell.candidatesCapacity(); bit++)
-            if (!cell.hasCandidate(bit))
+        for (int bit = 1; bit <= cell->candidatesCapacity(); bit++)
+            if (!cell->hasCandidate(bit))
                 removeCandidate(bit);
     }
 
-    connect (&cell, SIGNAL(valueSet(CellValue)),         SLOT(setValue(CellValue)));
-    connect (&cell, SIGNAL(candidateRemoved(CellValue)), SLOT(removeCandidate(CellValue)));
-    connect (&cell, &Cell::candidateAboutToBeRemoved, [this](CellValue v)
+    connect (cell, SIGNAL(valueSet(CellValue)),         SLOT(setValue(CellValue)));
+    connect (cell, SIGNAL(candidateRemoved(CellValue)), SLOT(removeCandidate(CellValue)));
+    connect (cell, &Cell::candidateAboutToBeRemoved, [this](CellValue v)
     {
         QLabel* label = this->candidateLabel[v-1];
 
@@ -109,7 +109,7 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
         pal.setColor(label->foregroundRole(), QColor("red"));
         label->setPalette(pal);
     });
-    connect (&cell, &Cell::candidatesRemoved, [this](QBitArray v)
+    connect (cell, &Cell::candidatesRemoved, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
         {
@@ -120,7 +120,7 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
             }
         }
     });
-    connect (&cell, &Cell::candidatesAboutToBeRemoved, [this](QBitArray v)
+    connect (cell, &Cell::candidatesAboutToBeRemoved, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
         {
@@ -134,7 +134,7 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
             }
         }
     });
-//    connect (&cell, &Cell::valueAboutToBeSet, [this](CellValue v)
+//    connect (cell, &Cell::valueAboutToBeSet, [this](CellValue v)
 //    {
 //        QPalette pal = this->palette();
 //        pal.setColor(this->foregroundRole(), QColor("red"));

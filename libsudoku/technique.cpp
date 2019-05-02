@@ -79,16 +79,16 @@ bool NakedSingleTechnique::run()
     bool changed = false;
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
-        Cell& cell = field.cell(coord);
-        if (!cell.isResolved() && cell.candidatesCount() == 1)
+        Cell::Ptr cell = field.cell(coord);
+        if (!cell->isResolved() && cell->candidatesCount() == 1)
         {
-            for (quint8 j=1;j<=cell.candidatesCapacity(); j++)
-                if (cell.hasCandidate(j))
+            for (quint8 j=1;j<=cell->candidatesCapacity(); j++)
+                if (cell->hasCandidate(j))
                 {
                     changed = true;
-                    std::cout << "Naked single " << (int)j << " found in " << cell.coord()
+                    std::cout << "Naked single " << (int)j << " found in " << cell->coord()
                               << std::endl;
-                    cell.setValue(j);
+                    cell->setValue(j);
                 }
         }
     }
@@ -192,12 +192,12 @@ QVector<ColumnHouse>& Technique::columns()
     return field.columns;
 }
 
-QVector<Cell*>& Technique::cells()
+QVector<Cell::Ptr>& Technique::cells()
 {
     return field.cells;
 }
 
-Cell& Technique::cell(const Coord& c)
+Cell::Ptr Technique::cell(const Coord& c)
 {
     return field.cell(c);
 }
@@ -475,16 +475,16 @@ bool XWingTechnique::run()
                     Coord B1(row1_idx, colB_idx);
                     Coord B2(row2_idx, colB_idx);
 
-                    Cell& cA1 = cell(A1);
-                    Cell& cA2 = cell(A2);
-                    Cell& cB1 = cell(B1);
-                    Cell& cB2 = cell(B2);
+                    Cell::Ptr cA1 = cell(A1);
+                    Cell::Ptr cA2 = cell(A2);
+                    Cell::Ptr cB1 = cell(B1);
+                    Cell::Ptr cB2 = cell(B2);
 
-                    if (cA1.isResolved() || cA2.isResolved() || cB1.isResolved() || cB2.isResolved())
+                    if (cA1->isResolved() || cA2->isResolved() || cB1->isResolved() || cB2->isResolved())
                         continue;
 
-                    mask  = cA1.commonCandidates(cA2);
-                    mask &= cB1.commonCandidates(cB2);
+                    mask  = cA1->commonCandidates(cA2);
+                    mask &= cB1->commonCandidates(cB2);
 
                     for (quint8 bit=0; bit < mask.count(); bit++)
                     {
@@ -500,9 +500,9 @@ bool XWingTechnique::run()
                                 if (col == colA_idx || col==colB_idx)
                                     continue;
                                 Coord c1(row1_idx, col);
-                                changed |= cell(c1).removeCandidate(value);
+                                changed |= cell(c1)->removeCandidate(value);
                                 Coord c2(row2_idx, col);
-                                changed |= cell(c2).removeCandidate(value);
+                                changed |= cell(c2)->removeCandidate(value);
                             }
                         }
                         if (row1.candidatesCount(value) == 2 && row2.candidatesCount(value) == 2
@@ -514,9 +514,9 @@ bool XWingTechnique::run()
                                 if (row == row1_idx || row==row2_idx)
                                     continue;
                                 Coord c1(row, colA_idx);
-                                changed |= cell(c1).removeCandidate(value);
+                                changed |= cell(c1)->removeCandidate(value);
                                 Coord c2(row, colB_idx);
-                                changed |= cell(c2).removeCandidate(value);
+                                changed |= cell(c2)->removeCandidate(value);
                             }
                         }
                     }
@@ -555,6 +555,7 @@ bool YWingTechnique::run()
 
         for(CellValue C=1; C<=N; C++)
         {
+            // this can be paralleled for every C
             if(A == C || B == C)
                 continue;
 
@@ -607,11 +608,11 @@ bool XYZWingTechnique::run()
         QVector<Coord> squareCoords = xyzcell->coord().sameSquareCoordinates();
         for(const Coord& xz_co: squareCoords)
         {
-            Cell& sq_cell = cell(xz_co);
-            if (sq_cell.candidatesCount() == 2 &&
+            Cell::Ptr sq_cell = cell(xz_co);
+            if (sq_cell->candidatesCount() == 2 &&
                 xyzcell->commonCandidates(sq_cell).count(true) == 2)
             {
-                Cell* xzcell = &sq_cell;
+                Cell::Ptr xzcell = sq_cell;
                 CellValue y;
                 if (!xzcell->hasCandidate(v1))
                     y = v1;
@@ -623,12 +624,12 @@ bool XYZWingTechnique::run()
                 QVector<Coord> rowCoords = xyzcell->coord().sameRowCoordinates();
                 for (const Coord& yz_co: rowCoords)
                 {
-                    Cell& row_cell = cell(yz_co);
-                    if (   row_cell.candidatesCount()==2
+                    Cell::Ptr row_cell = cell(yz_co);
+                    if (   row_cell->candidatesCount()==2
                         && xyzcell->commonCandidates(row_cell).count(true)==2
-                        && row_cell.hasCandidate(y))
+                        && row_cell->hasCandidate(y))
                     {
-                        Cell* yzcell = &row_cell;
+                        Cell::Ptr yzcell = row_cell;
                         CellValue z;
                         if ( yzcell->hasCandidate(v1) && y != v1)
                             z = v1;
@@ -646,7 +647,7 @@ bool XYZWingTechnique::run()
                         {
                             if (co.squareIdx() == xyzcell->coord().squareIdx()
                                     && co != xyzcell->coord())
-                                ret |= cell(co).removeCandidate(z);
+                                ret |= cell(co)->removeCandidate(z);
                         }
                     }
                 }
@@ -654,12 +655,12 @@ bool XYZWingTechnique::run()
                 QVector<Coord> colCoords = xyzcell->coord().sameColumnCoordinates();
                 for (const Coord& yz_co: colCoords)
                 {
-                    Cell& col_cell = cell(yz_co);
-                    if (   col_cell.candidatesCount()==2
+                    Cell::Ptr col_cell = cell(yz_co);
+                    if (   col_cell->candidatesCount()==2
                         && xyzcell->commonCandidates(col_cell).count(true)==2
-                        && col_cell.hasCandidate(y))
+                        && col_cell->hasCandidate(y))
                     {
-                        Cell* yzcell = &col_cell;
+                        Cell::Ptr yzcell = col_cell;
                         CellValue z;
                         if ( yzcell->hasCandidate(v1) && y != v1)
                             z = v1;
@@ -677,7 +678,7 @@ bool XYZWingTechnique::run()
                         {
                             if (co.squareIdx() == xyzcell->coord().squareIdx()
                                     && co != xyzcell->coord())
-                                ret |= cell(co).removeCandidate(z);
+                                ret |= cell(co)->removeCandidate(z);
                         }
                     }
                 }

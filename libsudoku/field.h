@@ -14,8 +14,8 @@ class Field
     QVector<ColumnHouse> columns;
     QVector<RowHouse> rows;
     QVector<SquareHouse> squares;
-    QVector<House*> areas;
-    QVector<Cell*> cells;
+    QVector<House::Ptr> areas;
+    QVector<Cell::Ptr> cells;
 public:
     Field();
     ~Field();
@@ -27,11 +27,11 @@ public:
     bool readFromFormattedTextFile(const QString& filename);
     bool readFromPlainTextFile(const QString& filename, int num);
 
-    Cell& cell(const Coord& coord);
-    const Cell& cell(const Coord& coord) const;
+    Cell::Ptr  cell(const Coord& coord);
+    Cell::CPtr cell(const Coord& coord) const;
 
-    CellSet allCellsVisibleFromCell(const Cell* c) ;
-    CellSet allCellsVisibleFromBothCell(const Cell* c1, const Cell* c2);
+    CellSet allCellsVisibleFromCell(Cell::CPtr c) ;
+    CellSet allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2);
 
     void print() const;
 

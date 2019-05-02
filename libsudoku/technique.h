@@ -34,8 +34,8 @@ protected:
     QVector<SquareHouse>& squares();
     QVector<RowHouse>& rows();
     QVector<ColumnHouse>& columns();
-    QVector<Cell*>& cells();
-    Cell& cell(const Coord& c);
+    QVector<Cell::Ptr>& cells();
+    Cell::Ptr cell(const Coord& c);
 
     virtual bool run() = 0;
     Field& field;

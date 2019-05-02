@@ -18,11 +18,11 @@ class QGridLayout;
 class CellGui : public QLabel
 {
     Q_OBJECT
-    const Cell& cell;
+    Cell::CPtr cell;
     QLayout* candidatesLayout;
     QMap<int, QLabel*> candidateLabel;
 public:
-    CellGui(const Cell& cell, QWidget* parent = nullptr);
+    CellGui(Cell::CPtr cell, QWidget* parent = nullptr);
 public slots:
     void setValue(CellValue );
     void removeCandidate(CellValue bit);

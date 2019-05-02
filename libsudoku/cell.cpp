@@ -33,7 +33,7 @@ void Cell::setValue(quint8 val, bool init_value)
         std::this_thread::sleep_until (t0);
     }
 
-    for(House* pArea: houses)
+    for(House::Ptr pArea: houses)
     {
         pArea->removeCandidate(val);
     }
@@ -44,7 +44,7 @@ bool Cell::removeCandidate(CellValue guessVal)
     if (isResolved())
     {
         return false;
-//        throw std::runtime_error("removing guess from knonw value");
+//        throw std::runtime_error("removing guess from known value");
     }
     if (!candidateMask.testBit(guessVal-1))
     {
@@ -161,10 +161,10 @@ void Cell::setDelay(bool use)
     useDelay =  use;
 }
 
-QBitArray Cell::commonCandidates(const Cell& a) const
+QBitArray Cell::commonCandidates(Cell::CPtr a) const
 {
     QBitArray ret(candidatesCapacity());
-    ret = candidateMask & a.candidateMask;
+    ret = candidateMask & a->candidateMask;
     return ret;
 }
 

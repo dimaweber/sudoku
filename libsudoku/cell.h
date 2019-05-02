@@ -40,6 +40,8 @@ class Cell: public QObject
     Cell& operator = (const Cell& );
     bool useDelay;
 public:
+    typedef Cell* Ptr;
+    typedef const Cell* CPtr;
     Cell(quint8 n = 0, QObject* parent = nullptr);
 
     CellValue value() const {return val;}
@@ -61,7 +63,7 @@ public:
     bool removeCandidate(const QBitArray& candidate);
     bool candidatesExactMatch(const QBitArray& mask) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;
-    QBitArray commonCandidates(const Cell& a) const;
+    QBitArray commonCandidates(Cell::CPtr a) const;
 
     bool operator == (const Cell& other) const;
 signals:

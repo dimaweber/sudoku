@@ -12,7 +12,7 @@ Field::Field()
 
 Field::~Field()
 {
-    for(Cell* cell: cells)
+    for(Cell::Ptr cell: cells)
         cell->deleteLater();
 }
 
@@ -63,7 +63,7 @@ bool Field::readFromFormattedTextFile(const QString& filename)
             if (lines[row-1][col-1]!= '.')
             {
                 CellValue v = static_cast<CellValue>(lines[row-1][col-1].digitValue());
-                cell(Coord(row,col)).setValue(v, true);
+                cell(Coord(row,col))->setValue(v, true);
             }
         }
     }
@@ -94,7 +94,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
     {
         QChar symbol = line[coord.rawIndex()];
         if (symbol.isDigit() && symbol.toLatin1() != '0')
-            cell(coord).setValue(static_cast<CellValue>(symbol.digitValue()), true);
+            cell(coord)->setValue(static_cast<CellValue>(symbol.digitValue()), true);
     }
     return true;
 }
@@ -113,10 +113,10 @@ void Field::prepareHouses(quint8 n)
 
     for (Coord coord = Coord::first(); coord.isValid(); coord++)
     {
-            Cell& c = cell(coord);
-            c.registerInHouse(columns[coord.col()-1]);
-            c.registerInHouse(rows[coord.row()-1]);
-            c.registerInHouse(squares[coord.squareIdx()]);
+            Cell::Ptr c = cell(coord);
+            c->registerInHouse(columns[coord.col()-1]);
+            c->registerInHouse(rows[coord.row()-1]);
+            c->registerInHouse(squares[coord.squareIdx()]);
     }
 
     for (int i=1; i<=n; i++)
@@ -131,30 +131,30 @@ void Field::prepareHouses(quint8 n)
     }
 }
 
-Cell& Field::cell(const Coord& coord)
+Cell::Ptr Field::cell(const Coord& coord)
 {
-    return *cells[coord.rawIndex()];
+    return cells[coord.rawIndex()];
 }
 
-const Cell& Field::cell(const Coord& coord) const
+Cell::CPtr Field::cell(const Coord& coord) const
 {
-    return *cells[coord.rawIndex()];
+    return cells[coord.rawIndex()];
 }
 
-CellSet Field::allCellsVisibleFromCell(const Cell* c)
+CellSet Field::allCellsVisibleFromCell(Cell::CPtr c)
 {
     CellSet visibleCells;
     QVector<Coord> coords = c->coord().sameColumnCoordinates();
     for (const Coord& co: coords)
     {
-        Cell* cellToAdd = &cell(co);
+        Cell::Ptr cellToAdd = cell(co);
         visibleCells.addCell(cellToAdd );
     }
 
     coords = c->coord().sameRowCoordinates();
     for (const Coord& co: coords)
     {
-        Cell* cellToAdd = &cell(co);
+        Cell::Ptr cellToAdd = cell(co);
         if (!visibleCells.hasCell(cellToAdd))
             visibleCells.addCell(cellToAdd);
     }
@@ -162,7 +162,7 @@ CellSet Field::allCellsVisibleFromCell(const Cell* c)
     coords = c->coord().sameSquareCoordinates();
     for (const Coord& co: coords)
     {
-        Cell* cellToAdd = &cell(co);
+        Cell::Ptr cellToAdd = cell(co);
         if (!visibleCells.hasCell(cellToAdd))
             visibleCells.addCell(cellToAdd);
     }
@@ -170,7 +170,7 @@ CellSet Field::allCellsVisibleFromCell(const Cell* c)
     return visibleCells;
 }
 
-CellSet Field::allCellsVisibleFromBothCell(const Cell* c1, const Cell* c2)
+CellSet Field::allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2)
 {
     CellSet vis1 = allCellsVisibleFromCell(c1);
     CellSet vis2 = allCellsVisibleFromCell(c2);
@@ -196,7 +196,7 @@ void Field::print() const
 
 bool Field::hasEmptyValues() const
 {
-    for (const Cell* cell: cells)
+    for (Cell::CPtr cell: cells)
         if (!cell->isResolved())
             return true;
     return false;
@@ -204,7 +204,7 @@ bool Field::hasEmptyValues() const
 
 bool Field::isValid() const
 {
-    for(const House* area: areas)
+    for(House::CPtr area: areas)
     {
         if (!area->isValid())
             return false;
