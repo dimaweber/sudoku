@@ -27,9 +27,10 @@ void Field::setN(quint8 n)
     {
         if (!cells[idx])
             cells[idx] = new Cell(n);
-        Cell& cell = *cells[idx];
-        cell.coord().setRawIndex(idx);
-        cell.resetCandidates(n);
+        Cell::Ptr pCell = cells[idx];
+        pCell->coord().setRawIndex(idx);
+        pCell->resetCandidates(n);
+        pCell->setDelay(false);
     }
 
     prepareHouses(n);

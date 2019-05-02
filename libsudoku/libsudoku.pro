@@ -49,8 +49,10 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 
-	LIBS += -lgsl -lgslcblas
+    LIBS += -lgsl -lgslcblas
+    QMAKE_CXXFLAGS += -Wall -Wpedantic
 }
+
 
 
 

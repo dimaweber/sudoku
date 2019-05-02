@@ -141,6 +141,12 @@ void Cell::registerInHouse(House& area)
     //        area.removeGuess(value);
 }
 
+void Cell::resetCandidates(quint8 n)
+{
+    candidateMask.resize(n);
+    candidateMask.fill(true);
+}
+
 bool Cell::isValid() const
 {
     return     (isResolved() && candidateMask.count(true) == 1 && candidateMask.at(value()-1) == true)

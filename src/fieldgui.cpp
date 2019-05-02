@@ -94,22 +94,22 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         setValue(cell->value());
     else
     {
-        for (int bit = 1; bit <= cell->candidatesCapacity(); bit++)
+        for (quint8 bit = 1; bit <= cell->candidatesCapacity(); bit++)
             if (!cell->hasCandidate(bit))
                 removeCandidate(bit);
     }
 
-    connect (cell, SIGNAL(valueSet(CellValue)),         SLOT(setValue(CellValue)));
-    connect (cell, SIGNAL(candidateRemoved(CellValue)), SLOT(removeCandidate(CellValue)));
-    connect (cell, &Cell::candidateAboutToBeRemoved, [this](CellValue v)
+    connect (cell, SIGNAL(valueSet(CellValue)),         this, SLOT(setValue(CellValue)), Qt::QueuedConnection);
+    connect (cell, SIGNAL(candidateRemoved(CellValue)), this, SLOT(removeCandidate(CellValue)), Qt::QueuedConnection);
+    connect (cell, &Cell::candidateAboutToBeRemoved, this, [this](CellValue v)
     {
         QLabel* label = this->candidateLabel[v-1];
 
         QPalette pal = label->palette();
         pal.setColor(label->foregroundRole(), QColor("red"));
         label->setPalette(pal);
-    });
-    connect (cell, &Cell::candidatesRemoved, [this](QBitArray v)
+    }, Qt::QueuedConnection);
+    connect (cell, &Cell::candidatesRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
         {
@@ -119,8 +119,8 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
                 label->setText(" ");
             }
         }
-    });
-    connect (cell, &Cell::candidatesAboutToBeRemoved, [this](QBitArray v)
+    }, Qt::QueuedConnection);
+    connect (cell, &Cell::candidatesAboutToBeRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
         {
@@ -133,13 +133,13 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
                 label->setPalette(pal);
             }
         }
-    });
-//    connect (cell, &Cell::valueAboutToBeSet, [this](CellValue v)
+    }, Qt::QueuedConnection);
+//    connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue v)
 //    {
 //        QPalette pal = this->palette();
 //        pal.setColor(this->foregroundRole(), QColor("red"));
 //        this->setPalette(pal);
-//    });
+//    }, Qt::QueuedConnection);
 }
 
 void CellGui::removeCandidate(CellValue bit)

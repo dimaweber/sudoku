@@ -115,11 +115,13 @@ int main(int argc, char *argv[])
         QDialog diag;
         FieldGui fgui_before(array, &diag);
         QPushButton goButton("Go", &diag);
+        QPushButton reloadButton("Reload", &diag);
         QString windowTitle = QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum);
         QGroupBox box;
 
-        QHBoxLayout layout(&diag);
-        QVBoxLayout controlsLayout(&diag);
+        QHBoxLayout layout;
+        diag.setLayout(&layout);
+        QVBoxLayout controlsLayout;
         QVBoxLayout boxLayout(&box);
 
         for (Technique* tech: resolver.techniques)
@@ -128,17 +130,17 @@ int main(int argc, char *argv[])
             boxLayout.addWidget(pCheck);
             pCheck->setChecked(tech->isEnabled());
             pCheck->setEnabled(tech->canBeDisabled());
-            app.connect(pCheck, &QCheckBox::clicked, [tech, pCheck]()
+            app.connect(pCheck, &QCheckBox::clicked, pCheck, [tech, pCheck]()
             {
                 tech->setEnabled( pCheck->isChecked());
-            });
-            app.connect(tech, &Technique::started, [pCheck]()
+            }, Qt::QueuedConnection);
+            app.connect(tech, &Technique::started, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(true);
                 pCheck->setFont(font);
-            });
-            app.connect(tech, &Technique::done, [pCheck]()
+            }, Qt::QueuedConnection);
+            app.connect(tech, &Technique::done, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -147,8 +149,8 @@ int main(int argc, char *argv[])
                 QPalette pal = pCheck->palette();
                 pal.setColor(pCheck->foregroundRole(), QColor("red"));
                 pCheck->setPalette(pal);
-            });
-            app.connect(tech, &Technique::applied, [pCheck]()
+            }, Qt::QueuedConnection);
+            app.connect(tech, &Technique::applied, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -157,19 +159,20 @@ int main(int argc, char *argv[])
                 QPalette pal = pCheck->palette();
                 pal.setColor(pCheck->foregroundRole(), QColor("green"));
                 pCheck->setPalette(pal);
-            });
-            app.connect(&resolver, &Resolver::newIteration, [pCheck]()
+            }, Qt::QueuedConnection);
+            app.connect(&resolver, &Resolver::newIteration, pCheck, [pCheck]()
             {
                 QPalette pal = pCheck->palette();
                 pal.setColor(pCheck->foregroundRole(), QColor("black"));
                 pCheck->setPalette(pal);
-            });
+            }, Qt::QueuedConnection);
         }
 
         layout.addWidget(&fgui_before);
         layout.addLayout(&controlsLayout);
         controlsLayout.addWidget(&box);
         controlsLayout.addWidget(&goButton);
+        controlsLayout.addWidget(&reloadButton);
         controlsLayout.addStretch();
 
         diag.setWindowTitle(windowTitle);
@@ -182,8 +185,14 @@ int main(int argc, char *argv[])
         {
             diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(e));
         }, Qt::QueuedConnection);
-        app.connect(&resolver, &Resolver::started, &goButton, [&goButton](){goButton.setEnabled(false);}, Qt::QueuedConnection);
-        app.connect(&resolver, &Resolver::done, &goButton, [&goButton](){goButton.setEnabled(true);}, Qt::QueuedConnection);
+        app.connect(&resolver, &Resolver::started, &app, [&goButton, &reloadButton](){goButton.setEnabled(false);reloadButton.setEnabled(false);}, Qt::QueuedConnection);
+        app.connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
+        app.connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
+        {
+
+        });
+
+        diag.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         diag.show();
         app.exec();

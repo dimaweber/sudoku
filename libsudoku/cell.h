@@ -56,7 +56,7 @@ public:
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
-    void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
+    void resetCandidates(quint8 n);
     bool isValid() const;
     QVector<CellValue> candidates() const;
     void setDelay(bool use = true);
