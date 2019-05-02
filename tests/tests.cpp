@@ -2,6 +2,7 @@
 
 #include "coord.h"
 #include "field.h"
+#include "resolver.h"
 
 class CommonTest : public QObject
 {
@@ -156,11 +157,21 @@ void CommonTest::Cell_test_candidates()
 void CommonTest::benchmark()
 {
     Field array;
-    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 0));
+    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 1));
     bool isResolved = false;
     bool isValid = false;
+    Resolver resolver(array, nullptr);
+    resolver.registerTechnique(new NakedSingleTechnique(array));
+    resolver.registerTechnique(new HiddenSingleTechnique(array));
+    resolver.registerTechnique(new NakedGroupTechnique(array));
+    resolver.registerTechnique(new HiddenGroupTechnique(array));
+    resolver.registerTechnique(new IntersectionsTechnique(array));
+    resolver.registerTechnique(new BiLocationColoringTechnique(array));
+    resolver.registerTechnique(new XWingTechnique(array));
+    resolver.registerTechnique(new YWingTechnique(array));
+    resolver.registerTechnique(new XYZWingTechnique(array));
     QBENCHMARK{
-        array.process();
+        resolver.process();
     }
     isValid = array.isValid();
     isResolved = array.isResolved();

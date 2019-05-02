@@ -26,6 +26,7 @@ class House;
 //};
 
 typedef quint8 CellValue;
+Q_DECLARE_METATYPE(CellValue)
 
 class Cell: public QObject
 {
@@ -37,14 +38,14 @@ class Cell: public QObject
     Coord coordinate;
     QVector<House*> houses;
     Cell& operator = (const Cell& );
-
+    bool useDelay;
 public:
     Cell(quint8 n = 0, QObject* parent = nullptr);
 
     CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
-    bool removeCandidate(quint8 val);
+    bool removeCandidate(CellValue val);
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
     bool isResolved() const {return value() != 0;}
@@ -56,7 +57,7 @@ public:
     void resetCandidates(quint8 n) { candidateMask.resize(n); candidateMask.fill(true);}
     bool isValid() const;
     QVector<CellValue> candidates() const;
-
+    void setDelay(bool use = true);
     bool removeCandidate(const QBitArray& candidate);
     bool candidatesExactMatch(const QBitArray& mask) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;

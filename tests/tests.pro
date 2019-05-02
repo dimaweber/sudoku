@@ -26,10 +26,13 @@ SOURCES += \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-LIBS += -lgsl -lgslcblas
 LIBS += -L../bin -lsudoku
 
-unix:QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+unix {
+    LIBS += -lgsl -lgslcblas
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+}
+
 
 INCLUDEPATH += ../libsudoku
 

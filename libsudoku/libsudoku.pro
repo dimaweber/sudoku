@@ -9,6 +9,8 @@ QT       -= gui
 TARGET = sudoku
 TEMPLATE = lib
 
+CONFIG += c++14 staticlib
+
 DEFINES += SUDOKU_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
@@ -28,7 +30,9 @@ SOURCES += \
 		house.cpp \
 		bilocationlink.cpp \
 		cellcolor.cpp \
-		field.cpp
+		field.cpp \
+		resolver.cpp \
+		technique.cpp
 
 HEADERS += \
 		coord.h \
@@ -37,14 +41,18 @@ HEADERS += \
 		house.h \
 		bilocationlink.h \
 		field.h \
-		libsudoku_global.h
+		libsudoku_global.h \
+		resolver.h \
+		technique.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
+
+	LIBS += -lgsl -lgslcblas
 }
 
-LIBS += -lgsl -lgslcblas
+
 
 DESTDIR=../bin
 
