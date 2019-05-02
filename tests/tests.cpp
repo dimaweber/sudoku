@@ -112,14 +112,14 @@ void CommonTest::Coord_same_house_tests()
     c.setRowCol(1,1);
 
     QVector<Coord> sameHouse = c.sameColumnCoordinates();
-    for(int i=1;i<=9;i++)
+    for(quint8 i=1;i<=9;i++)
         if (i!=c.row())
             QVERIFY(sameHouse.contains(Coord(i,c.col())));
         else
             QVERIFY(!sameHouse.contains(Coord(i, c.col())));
 
     sameHouse = c.sameRowCoordinates();
-    for(int i=1;i<=9;i++)
+    for(quint8 i=1;i<=9;i++)
         if (i!=c.col())
             QVERIFY(sameHouse.contains(Coord(c.row(), i)));
         else

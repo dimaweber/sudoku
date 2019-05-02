@@ -71,7 +71,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
             sublay->setSpacing(0);
             widget->setLayout(sublay);
             int s_n = static_cast<int>(qSqrt(cell.candidatesCapacity()));
-            for (int bit = 1; bit <= cell.candidatesCapacity(); bit++)
+            for (quint8 bit = 1; bit <= cell.candidatesCapacity(); bit++)
             {
                 int subrow = (bit-1) / s_n;
                 int subcol = (bit-1) % s_n;
