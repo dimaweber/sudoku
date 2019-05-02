@@ -132,13 +132,13 @@ int main(int argc, char *argv[])
             {
                 tech->setEnabled( pCheck->isChecked());
             });
-            app.connect(tech, &Technique::started, pCheck, [pCheck]()
+            app.connect(tech, &Technique::started, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(true);
                 pCheck->setFont(font);
             });
-            app.connect(tech, &Technique::done, pCheck, [pCheck]()
+            app.connect(tech, &Technique::done, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
                 pal.setColor(pCheck->foregroundRole(), QColor("red"));
                 pCheck->setPalette(pal);
             });
-            app.connect(tech, &Technique::applied, pCheck, [pCheck]()
+            app.connect(tech, &Technique::applied, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
                 pal.setColor(pCheck->foregroundRole(), QColor("green"));
                 pCheck->setPalette(pal);
             });
-            app.connect(&resolver, &Resolver::newIteration, pCheck, [pCheck]()
+            app.connect(&resolver, &Resolver::newIteration, [pCheck]()
             {
                 QPalette pal = pCheck->palette();
                 pal.setColor(pCheck->foregroundRole(), QColor("black"));

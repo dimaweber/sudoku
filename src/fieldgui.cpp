@@ -16,6 +16,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     layout = new QGridLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for (int i=1; i<=qSqrt(Coord::maxRawIndex()); i++)
     {
         QLabel* htitle = new QLabel(this);
@@ -100,6 +101,45 @@ CellGui::CellGui(const Cell& cell, QWidget* parent)
 
     connect (&cell, SIGNAL(valueSet(CellValue)),         SLOT(setValue(CellValue)));
     connect (&cell, SIGNAL(candidateRemoved(CellValue)), SLOT(removeCandidate(CellValue)));
+    connect (&cell, &Cell::candidateAboutToBeRemoved, [this](CellValue v)
+    {
+        QLabel* label = this->candidateLabel[v-1];
+
+        QPalette pal = label->palette();
+        pal.setColor(label->foregroundRole(), QColor("red"));
+        label->setPalette(pal);
+    });
+    connect (&cell, &Cell::candidatesRemoved, [this](QBitArray v)
+    {
+        for (int i=0; i<v.count(); i++)
+        {
+            if (v.testBit(i))
+            {
+                QLabel* label = this->candidateLabel[i];
+                label->setText(" ");
+            }
+        }
+    });
+    connect (&cell, &Cell::candidatesAboutToBeRemoved, [this](QBitArray v)
+    {
+        for (int i=0; i<v.count(); i++)
+        {
+            if (v.testBit(i))
+            {
+                QLabel* label = this->candidateLabel[i];
+
+                QPalette pal = label->palette();
+                pal.setColor(label->foregroundRole(), QColor("red"));
+                label->setPalette(pal);
+            }
+        }
+    });
+//    connect (&cell, &Cell::valueAboutToBeSet, [this](CellValue v)
+//    {
+//        QPalette pal = this->palette();
+//        pal.setColor(this->foregroundRole(), QColor("red"));
+//        this->setPalette(pal);
+//    });
 }
 
 void CellGui::removeCandidate(CellValue bit)

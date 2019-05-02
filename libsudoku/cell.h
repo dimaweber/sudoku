@@ -66,8 +66,11 @@ public:
     bool operator == (const Cell& other) const;
 signals:
     void valueSet(CellValue v);
+    void valueAboutToBeSet(CellValue v);
     void candidateRemoved(CellValue v);
+    void candidateAboutToBeRemoved(CellValue v);
     void candidatesRemoved(QBitArray v);
+    void candidatesAboutToBeRemoved(QBitArray v);
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);

@@ -18,6 +18,13 @@ void Cell::setValue(quint8 val, bool init_value)
     candidateMask.setBit(val-1, true);
     initial_value = init_value;
     std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
+    emit valueAboutToBeSet(val);
+    if (useDelay)
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 500ms;
+        std::this_thread::sleep_until (t0);
+    }
     emit valueSet(val);
     if(useDelay)
     {
@@ -44,6 +51,13 @@ bool Cell::removeCandidate(CellValue guessVal)
         //throw std::runtime_error("removing unset guess");
         return false;
     }
+    emit candidateAboutToBeRemoved(guessVal);
+    if (useDelay)
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 500ms;
+        std::this_thread::sleep_until (t0);
+    }
     candidateMask.clearBit(guessVal-1);
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
@@ -68,11 +82,24 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     QBitArray a = candidateMask & candidate;
     if ((candidateMask & candidate).count(true) == 0)
         return false; // nothing will be removed
+    emit candidatesAboutToBeRemoved(candidate);
+    if (useDelay)
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 500ms;
+        std::this_thread::sleep_until (t0);
+    }
     candidateMask &= ~candidate;
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
     emit candidatesRemoved(candidate);
+    if (useDelay)
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 50ms;
+        std::this_thread::sleep_until (t0);
+    }
     return true;
 }
 
