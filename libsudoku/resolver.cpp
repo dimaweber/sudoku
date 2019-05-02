@@ -3,6 +3,9 @@
 
 #include <QElapsedTimer>
 
+#include <thread>
+#include <chrono>
+
 Resolver::Resolver(Field &field, QObject *parent)
     :QThread(parent), field(field), elaps(0), enabledTechniques(0xffff)
 {}
@@ -50,6 +53,7 @@ void Resolver::process()
 
     do
     {
+        emit newIteration();
         changed = false;
 
         for(Technique* tech: techniques)
@@ -57,6 +61,12 @@ void Resolver::process()
             changed = tech->perform();
             if (changed)
                 break;
+        }
+
+        {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 1s;
+        std::this_thread::sleep_until (t0);
         }
     }while(changed);
 }

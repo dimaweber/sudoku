@@ -132,6 +132,38 @@ int main(int argc, char *argv[])
             {
                 tech->setEnabled( pCheck->isChecked());
             });
+            app.connect(tech, &Technique::started, pCheck, [pCheck]()
+            {
+                QFont font = pCheck->font();
+                font.setBold(true);
+                pCheck->setFont(font);
+            });
+            app.connect(tech, &Technique::done, pCheck, [pCheck]()
+            {
+                QFont font = pCheck->font();
+                font.setBold(false);
+                pCheck->setFont(font);
+
+                QPalette pal = pCheck->palette();
+                pal.setColor(pCheck->foregroundRole(), QColor("red"));
+                pCheck->setPalette(pal);
+            });
+            app.connect(tech, &Technique::applied, pCheck, [pCheck]()
+            {
+                QFont font = pCheck->font();
+                font.setBold(false);
+                pCheck->setFont(font);
+
+                QPalette pal = pCheck->palette();
+                pal.setColor(pCheck->foregroundRole(), QColor("green"));
+                pCheck->setPalette(pal);
+            });
+            app.connect(&resolver, &Resolver::newIteration, pCheck, [pCheck]()
+            {
+                QPalette pal = pCheck->palette();
+                pal.setColor(pCheck->foregroundRole(), QColor("black"));
+                pCheck->setPalette(pal);
+            });
         }
 
         layout.addWidget(&fgui_before);
@@ -152,7 +184,6 @@ int main(int argc, char *argv[])
         }, Qt::QueuedConnection);
         app.connect(&resolver, &Resolver::started, &goButton, [&goButton](){goButton.setEnabled(false);}, Qt::QueuedConnection);
         app.connect(&resolver, &Resolver::done, &goButton, [&goButton](){goButton.setEnabled(true);}, Qt::QueuedConnection);
-
 
         diag.show();
         app.exec();

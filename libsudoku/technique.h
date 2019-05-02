@@ -9,27 +9,25 @@
 #include <QBitArray>
 #include <QSet>
 
+#include <chrono>
+#include <thread>
+
 class Field;
 
-class Technique
+class Technique : public QObject
 {
+    Q_OBJECT
     bool enabled;
     const QString techniqueName;
     static void fillCandidatesCombinationsMasks(quint8 n);
 public:
-    Technique (Field& field, const QString name);
-    virtual ~Technique()
-    {}
+    Technique (Field& field, const QString name, QObject* parent = nullptr);
+    virtual ~Technique();
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
     virtual bool canBeDisabled() const { return true;}
     bool isEnabled() const {return enabled;}
-    bool perform()
-    {
-        if (!enabled)
-            return false;
-        return run();
-    }
+    bool perform();
 protected:
     static QSet<QBitArray> allCandidatesCombinationsMasks;
     QVector<House*>& areas();
@@ -42,12 +40,17 @@ protected:
     virtual bool run() = 0;
     Field& field;
     int N;
+signals:
+    void started();
+    void done();
+    void applied();
 };
 
 class NakedSingleTechnique : public Technique
 {
+    Q_OBJECT
 public:
-    NakedSingleTechnique(Field& field);
+    NakedSingleTechnique(Field& field, QObject* parent = nullptr);
     virtual void setEnabled(bool enabled = true) override;
     virtual bool canBeDisabled() const override { return false;}
 protected:
@@ -56,9 +59,10 @@ protected:
 
 class PerHouseTechnique: public Technique
 {
+    Q_OBJECT
 public:
-    PerHouseTechnique (Field& field, const QString name)
-        :Technique(field, name)
+    PerHouseTechnique (Field& field, const QString name, QObject* parent = nullptr)
+        :Technique(field, name, parent)
     {}
 protected:
     virtual bool runPerHouse(House* ) =0;
@@ -67,43 +71,48 @@ protected:
 
 class HiddenSingleTechnique : public PerHouseTechnique
 {
+    Q_OBJECT
 protected:
     bool runPerHouse(House* house);
 public:
-    HiddenSingleTechnique(Field& field);
+    HiddenSingleTechnique(Field& field, QObject* parent = nullptr);
 };
 
 class NakedGroupTechnique : public PerHouseTechnique
 {
+    Q_OBJECT
 protected:
     bool runPerHouse(House* house);
 public:
-    NakedGroupTechnique(Field& field);
+    NakedGroupTechnique(Field& field, QObject* parent = nullptr);
 };
 
 class HiddenGroupTechnique: public PerHouseTechnique
 {
+    Q_OBJECT
 protected:
     bool runPerHouse(House* house);
 public:
-    HiddenGroupTechnique(Field& field);
+    HiddenGroupTechnique(Field& field, QObject* parent = nullptr);
 };
 
 
 class IntersectionsTechnique: public Technique
 {
+    Q_OBJECT
 private:
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
 public:
-    IntersectionsTechnique(Field& field);
+    IntersectionsTechnique(Field& field, QObject* parent = nullptr);
 protected:
     virtual bool run() override;
 };
 
 class BiLocationColoringTechnique: public Technique
 {
+    Q_OBJECT
 public:
-    BiLocationColoringTechnique(Field& field);
+    BiLocationColoringTechnique(Field& field, QObject* parent = nullptr);
 protected:
     bool run() override;
     QVector<BiLocationLink> findBiLocationLinks(CellValue val);
@@ -113,24 +122,27 @@ protected:
 
 class XWingTechnique : public Technique
 {
+    Q_OBJECT
 public:
-    XWingTechnique(Field& field);
+    XWingTechnique(Field& field, QObject* parent = nullptr);
 protected:
     bool run() override;
 };
 
 class YWingTechnique : public Technique
 {
+    Q_OBJECT
 public:
-    YWingTechnique(Field& field);
+    YWingTechnique(Field& field, QObject* parent = nullptr);
 protected:
     bool run() override;
 };
 
 class XYZWingTechnique: public Technique
 {
+    Q_OBJECT
 public:
-    XYZWingTechnique(Field& field);
+    XYZWingTechnique(Field& field, QObject* parent = nullptr);
 protected:
     bool run() override;
 };

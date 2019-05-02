@@ -70,8 +70,8 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 }
 #endif
 
-NakedSingleTechnique::NakedSingleTechnique(Field& field)
-    :Technique(field, "Naked Single")
+NakedSingleTechnique::NakedSingleTechnique(Field& field, QObject *parent)
+    :Technique(field, "Naked Single", parent)
 {}
 
 bool NakedSingleTechnique::run()
@@ -133,22 +133,43 @@ bool HiddenSingleTechnique::runPerHouse(House* house)
     return newValueSet;
 }
 
-HiddenSingleTechnique::HiddenSingleTechnique(Field& field)
-    :PerHouseTechnique(field, "Hidden Single")
+HiddenSingleTechnique::HiddenSingleTechnique(Field& field, QObject* parent)
+    :PerHouseTechnique(field, "Hidden Single", parent)
 {
 
 }
 
-Technique::Technique(Field& field, const QString name)
-    :enabled(true), techniqueName(name), field(field), N(field.getN())
+Technique::Technique(Field& field, const QString name, QObject *parent)
+    :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
 {
     if (Technique::allCandidatesCombinationsMasks.isEmpty())
         fillCandidatesCombinationsMasks(N);
 }
 
+Technique::~Technique()
+{}
+
 void Technique::setEnabled(bool enabled)
 {
     this->enabled = enabled;
+}
+
+bool Technique::perform()
+{
+    if (!enabled)
+        return false;
+    emit started();
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 100ms;
+        std::this_thread::sleep_until (t0);
+    }
+    bool res = run();
+    if (res)
+        emit applied();
+    else
+        emit done();
+    return res;
 }
 
 QVector<House*>& Technique::areas()
@@ -204,8 +225,8 @@ bool NakedGroupTechnique::runPerHouse(House *house)
     return ret;
 }
 
-NakedGroupTechnique::NakedGroupTechnique(Field& field)
-    :PerHouseTechnique(field, "Naked Group")
+NakedGroupTechnique::NakedGroupTechnique(Field& field, QObject* parent)
+    :PerHouseTechnique(field, "Naked Group", parent)
 {
 
 }
@@ -245,8 +266,8 @@ bool HiddenGroupTechnique::runPerHouse(House* house)
 
 }
 
-HiddenGroupTechnique::HiddenGroupTechnique(Field& field)
-    :PerHouseTechnique(field, "Hidden Group")
+HiddenGroupTechnique::HiddenGroupTechnique(Field& field, QObject* parent)
+    :PerHouseTechnique(field, "Hidden Group", parent)
 {
 
 }
@@ -261,8 +282,8 @@ bool PerHouseTechnique::run()
     return newValuesSet;
 }
 
-IntersectionsTechnique::IntersectionsTechnique(Field& field)
-    :Technique (field, "Intersections")
+IntersectionsTechnique::IntersectionsTechnique(Field& field, QObject* parent)
+    :Technique (field, "Intersections", parent)
 {
 }
 
@@ -310,8 +331,8 @@ bool IntersectionsTechnique::reduceIntersection(SquareHouse& square, LineHouse& 
     return changed;
 }
 
-BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field)
-    :Technique (field, "Bi-Location Coloring")
+BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, QObject* parent)
+    :Technique (field, "Bi-Location Coloring", parent)
 {
 
 }
@@ -425,8 +446,8 @@ QVector<BiLocationLink> BiLocationColoringTechnique::findBiLocationLinks(CellVal
     return ret;
 }
 
-XWingTechnique::XWingTechnique(Field& field)
-    :Technique(field, "X-Wing")
+XWingTechnique::XWingTechnique(Field& field, QObject* parent)
+    :Technique(field, "X-Wing", parent)
 {
 
 }
@@ -506,8 +527,8 @@ bool XWingTechnique::run()
     return changed;
 }
 
-YWingTechnique::YWingTechnique(Field &field)
-    :Technique(field, "Y-Wing")
+YWingTechnique::YWingTechnique(Field &field, QObject* parent)
+    :Technique(field, "Y-Wing", parent)
 {
 
 }
@@ -562,8 +583,8 @@ bool YWingTechnique::run()
 
 }
 
-XYZWingTechnique::XYZWingTechnique(Field &field)
-    :Technique (field, "XYZ-Wing")
+XYZWingTechnique::XYZWingTechnique(Field &field, QObject *parent)
+    :Technique (field, "XYZ-Wing", parent)
 {
 
 }

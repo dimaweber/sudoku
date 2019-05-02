@@ -27,6 +27,7 @@ signals:
     void resolved(quint64);
     void unresolved(quint64);
     void failed(quint64);
+    void newIteration();
 };
 
 #endif // RESOLVER_H
