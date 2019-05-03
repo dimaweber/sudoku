@@ -17,7 +17,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     layout->setMargin(0);
     layout->setSpacing(0);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    for (int i=1; i<=qSqrt(Coord::maxRawIndex()); i++)
+    for (quint8 i=1; i<=field.getN(); i++)
     {
         QLabel* htitle = new QLabel(this);
         htitle->setText(QString("R%1").arg(i));
@@ -134,12 +134,12 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
-//    connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue v)
-//    {
-//        QPalette pal = this->palette();
-//        pal.setColor(this->foregroundRole(), QColor("red"));
-//        this->setPalette(pal);
-//    }, Qt::QueuedConnection);
+    connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue v)
+    {
+        QPalette pal = this->palette();
+        pal.setColor(QPalette::Window, QColor("yellow"));
+        this->setPalette(pal);
+    }, Qt::QueuedConnection);
 }
 
 void CellGui::removeCandidate(CellValue bit)
@@ -154,4 +154,11 @@ void CellGui::setValue(CellValue v)
         candidate->hide();
     QString text = QString("%1").arg(v);
     setText(text);
+
+    QPalette pal = this->palette();
+    if (cell->coord().squareIdx() % 2)
+        pal.setColor(QPalette::Window, QColor("pale green"));
+    else
+        pal.setColor(QPalette::Window, QColor("wheat"));
+    this->setPalette(pal);
 }

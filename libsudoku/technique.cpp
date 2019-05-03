@@ -139,7 +139,7 @@ NakedSingleTechnique::NakedSingleTechnique(Field& field, QObject *parent)
 bool NakedSingleTechnique::run()
 {
     bool changed = false;
-    for(Coord coord = Coord::first(); coord.isValid(); coord++)
+    for(Coord coord = Coord::first(); coord.isValid() && !changed; coord++)
     {
         Cell::Ptr pCell = cell(coord);
         if (!pCell->isResolved() && pCell->candidatesCount() == 1)
@@ -147,10 +147,11 @@ bool NakedSingleTechnique::run()
             for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
                 if (pCell->hasCandidate(j))
                 {
-                    changed = true;
                     std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
                               << std::endl;
                     pCell->setValue(j);
+                    changed = true;
+                    break;
                 }
         }
     }
@@ -176,7 +177,7 @@ bool HiddenSingleTechnique::runPerHouse(House* house)
                     valuesCount[bit-1]++;
         }
     }
-    for(CellValue bit=1; bit <= valuesCount.count(); bit++)
+    for(CellValue bit=1; bit <= valuesCount.count() && !newValueSet; bit++)
     {
         if (valuesCount[bit-1] == 1)
         {
@@ -188,6 +189,7 @@ bool HiddenSingleTechnique::runPerHouse(House* house)
                               << std::endl;
                     pCell->setValue(bit);
                     newValueSet = true;
+                    break;
                 }
             }
         }
@@ -206,20 +208,22 @@ bool NakedGroupTechnique::runPerHouse(House *house)
     bool ret = false;
     for(const QBitArray& testMask: allCandidatesCombinationsMasks)
     {
-            QVector<Cell*> indices;
+        QVector<Cell*> indices;
+        for(Cell* pCell: *house)
+            if (pCell->candidatesExactMatch(testMask) && !pCell->isResolved())
+                indices.append(pCell);
+        if (indices.count() == testMask.count(true) && house->unresolvedCellsCount() > indices.count())
+        {
+            std::cout << "Naked combination " << testMask << " found in ";
+            for (Cell* pCell: indices)
+                std::cout << pCell->coord();
+            std::cout << std::endl;
             for(Cell* pCell: *house)
-                if (pCell->candidatesExactMatch(testMask) && !pCell->isResolved())
-                    indices.append(pCell);
-            if (indices.count() == testMask.count(true) && house->unresolvedCellsCount() > indices.count())
-            {
-                std::cout << "Naked combination " << testMask << " found in ";
-                for (Cell* pCell: indices)
-                    std::cout << pCell->coord();
-                std::cout << std::endl;
-                for(Cell* pCell: *house)
-                    if (!indices.contains(pCell) && !pCell->isResolved())
-                        ret |= pCell->removeCandidate(testMask);
-            }
+                if (!indices.contains(pCell) && !pCell->isResolved())
+                    ret |= pCell->removeCandidate(testMask);
+            if (ret)
+                break;
+        }
     }
     return ret;
 }
@@ -259,6 +263,8 @@ bool HiddenGroupTechnique::runPerHouse(House* house)
                 ret |= pCell->removeCandidate(~testMask);
             }
             std::cout << std::endl;
+            if (ret)
+                return true;
         }
     }
     return ret;
@@ -277,6 +283,8 @@ bool PerHouseTechnique::run()
     for(House* area: areas())
     {
         newValuesSet = runPerHouse(area);
+        if (newValuesSet)
+            break;
     }
     return newValuesSet;
 }
@@ -527,56 +535,53 @@ bool XWingTechnique::run()
 }
 
 YWingTechnique::YWingTechnique(Field &field, QObject* parent)
-    :Technique(field, "Y-Wing", parent)
+    :PerCellTechnique(field, "Y-Wing", parent)
 {
 
 }
 
-bool YWingTechnique::run()
+bool YWingTechnique::runPerCell(Cell::Ptr cellAB)
 {
     bool ret = false;
 
-    for (Cell* cellAB: cells())
+    if (cellAB->candidatesCount() != 2)
+        return ret;
+
+    QVector<CellValue> candidates = cellAB->candidates();
+    CellValue A = candidates[0];
+    CellValue B = candidates[1];
+
+    CellSet visibleFromAB = field.allCellsVisibleFromCell(cellAB);
+    CellSet biValueCellsVisibleFromAB;
+    for(Cell* c: visibleFromAB)
+        if (c->candidatesCount() == 2)
+            biValueCellsVisibleFromAB.addCell(c);
+
+
+    for(CellValue C=1; C<=N; C++)
     {
-        if (cellAB->candidatesCount() != 2)
+        // this can be paralleled for every C
+        if(A == C || B == C)
             continue;
 
-        QVector<CellValue> candidates = cellAB->candidates();
-        CellValue A = candidates[0];
-        CellValue B = candidates[1];
+        CellSet cellsAC;
+        CellSet cellsBC;
 
-        CellSet visibleFromAB = field.allCellsVisibleFromCell(cellAB);
-        CellSet biValueCellsVisibleFromAB;
-        for(Cell* c: visibleFromAB)
-            if (c->candidatesCount() == 2)
-                biValueCellsVisibleFromAB.addCell(c);
-
-
-        for(CellValue C=1; C<=N; C++)
+        for (Cell* c: biValueCellsVisibleFromAB)
         {
-            // this can be paralleled for every C
-            if(A == C || B == C)
-                continue;
-
-            CellSet cellsAC;
-            CellSet cellsBC;
-
-            for (Cell* c: biValueCellsVisibleFromAB)
-            {
-                if (c->hasCandidate(C) && c->hasCandidate(A))
-                    cellsAC.addCell(c);
-                if (c->hasCandidate(C) && c->hasCandidate(B))
-                    cellsBC.addCell(c);
-            }
-
-            for (Cell* ac: cellsAC)
-                for(Cell* bc: cellsBC)
-                {
-                    std::cout << "Y-Wing found: " << cellAB->coord() << " " << ac->coord() << " " << bc->coord() << std::endl;
-                    CellSet visibleFromBoth = field.allCellsVisibleFromBothCell(ac, bc);
-                    ret |= visibleFromBoth.removeCandidate(C);
-                }
+            if (c->hasCandidate(C) && c->hasCandidate(A))
+                cellsAC.addCell(c);
+            if (c->hasCandidate(C) && c->hasCandidate(B))
+                cellsBC.addCell(c);
         }
+
+        for (Cell* ac: cellsAC)
+            for(Cell* bc: cellsBC)
+            {
+                std::cout << "Y-Wing found: " << cellAB->coord() << " " << ac->coord() << " " << bc->coord() << std::endl;
+                CellSet visibleFromBoth = field.allCellsVisibleFromBothCell(ac, bc);
+                ret |= visibleFromBoth.removeCandidate(C);
+            }
     }
 
     return ret;
@@ -584,108 +589,115 @@ bool YWingTechnique::run()
 }
 
 XYZWingTechnique::XYZWingTechnique(Field &field, QObject *parent)
-    :Technique (field, "XYZ-Wing", parent)
+    :PerCellTechnique (field, "XYZ-Wing", parent)
 {
 
 }
 
-bool XYZWingTechnique::run()
+bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
 {
     bool ret = false;
 
-    for (Cell* xyzcell: cells())
+    if (xyzcell->candidatesCount() != 3)
+        return ret;
+
+    QVector<CellValue> xyzvalues = xyzcell->candidates();
+
+    CellValue v1 = xyzvalues[0];
+    CellValue v2 = xyzvalues[1];
+    CellValue v3 = xyzvalues[2];
+
+    QVector<Coord> squareCoords = xyzcell->coord().sameSquareCoordinates();
+    for(const Coord& xz_co: squareCoords)
     {
-        if (xyzcell->candidatesCount() != 3)
-            continue;
-
-        QVector<CellValue> xyzvalues = xyzcell->candidates();
-
-        CellValue v1 = xyzvalues[0];
-        CellValue v2 = xyzvalues[1];
-        CellValue v3 = xyzvalues[2];
-
-        QVector<Coord> squareCoords = xyzcell->coord().sameSquareCoordinates();
-        for(const Coord& xz_co: squareCoords)
+        Cell::Ptr sq_cell = cell(xz_co);
+        if (sq_cell->candidatesCount() == 2 &&
+            xyzcell->commonCandidates(sq_cell).count(true) == 2)
         {
-            Cell::Ptr sq_cell = cell(xz_co);
-            if (sq_cell->candidatesCount() == 2 &&
-                xyzcell->commonCandidates(sq_cell).count(true) == 2)
+            Cell::Ptr xzcell = sq_cell;
+            CellValue y;
+            if (!xzcell->hasCandidate(v1))
+                y = v1;
+            else if (!xzcell->hasCandidate(v2))
+                y = v2;
+            else
+                y = v3;
+
+            QVector<Coord> rowCoords = xyzcell->coord().sameRowCoordinates();
+            for (const Coord& yz_co: rowCoords)
             {
-                Cell::Ptr xzcell = sq_cell;
-                CellValue y;
-                if (!xzcell->hasCandidate(v1))
-                    y = v1;
-                else if (!xzcell->hasCandidate(v2))
-                    y = v2;
-                else
-                    y = v3;
-
-                QVector<Coord> rowCoords = xyzcell->coord().sameRowCoordinates();
-                for (const Coord& yz_co: rowCoords)
+                Cell::Ptr row_cell = cell(yz_co);
+                if (   row_cell->candidatesCount()==2
+                    && xyzcell->commonCandidates(row_cell).count(true)==2
+                    && row_cell->hasCandidate(y))
                 {
-                    Cell::Ptr row_cell = cell(yz_co);
-                    if (   row_cell->candidatesCount()==2
-                        && xyzcell->commonCandidates(row_cell).count(true)==2
-                        && row_cell->hasCandidate(y))
+                    Cell::Ptr yzcell = row_cell;
+                    CellValue z;
+                    if ( yzcell->hasCandidate(v1) && y != v1)
+                        z = v1;
+                    else if (yzcell->hasCandidate(v2) && y != v2)
+                        z = v2;
+                    else
+                        z = v3;
+
+                    std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
+                              << " and wings " << xzcell->coord()
+                              << " / " << yzcell->coord()
+                              << " Z is " << (int)z << std::endl;
+
+                    for (const Coord& co: yz_co.sameRowCoordinates())
                     {
-                        Cell::Ptr yzcell = row_cell;
-                        CellValue z;
-                        if ( yzcell->hasCandidate(v1) && y != v1)
-                            z = v1;
-                        else if (yzcell->hasCandidate(v2) && y != v2)
-                            z = v2;
-                        else
-                            z = v3;
-
-                        std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
-                                  << " and wings " << xzcell->coord()
-                                  << " / " << yzcell->coord()
-                                  << " Z is " << (int)z << std::endl;
-
-                        for (const Coord& co: yz_co.sameRowCoordinates())
-                        {
-                            if (co.squareIdx() == xyzcell->coord().squareIdx()
-                                    && co != xyzcell->coord())
-                                ret |= cell(co)->removeCandidate(z);
-                        }
+                        if (co.squareIdx() == xyzcell->coord().squareIdx()
+                                && co != xyzcell->coord())
+                            ret |= cell(co)->removeCandidate(z);
                     }
                 }
-
-                QVector<Coord> colCoords = xyzcell->coord().sameColumnCoordinates();
-                for (const Coord& yz_co: colCoords)
-                {
-                    Cell::Ptr col_cell = cell(yz_co);
-                    if (   col_cell->candidatesCount()==2
-                        && xyzcell->commonCandidates(col_cell).count(true)==2
-                        && col_cell->hasCandidate(y))
-                    {
-                        Cell::Ptr yzcell = col_cell;
-                        CellValue z;
-                        if ( yzcell->hasCandidate(v1) && y != v1)
-                            z = v1;
-                        else if (yzcell->hasCandidate(v2) && y != v2)
-                            z = v2;
-                        else
-                            z = v3;
-
-                        std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
-                                  << " and wings " << xzcell->coord()
-                                  << " / " << yzcell->coord()
-                                  << " Z is " << (int)z << std::endl;
-
-                        for (const Coord& co: yz_co.sameColumnCoordinates())
-                        {
-                            if (co.squareIdx() == xyzcell->coord().squareIdx()
-                                    && co != xyzcell->coord())
-                                ret |= cell(co)->removeCandidate(z);
-                        }
-                    }
-                }
-
             }
+
+            QVector<Coord> colCoords = xyzcell->coord().sameColumnCoordinates();
+            for (const Coord& yz_co: colCoords)
+            {
+                Cell::Ptr col_cell = cell(yz_co);
+                if (   col_cell->candidatesCount()==2
+                    && xyzcell->commonCandidates(col_cell).count(true)==2
+                    && col_cell->hasCandidate(y))
+                {
+                    Cell::Ptr yzcell = col_cell;
+                    CellValue z;
+                    if ( yzcell->hasCandidate(v1) && y != v1)
+                        z = v1;
+                    else if (yzcell->hasCandidate(v2) && y != v2)
+                        z = v2;
+                    else
+                        z = v3;
+
+                    std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
+                              << " and wings " << xzcell->coord()
+                              << " / " << yzcell->coord()
+                              << " Z is " << (int)z << std::endl;
+
+                    for (const Coord& co: yz_co.sameColumnCoordinates())
+                    {
+                        if (co.squareIdx() == xyzcell->coord().squareIdx()
+                                && co != xyzcell->coord())
+                            ret |= cell(co)->removeCandidate(z);
+                    }
+                }
+            }
+
         }
     }
 
     return ret;
 }
 
+
+bool PerCellTechnique::run()
+{
+    bool ret = false;
+    for (Cell::Ptr pCell: cells())
+    {
+        ret |= runPerCell(pCell);
+    }
+    return ret;
+}

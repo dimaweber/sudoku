@@ -225,6 +225,6 @@ quint8 Field::rowsCount() const
 
 bool Field::isResolved() const
 {
-    return isValid() && !hasEmptyValues();
+    return !hasEmptyValues() && isValid();
 }
 

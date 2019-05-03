@@ -65,9 +65,9 @@ void Resolver::process()
         }
 
         {
-        using namespace  std::chrono_literals;
-        auto t0 = std::chrono::steady_clock::now() + 1s;
-        std::this_thread::sleep_until (t0);
+            using namespace  std::chrono_literals;
+            auto t0 = std::chrono::steady_clock::now() + 1s;
+            std::this_thread::sleep_until (t0);
         }
     }while(changed);
 }

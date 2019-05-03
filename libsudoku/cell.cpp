@@ -22,13 +22,6 @@ void Cell::setValue(quint8 val, bool init_value)
     if (useDelay)
     {
         using namespace  std::chrono_literals;
-        auto t0 = std::chrono::steady_clock::now() + 500ms;
-        std::this_thread::sleep_until (t0);
-    }
-    emit valueSet(val);
-    if(useDelay)
-    {
-        using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
         std::this_thread::sleep_until (t0);
     }
@@ -37,6 +30,14 @@ void Cell::setValue(quint8 val, bool init_value)
     {
         pArea->removeCandidate(val);
     }
+
+    if(useDelay)
+    {
+        using namespace  std::chrono_literals;
+        auto t0 = std::chrono::steady_clock::now() + 100ms;
+        std::this_thread::sleep_until (t0);
+    }
+    emit valueSet(val);
 }
 
 bool Cell::removeCandidate(CellValue guessVal)

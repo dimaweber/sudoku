@@ -39,7 +39,7 @@ protected:
 
     virtual bool run() = 0;
     Field& field;
-    int N;
+    quint8 N;
 signals:
     void started();
     void done();
@@ -68,6 +68,19 @@ protected:
     virtual bool runPerHouse(House* ) =0;
     virtual bool run() final;
 };
+
+class PerCellTechnique: public Technique
+{
+    Q_OBJECT
+public:
+    PerCellTechnique (Field& field, const QString name, QObject* parent = nullptr)
+        :Technique(field, name, parent)
+    {}
+protected:
+    virtual bool runPerCell(Cell::Ptr ) =0;
+    virtual bool run() final;
+};
+
 
 class HiddenSingleTechnique : public PerHouseTechnique
 {
@@ -129,22 +142,22 @@ protected:
     bool run() override;
 };
 
-class YWingTechnique : public Technique
+class YWingTechnique : public PerCellTechnique
 {
     Q_OBJECT
 public:
     YWingTechnique(Field& field, QObject* parent = nullptr);
 protected:
-    bool run() override;
+    bool runPerCell(Cell::Ptr) override;
 };
 
-class XYZWingTechnique: public Technique
+class XYZWingTechnique: public PerCellTechnique
 {
     Q_OBJECT
 public:
     XYZWingTechnique(Field& field, QObject* parent = nullptr);
 protected:
-    bool run() override;
+    bool runPerCell(Cell::Ptr) override;
 };
 
 #endif // TECHNIQUE_H
