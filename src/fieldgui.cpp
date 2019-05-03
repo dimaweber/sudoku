@@ -54,6 +54,7 @@ void FieldGui::highlightCellOff(Cell::Ptr pCell)
 CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     :QLabel(parent), cell(cell), candidatesLayout(nullptr)
 {
+    quint8 n = sqrt(cell->candidatesCapacity());
     QFont fnt = font();
     fnt.setPixelSize(FONT_SIZE * 2 / 3);
     fnt.setBold(true);
@@ -64,10 +65,23 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         pal.setColor(foregroundRole(), QColor("black"));
     else
         pal.setColor(foregroundRole(), QColor("blue"));
-    if (cell->coord().squareIdx() % 2)
-        pal.setColor(QPalette::Window, QColor("pale green"));
+    quint8 sq_row = cell->coord().squareIdx() / n;
+    quint8 sq_col = cell->coord().squareIdx() % n;
+    if (sq_row % 2)
+    {
+        if (sq_col % 2)
+            pal.setColor(QPalette::Window, QColor("pale green"));
+        else
+            pal.setColor(QPalette::Window, QColor("wheat"));
+    }
     else
-        pal.setColor(QPalette::Window, QColor("wheat"));
+    {
+        if (sq_col % 2)
+            pal.setColor(QPalette::Window, QColor("wheat"));
+        else
+            pal.setColor(QPalette::Window, QColor("pale green"));
+
+    }
     setPalette(pal);
 
     setAutoFillBackground(true);
@@ -95,10 +109,10 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         sublay->addWidget(label, subrow, subcol, Qt::AlignCenter);
 
         label->setAlignment(Qt::AlignCenter);
-        label->setMinimumSize(QSize(FONT_SIZE/3,FONT_SIZE/3));
+        label->setMinimumSize(QSize(FONT_SIZE/n,FONT_SIZE/n));
         label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         QFont font = label->font();
-        font.setPixelSize(FONT_SIZE * 2 / 3 / 2);
+        font.setPixelSize(FONT_SIZE / n - 2);
         font.setBold(true);
         label->setFont(font);
     }

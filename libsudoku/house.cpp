@@ -55,10 +55,10 @@ int CellSet::unresolvedCellsCount() const
 
 bool CellSet::hasValue(CellValue val) const
 {
-    for (Cell::CPtr pCell: cells)
-        if (pCell->value() == val)
-            return true;
-    return false;
+    return std::any_of(cells.begin(), cells.end(), [val](Cell::Ptr pCell)
+    {
+        return pCell->value() == val;
+    });
 }
 
 int CellSet::candidatesCount(CellValue val) const
@@ -68,12 +68,12 @@ int CellSet::candidatesCount(CellValue val) const
     );
 }
 
-bool CellSet::hasEmptyValues() const
+bool CellSet::hasUnresolvedCells() const
 {
-    for (Cell::CPtr pCell: cells)
-        if (!pCell->isResolved())
-            return true;
-    return  false;
+    return std::any_of(begin(), end(), [](Cell::Ptr pCell)
+    {
+       return !pCell->isResolved();
+    });
 }
 
 bool House::isValid() const
@@ -95,15 +95,15 @@ bool House::isValid() const
 
 bool House::isResolved() const
 {
-    return isValid() && !hasEmptyValues();
+    return isValid() && !hasUnresolvedCells();
 }
 
 bool CellSet::hasCell(Cell::CPtr p) const
 {
-    for(const Cell* pCell: cells)
-        if (pCell->coord() == p->coord())
-            return true;
-    return false;
+    return std::any_of(begin(), end(), [p](Cell::Ptr pCell)
+    {
+       return *pCell == *p;
+    });
 }
 
 CellSet CellSet::cellsWithCandidate(CellValue val) const

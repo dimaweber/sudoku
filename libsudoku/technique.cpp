@@ -92,7 +92,7 @@ bool Technique::perform()
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     bool res = run();
     if (res)

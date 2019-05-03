@@ -1,7 +1,7 @@
 #ifndef AREA_H
 #define AREA_H
 
-#include <QVector>
+#include <QSet>
 #include "cell.h"
 
 class CellSet
@@ -20,7 +20,7 @@ public:
 
     bool hasValue(CellValue val) const;
     int candidatesCount(CellValue val) const;
-    bool hasEmptyValues() const;
+    bool hasUnresolvedCells() const;
     bool removeCandidate(CellValue val);
     int unresolvedCellsCount() const;
     bool hasCell(Cell::CPtr p) const;

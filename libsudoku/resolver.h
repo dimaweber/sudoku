@@ -21,6 +21,8 @@ public:
     quint64 resolveTime() const;
     template<class TECH> void registerTechnique() { techniques.append(new TECH(field, this)); }
     void process();
+public slots:
+    void stop();
 protected:
     void run();
 signals:

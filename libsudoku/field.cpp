@@ -96,6 +96,12 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
         QChar symbol = line[coord.rawIndex()];
         if (symbol.isDigit() && symbol.toLatin1() != '0')
             cell(coord)->setValue(static_cast<CellValue>(symbol.digitValue()), true);
+        if (symbol.isLetter())
+        {
+            QString s(symbol);
+            quint8 v = s.toUInt(nullptr, 17);
+            cell(coord)->setValue(static_cast<CellValue>(v), true);
+        }
     }
     return true;
 }

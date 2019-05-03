@@ -192,9 +192,9 @@ int main(int argc, char *argv[])
         app.connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
         app.connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
         {
-
+//            array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
         });
-        app.connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::terminate);
+        app.connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::stop);
 
         diag.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 

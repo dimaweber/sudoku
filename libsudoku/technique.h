@@ -4,10 +4,8 @@
 #include "house.h"
 #include "bilocationlink.h"
 
-#include <QtCore/qglobal.h>
 #include <QString>
 #include <QBitArray>
-#include <QSet>
 
 #include <chrono>
 #include <thread>

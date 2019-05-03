@@ -23,7 +23,7 @@ void Cell::setValue(quint8 val, bool init_value)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-        std::this_thread::sleep_until (t0);
+        //std::this_thread::sleep_until (t0);
     }
 
     for(House::Ptr pArea: houses)
@@ -35,7 +35,7 @@ void Cell::setValue(quint8 val, bool init_value)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     emit valueSet(val);
 }
@@ -57,7 +57,7 @@ bool Cell::removeCandidate(CellValue guessVal)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 500ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     candidateMask.clearBit(guessVal-1);
     if (candidateMask.count(true) == 0)
@@ -68,7 +68,7 @@ bool Cell::removeCandidate(CellValue guessVal)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 50ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     return true;
 }
@@ -88,7 +88,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 500ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     candidateMask &= ~candidate;
     if (candidateMask.count(true) == 0)
@@ -99,7 +99,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 50ms;
-        std::this_thread::sleep_until (t0);
+//        std::this_thread::sleep_until (t0);
     }
     return true;
 }

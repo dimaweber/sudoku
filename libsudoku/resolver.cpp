@@ -63,13 +63,11 @@ void Resolver::process()
             if (changed)
                 break;
         }
-
-        if (field.isResolved())
-            break;
-        {
-            using namespace  std::chrono_literals;
-            auto t0 = std::chrono::steady_clock::now() + 1s;
-            std::this_thread::sleep_until (t0);
-        }
     }while(changed);
+}
+
+void Resolver::stop()
+{
+    if (isRunning())
+        terminate();
 }
