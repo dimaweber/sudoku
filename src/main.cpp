@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
         {
 
         });
+        app.connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::terminate);
 
         diag.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
