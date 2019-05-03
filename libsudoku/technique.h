@@ -44,17 +44,9 @@ signals:
     void started();
     void done();
     void applied();
-};
 
-class NakedSingleTechnique : public Technique
-{
-    Q_OBJECT
-public:
-    NakedSingleTechnique(Field& field, QObject* parent = nullptr);
-    virtual void setEnabled(bool enabled = true) override;
-    virtual bool canBeDisabled() const override { return false;}
-protected:
-    virtual bool run() override;
+    void cellAnalyzeStarted(Cell::Ptr);
+    void cellAnalyzeFinished(Cell::Ptr);
 };
 
 class PerHouseTechnique: public Technique
@@ -81,6 +73,16 @@ protected:
     virtual bool run() final;
 };
 
+class NakedSingleTechnique : public PerCellTechnique
+{
+    Q_OBJECT
+public:
+    NakedSingleTechnique(Field& field, QObject* parent = nullptr);
+    virtual void setEnabled(bool enabled = true) override;
+    virtual bool canBeDisabled() const override { return false;}
+protected:
+    virtual bool runPerCell(Cell::Ptr) override;
+};
 
 class HiddenSingleTechnique : public PerHouseTechnique
 {

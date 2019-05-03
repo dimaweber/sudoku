@@ -166,6 +166,9 @@ int main(int argc, char *argv[])
                 pal.setColor(pCheck->foregroundRole(), QColor("black"));
                 pCheck->setPalette(pal);
             }, Qt::QueuedConnection);
+
+            app.connect(tech, &Technique::cellAnalyzeStarted, &fgui_before, &FieldGui::highlightCellOn, Qt::QueuedConnection);
+            app.connect(tech, &Technique::cellAnalyzeFinished, &fgui_before, &FieldGui::highlightCellOff, Qt::QueuedConnection);
         }
 
         layout.addWidget(&fgui_before);

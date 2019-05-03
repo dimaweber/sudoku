@@ -133,27 +133,23 @@ Cell::Ptr Technique::cell(const Coord& c)
 }
 
 NakedSingleTechnique::NakedSingleTechnique(Field& field, QObject *parent)
-    :Technique(field, "Naked Single", parent)
+    :PerCellTechnique(field, "Naked Single", parent)
 {}
 
-bool NakedSingleTechnique::run()
+bool NakedSingleTechnique::runPerCell(Cell::Ptr pCell)
 {
     bool changed = false;
-    for(Coord coord = Coord::first(); coord.isValid() && !changed; coord++)
+    if (!pCell->isResolved() && pCell->candidatesCount() == 1)
     {
-        Cell::Ptr pCell = cell(coord);
-        if (!pCell->isResolved() && pCell->candidatesCount() == 1)
-        {
-            for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
-                if (pCell->hasCandidate(j))
-                {
-                    std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
-                              << std::endl;
-                    pCell->setValue(j);
-                    changed = true;
-                    break;
-                }
-        }
+        for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
+            if (pCell->hasCandidate(j))
+            {
+                std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
+                          << std::endl;
+                pCell->setValue(j);
+                changed = true;
+                break;
+            }
     }
     return changed;
 }
@@ -697,7 +693,11 @@ bool PerCellTechnique::run()
     bool ret = false;
     for (Cell::Ptr pCell: cells())
     {
+        emit cellAnalyzeStarted(pCell);
         ret |= runPerCell(pCell);
+        emit cellAnalyzeFinished(pCell);
+        if (ret)
+            break;
     }
     return ret;
 }

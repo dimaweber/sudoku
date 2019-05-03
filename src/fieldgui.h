@@ -21,8 +21,14 @@ class CellGui : public QLabel
     Cell::CPtr cell;
     QLayout* candidatesLayout;
     QMap<int, QLabel*> candidateLabel;
+    QBrush backgroundBrush;
+    QBrush hightlightBrush;
 public:
     CellGui(Cell::CPtr cell, QWidget* parent = nullptr);
+
+    void highlightOn();
+    void highlightOff();
+
 public slots:
     void setValue(CellValue );
     void removeCandidate(CellValue bit);
@@ -34,10 +40,12 @@ class FieldGui : public QWidget
     Q_OBJECT
     QGridLayout* layout;
 
-    QMap<Cell*, QWidget*> cellWidgets;
+    QMap<Cell::Ptr, CellGui*> cellWidgets;
 public:
     explicit FieldGui(Field& field, QWidget *parent = nullptr);
-
+public slots:
+    void highlightCellOn(Cell::Ptr );
+    void highlightCellOff(Cell::Ptr );
 signals:
 private:
     void setCellWidgetValue(const Cell& cell);

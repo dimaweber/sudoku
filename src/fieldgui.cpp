@@ -41,6 +41,16 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     }
 }
 
+void FieldGui::highlightCellOn(Cell::Ptr pCell)
+{
+    cellWidgets[pCell]->highlightOn();
+}
+
+void FieldGui::highlightCellOff(Cell::Ptr pCell)
+{
+    cellWidgets[pCell]->highlightOff();
+}
+
 CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     :QLabel(parent), cell(cell), candidatesLayout(nullptr)
 {
@@ -48,6 +58,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     fnt.setPixelSize(FONT_SIZE * 2 / 3);
     fnt.setBold(true);
     setFont(fnt);
+
     QPalette pal = palette();
     if (cell->isInitialValue())
         pal.setColor(foregroundRole(), QColor("black"));
@@ -57,13 +68,16 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         pal.setColor(QPalette::Window, QColor("pale green"));
     else
         pal.setColor(QPalette::Window, QColor("wheat"));
+    setPalette(pal);
+
     setAutoFillBackground(true);
     setAlignment(Qt::AlignCenter);
     setMinimumSize(QSize(FONT_SIZE,FONT_SIZE));
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFrameStyle(QFrame::Box);
 
-    setPalette(pal);
+    backgroundBrush = pal.brush(QPalette::Background);
+    hightlightBrush = QColor("tan");
 
     QGridLayout* sublay = new QGridLayout(this);
     sublay->setMargin(0);
@@ -134,12 +148,22 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
-    connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue v)
+    connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue)
     {
         QPalette pal = this->palette();
-        pal.setColor(QPalette::Window, QColor("yellow"));
+        pal.setBrush(QPalette::Window, hightlightBrush);
         this->setPalette(pal);
     }, Qt::QueuedConnection);
+}
+
+void CellGui::highlightOn()
+{
+    setFrameShadow(QFrame::Raised);
+}
+
+void CellGui::highlightOff()
+{
+    setFrameShadow(QFrame::Plain);
 }
 
 void CellGui::removeCandidate(CellValue bit)
@@ -156,9 +180,6 @@ void CellGui::setValue(CellValue v)
     setText(text);
 
     QPalette pal = this->palette();
-    if (cell->coord().squareIdx() % 2)
-        pal.setColor(QPalette::Window, QColor("pale green"));
-    else
-        pal.setColor(QPalette::Window, QColor("wheat"));
+    pal.setBrush(QPalette::Window, backgroundBrush);
     this->setPalette(pal);
 }

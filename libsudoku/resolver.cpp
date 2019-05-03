@@ -64,6 +64,8 @@ void Resolver::process()
                 break;
         }
 
+        if (field.isResolved())
+            break;
         {
             using namespace  std::chrono_literals;
             auto t0 = std::chrono::steady_clock::now() + 1s;
