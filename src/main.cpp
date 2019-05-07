@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     resolver.registerTechnique<XWingTechnique>();
     resolver.registerTechnique<YWingTechnique>();
     resolver.registerTechnique<XYZWingTechnique>();
+    resolver.registerTechnique<UniqueRectangle>();
 
     if (noGui)
     {
@@ -130,17 +131,17 @@ int main(int argc, char *argv[])
             boxLayout.addWidget(pCheck);
             pCheck->setChecked(tech->isEnabled());
             pCheck->setEnabled(tech->canBeDisabled());
-            app.connect(pCheck, &QCheckBox::clicked, pCheck, [tech, pCheck]()
+            QApplication::connect(pCheck, &QCheckBox::clicked, pCheck, [tech, pCheck]()
             {
                 tech->setEnabled( pCheck->isChecked());
             }, Qt::QueuedConnection);
-            app.connect(tech, &Technique::started, pCheck, [pCheck]()
+            QApplication::connect(tech, &Technique::started, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(true);
                 pCheck->setFont(font);
             }, Qt::QueuedConnection);
-            app.connect(tech, &Technique::done, pCheck, [pCheck]()
+            QApplication::connect(tech, &Technique::done, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -150,7 +151,7 @@ int main(int argc, char *argv[])
                 pal.setColor(pCheck->foregroundRole(), QColor("red"));
                 pCheck->setPalette(pal);
             }, Qt::QueuedConnection);
-            app.connect(tech, &Technique::applied, pCheck, [pCheck]()
+            QApplication::connect(tech, &Technique::applied, pCheck, [pCheck]()
             {
                 QFont font = pCheck->font();
                 font.setBold(false);
@@ -160,15 +161,15 @@ int main(int argc, char *argv[])
                 pal.setColor(pCheck->foregroundRole(), QColor("green"));
                 pCheck->setPalette(pal);
             }, Qt::QueuedConnection);
-            app.connect(&resolver, &Resolver::newIteration, pCheck, [pCheck]()
+            QApplication::connect(&resolver, &Resolver::newIteration, pCheck, [pCheck]()
             {
                 QPalette pal = pCheck->palette();
                 pal.setColor(pCheck->foregroundRole(), QColor("black"));
                 pCheck->setPalette(pal);
             }, Qt::QueuedConnection);
 
-            app.connect(tech, &Technique::cellAnalyzeStarted, &fgui_before, &FieldGui::highlightCellOn, Qt::QueuedConnection);
-            app.connect(tech, &Technique::cellAnalyzeFinished, &fgui_before, &FieldGui::highlightCellOff, Qt::QueuedConnection);
+            QApplication::connect(tech, &Technique::cellAnalyzeStarted, &fgui_before, &FieldGui::highlightCellOn, Qt::QueuedConnection);
+            QApplication::connect(tech, &Technique::cellAnalyzeFinished, &fgui_before, &FieldGui::highlightCellOff, Qt::QueuedConnection);
         }
 
         layout.addWidget(&fgui_before);
@@ -183,23 +184,23 @@ int main(int argc, char *argv[])
 
         box.setTitle("Techniques");
 
-        goButton.connect(&goButton, SIGNAL(pressed()), &resolver, SLOT(start()));
-        app.connect(&resolver, &Resolver::done, &diag, [&windowTitle, &diag](quint64 e)
+        QPushButton::connect(&goButton, SIGNAL(pressed()), &resolver, SLOT(start()));
+        QApplication::connect(&resolver, &Resolver::done, &diag, [&windowTitle, &diag](quint64 e)
         {
             diag.setWindowTitle(QString("%1 resolved in %2 ms").arg(windowTitle).arg(e));
         }, Qt::QueuedConnection);
-        app.connect(&resolver, &Resolver::started, &app, [&goButton, &reloadButton](){goButton.setEnabled(false);reloadButton.setEnabled(false);}, Qt::QueuedConnection);
-        app.connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
-        app.connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
+        QApplication::connect(&resolver, &Resolver::started, &app, [&goButton, &reloadButton](){goButton.setEnabled(false);reloadButton.setEnabled(false);}, Qt::QueuedConnection);
+        QApplication::connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
+        QApplication::connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
         {
 //            array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
         });
-        app.connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::stop);
+        QApplication::connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::stop);
 
         diag.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         diag.show();
-        app.exec();
+        QApplication::exec();
     }
 
     return 0;

@@ -6,11 +6,11 @@
 
 class BiLocationLink
 {
-    int candidate;
-    Cell* cell1;
-    Cell* cell2;
+    int candidate {0};
+    Cell* cell1   {nullptr};
+    Cell* cell2   {nullptr};
 public:
-    BiLocationLink():candidate(0),cell1(nullptr),cell2(nullptr){}
+    BiLocationLink()= default;
     BiLocationLink(int val, Cell::Ptr cell1, Cell::Ptr cell2);
 
     Cell* first() const { return cell1;}

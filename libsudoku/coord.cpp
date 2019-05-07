@@ -108,14 +108,14 @@ Coord Coord::first()
 {
     if (N<4)
         throw std::runtime_error("Coord::N not set");
-    return Coord(1,1);
+    return {1,1};
 }
 
 Coord Coord::last()
 {
     if (N<4)
         throw std::runtime_error("Coord::N not set");
-    return Coord(N, N);
+    return {N, N};
 }
 
 QVector<Coord> Coord::sameColumnCoordinates() const
@@ -139,7 +139,7 @@ QVector<Coord> Coord::sameRowCoordinates() const
 QVector<Coord> Coord::sameSquareCoordinates() const
 {
     QVector<Coord> ret;
-    quint8 s_n = static_cast<quint8>(qSqrt(Coord::N));
+    auto s_n = static_cast<quint8>(qSqrt(Coord::N));
     quint8 s_row = squareIdx() / s_n;
     quint8 s_col = squareIdx() % s_n;
     Coord co;
