@@ -69,7 +69,7 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 }
 #endif
 
-Technique::Technique(Field& field, const QString name, QObject *parent)
+Technique::Technique(Field& field, const QString& name, QObject *parent)
     :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
 {
     if (Technique::allCandidatesCombinationsMasks.isEmpty())
@@ -77,7 +77,7 @@ Technique::Technique(Field& field, const QString name, QObject *parent)
 }
 
 Technique::~Technique()
-{}
+= default;
 
 void Technique::setEnabled(bool enabled)
 {
@@ -377,7 +377,7 @@ bool BiLocationColoringTechnique::run()
         }
         for (BiLocationLink& link: links[i])
         {
-            std::cout << i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
+            std::cout << (int)i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
                       << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
         }
         for(House* house: areas())
@@ -698,6 +698,158 @@ bool PerCellTechnique::run()
         emit cellAnalyzeFinished(pCell);
         if (ret)
             break;
+    }
+    return ret;
+}
+
+std::ostream& operator << (std::ostream& stream, UniqueRectangle::Rectangle& r)
+{
+    stream << r.cell->coord() << r.sameRowCell->coord() << r.sameColumnCell->coord() << r.diagonalCell->coord();
+    return stream;
+}
+
+bool UniqueRectangle::Rectangle::applyType1Check()
+{
+    if (   sameRowCell->candidatesExactMatch(cell)
+        && sameColumnCell->candidatesExactMatch(cell))
+    {
+
+        QBitArray commonCandidates = diagonalCell->commonCandidates(cell);
+        if (commonCandidates.count(true) == 2)
+        {
+            std::cout << "Unique Rectangle Type 1" << *this << std::endl;
+            return diagonalCell->removeCandidate(commonCandidates);
+        }
+    }
+    return  false;
+}
+
+bool UniqueRectangle::Rectangle::applyType2aCheck()
+{
+    if ( cell->candidatesExactMatch(neigborCell) &&
+         cell->commonCandidates(diagonalCell).count(true) == 2 &&
+         diagNeigborCell->candidatesExactMatch(diagonalCell) &&
+         diagonalCell->candidatesCount() == 3)
+    {
+        std::cout << "Unique Rectangle Type 2A" << *this << std::endl;
+        QVector<CellValue> cellValues = cell->candidates();
+        QVector<CellValue> diagValues = diagonalCell->candidates();
+        for (CellValue v: cellValues)
+            diagValues.removeAll(v);
+        CellValue candidateToRemove = diagValues[0];
+        return field.allCellsVisibleFromBothCell(diagonalCell, diagNeigborCell).removeCandidate(candidateToRemove);
+    }
+    return false;
+}
+
+bool UniqueRectangle::Rectangle::applyType2bCheck()
+{
+    if (cell->candidatesExactMatch(diagNeigborCell) &&
+        cell->commonCandidates(neigborCell).count(true) == 2 &&
+        neigborCell->candidatesExactMatch(diagonalCell) &&
+        neigborCell->candidatesCount() == 3)
+    {
+        std::cout << "Unique Rectangle Type 2B" << *this << std::endl;
+        QVector<CellValue> cellValues = cell->candidates();
+        QVector<CellValue> neigValues = neigborCell->candidates();
+        for (CellValue v: cellValues)
+            neigValues.removeAll(v);
+        CellValue candidateToRemove = neigValues[0];
+        return field.allCellsVisibleFromBothCell(neigborCell, diagonalCell).removeCandidate(candidateToRemove);
+    }
+    return false;
+}
+
+bool UniqueRectangle::Rectangle::applyType2cCheck()
+{
+    if (cell->candidatesExactMatch(diagonalCell) &&
+        cell->commonCandidates(neigborCell).count(true) == 2 &&
+        neigborCell->candidatesExactMatch(diagNeigborCell) &&
+        neigborCell->candidatesCount() == 3
+        )
+    {
+        std::cout << "Unique Rectangle Type 2C" << *this << std::endl;
+        QVector<CellValue> cellValues = cell->candidates();
+        QVector<CellValue> neigValues = neigborCell->candidates();
+        for (CellValue v: cellValues)
+            neigValues.removeAll(v);
+        CellValue candidateToRemove = neigValues[0];
+        return field.allCellsVisibleFromBothCell(neigborCell, diagNeigborCell).removeCandidate(candidateToRemove);
+    }
+    return false;
+}
+
+bool UniqueRectangle::Rectangle::applyType3aCheck()
+{
+    if (cell->candidatesExactMatch(diagNeigborCell) &&
+        cell->commonCandidates(neigborCell).count(true) == 2 &&
+        cell->commonCandidates(diagonalCell).count(true) == 2 &&
+        neigborCell->candidatesCount() == 3 &&
+        diagonalCell->candidatesCount() == 3 &&
+        !diagonalCell->candidatesExactMatch(neigborCell)
+       )
+    {
+
+    }
+    return false;
+}
+
+UniqueRectangle::UniqueRectangle(Field& field, QObject* parent)
+    :PerCellTechnique (field, "Unique Rectangle", parent)
+{
+
+}
+
+bool UniqueRectangle::runPerCell(Cell::Ptr pCell)
+{
+    bool ret = false;
+    if (pCell->candidatesCount() != 2)
+        return false;
+    RowHouse&    row = rows()[pCell->coord().row()-1];
+    ColumnHouse& col = columns()[pCell->coord().col()-1];
+    Rectangle rect(field);
+    rect.cell = pCell;
+
+    for(Cell::Ptr cellInSameRow: row)
+    {
+        if (cellInSameRow == pCell)
+            continue;
+        if (cellInSameRow->isResolved())
+            continue;
+        rect.sameRowCell = cellInSameRow;
+
+        for (Cell::Ptr cellInSameColumn: col)
+        {
+            if (cellInSameColumn == pCell)
+                continue;
+            if (cellInSameColumn->isResolved())
+                continue;
+            rect.sameColumnCell = cellInSameColumn;
+
+            rect.diagonalCell = cell(Coord(cellInSameColumn->coord().row(), cellInSameRow->coord().col()));
+            if (rect.diagonalCell->isResolved())
+                continue;
+            if (rect.diagonalCell->coord().squareIdx() == pCell->coord().squareIdx())
+                continue;
+
+            if (cellInSameRow->coord().squareIdx() == pCell->coord().squareIdx())
+            {
+                rect.neigborCell = cellInSameRow;
+                rect.diagNeigborCell = cellInSameColumn;
+            }
+            else if (cellInSameColumn->coord().squareIdx() == pCell->coord().squareIdx())
+            {
+                rect.neigborCell = cellInSameColumn;
+                rect.diagNeigborCell = cellInSameRow;
+            }
+            else
+                continue;
+
+            ret |= rect.applyType1Check();
+            ret |= rect.applyType2aCheck();
+            ret |= rect.applyType2bCheck();
+            ret |= rect.applyType2cCheck();
+        }
     }
     return ret;
 }

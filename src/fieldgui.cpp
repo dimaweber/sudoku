@@ -34,7 +34,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     for (Coord coord=Coord::first(); coord.isValid(); coord++)
     {
         Cell::Ptr cell = field.cell(coord);
-        CellGui* widget = new CellGui(cell, this);
+        auto widget = new CellGui(cell, this);
         cellWidgets[cell] = widget;
         layout->addWidget(widget, coord.row(), coord.col(), Qt::AlignCenter);
         cell->setDelay(true);
@@ -93,7 +93,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     backgroundBrush = pal.brush(QPalette::Background);
     hightlightBrush = QColor("tan");
 
-    QGridLayout* sublay = new QGridLayout(this);
+    auto sublay = new QGridLayout(this);
     sublay->setMargin(0);
     sublay->setSpacing(0);
     setLayout(sublay);

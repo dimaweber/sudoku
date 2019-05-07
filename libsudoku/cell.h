@@ -25,20 +25,20 @@ class House;
 //    bool presentInMask (const QBitArray& a) const { return a.testBit(val-1); }
 //};
 
-typedef quint8 CellValue;
+using CellValue = quint8;
 Q_DECLARE_METATYPE(CellValue)
 
 class Cell: public QObject
 {
     Q_OBJECT
 
-    CellValue    val;
+    CellValue    val{0};
     QBitArray candidateMask;
-    bool initial_value;
+    bool initial_value{false};
     Coord coordinate;
     QVector<House*> houses;
-    Cell& operator = (const Cell& );
-    bool useDelay;
+    //Cell& operator = (const Cell& );
+    bool useDelay{false};
 public:
     typedef Cell* Ptr;
     typedef const Cell* CPtr;
@@ -59,9 +59,11 @@ public:
     void resetCandidates(quint8 n);
     bool isValid() const;
     QVector<CellValue> candidates() const;
+    QBitArray commonCandidates(Cell::Ptr o) const { return candidateMask & o->candidateMask;}
     void setDelay(bool use = true);
     bool removeCandidate(const QBitArray& candidate);
     bool candidatesExactMatch(const QBitArray& mask) const;
+    bool candidatesExactMatch(Cell::CPtr o) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;
     QBitArray commonCandidates(Cell::CPtr a) const;
 

@@ -5,7 +5,7 @@
 #include <thread>
 
 Cell::Cell(quint8 n, QObject* parent)
-    :QObject(parent), val(0), initial_value(false), useDelay(false)
+    :QObject(parent)
 {
     if (n>0)
         resetCandidates(n);
@@ -80,7 +80,6 @@ bool Cell::removeCandidate(const QBitArray& candidate)
         return false;
 //        throw std::runtime_error("trying to remove candaidate from resolved cell");
     }
-    QBitArray a = candidateMask & candidate;
     if ((candidateMask & candidate).count(true) == 0)
         return false; // nothing will be removed
     emit candidatesAboutToBeRemoved(candidate);
@@ -107,6 +106,11 @@ bool Cell::removeCandidate(const QBitArray& candidate)
 bool Cell::candidatesExactMatch(const QBitArray& mask) const
 {
     return (candidateMask & mask) == candidateMask;
+}
+
+bool Cell::candidatesExactMatch(Cell::CPtr o) const
+{
+    return candidateMask == o->candidateMask;
 }
 
 bool Cell::hasCandidate(quint8 guessVal) const
@@ -150,7 +154,7 @@ void Cell::resetCandidates(quint8 n)
 
 bool Cell::isValid() const
 {
-    return     (isResolved() && candidateMask.count(true) == 1 && candidateMask.at(value()-1) == true)
+    return     (isResolved() && candidateMask.count(true) == 1 && candidateMask.at(value()-1))
             || (!isResolved() && candidateMask.count(true) > 1);
 }
 

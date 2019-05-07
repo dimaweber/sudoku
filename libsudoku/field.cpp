@@ -50,7 +50,7 @@ bool Field::readFromFormattedTextFile(const QString& filename)
     {
         lines.append(stream.readLine());
     }
-    quint8 n = static_cast<quint8>(lines.count());
+    auto n = static_cast<quint8>(lines.count());
     setN(n);
     for(quint8 row=1;row <= n; row++)
     {
@@ -89,7 +89,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
             lines.append(line);
     }while(!stream.atEnd());
     QString line = lines.at(qMin(num, lines.count()));
-    quint8 n = static_cast<quint8>(qSqrt(line.count()));
+    auto n = static_cast<quint8>(qSqrt(line.count()));
     setN(n);
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
