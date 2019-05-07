@@ -52,8 +52,8 @@ class House : public CellSet
 {
     static quint8 N;
 public:
-    typedef House* Ptr;
-    typedef const House* CPtr;
+    using Ptr = House*;
+    using CPtr = const House*;
     House();
     static void init(quint8 n);
 

@@ -175,6 +175,11 @@ QBitArray Cell::commonCandidates(Cell::CPtr a) const
     return ret;
 }
 
+int Cell::commonCandidatesCount(Cell::CPtr a) const
+{
+    return commonCandidates(a).count(true);
+}
+
 bool Cell::operator ==(const Cell& other) const
 {
     return coord() == other.coord();

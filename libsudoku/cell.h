@@ -64,6 +64,7 @@ public:
     bool candidatesExactMatch(const QBitArray& mask) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;
     QBitArray commonCandidates(Cell::CPtr a) const;
+    int commonCandidatesCount(Cell::CPtr a) const;
 
     bool operator == (const Cell& other) const;
 signals:

@@ -608,7 +608,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
     {
         Cell::Ptr sq_cell = cell(xz_co);
         if (sq_cell->candidatesCount() == 2 &&
-            xyzcell->commonCandidates(sq_cell).count(true) == 2)
+            xyzcell->commonCandidatesCount(sq_cell) == 2)
         {
             Cell::Ptr xzcell = sq_cell;
             CellValue y;
@@ -624,7 +624,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
             {
                 Cell::Ptr row_cell = cell(yz_co);
                 if (   row_cell->candidatesCount()==2
-                    && xyzcell->commonCandidates(row_cell).count(true)==2
+                    && xyzcell->commonCandidatesCount(row_cell)==2
                     && row_cell->hasCandidate(y))
                 {
                     Cell::Ptr yzcell = row_cell;
@@ -655,7 +655,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
             {
                 Cell::Ptr col_cell = cell(yz_co);
                 if (   col_cell->candidatesCount()==2
-                    && xyzcell->commonCandidates(col_cell).count(true)==2
+                    && xyzcell->commonCandidatesCount(col_cell)==2
                     && col_cell->hasCandidate(y))
                 {
                     Cell::Ptr yzcell = col_cell;
