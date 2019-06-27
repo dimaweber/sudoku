@@ -636,6 +636,9 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
                     else
                         z = v3;
 
+                    if (xz_co.row() == yz_co.row())
+                        continue;
+
                     std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
                               << " and wings " << xzcell->coord()
                               << " / " << yzcell->coord()
@@ -666,6 +669,9 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
                         z = v2;
                     else
                         z = v3;
+
+                    if (xz_co.col() == yz_co.col())
+                        continue;
 
                     std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
                               << " and wings " << xzcell->coord()
@@ -781,6 +787,7 @@ bool UniqueRectangle::Rectangle::applyType2cCheck()
 
 bool UniqueRectangle::Rectangle::applyType3aCheck()
 {
+    bool ret = false;
     if (cell->candidatesExactMatch(diagNeigborCell) &&
         cell->commonCandidates(neigborCell).count(true) == 2 &&
         cell->commonCandidates(diagonalCell).count(true) == 2 &&
@@ -789,9 +796,40 @@ bool UniqueRectangle::Rectangle::applyType3aCheck()
         !diagonalCell->candidatesExactMatch(neigborCell)
        )
     {
-
+        std::cout << "Unique rectangle type 3A" << *this << std::endl;
+        QVector<CellValue> vals1 = diagonalCell->candidates();
+        QVector<CellValue> vals2 = neigborCell->candidates();
+        QVector<CellValue> baseValues = cell->candidates();
+        vals1.removeAll(baseValues[0]);
+        vals1.removeAll(baseValues[1]);
+        vals2.removeAll(baseValues[0]);
+        vals2.removeAll(baseValues[1]);
+        std::cout << "virtual cell values from roof are " << (int)vals1[0] << " " << (int)vals2[0] <<std::endl;
+        QBitArray virtualCellCandidates(cell->candidatesCapacity());
+        virtualCellCandidates.setBit(vals1[0]-1);
+        virtualCellCandidates.setBit(vals2[0]-1);
+        Cell* pair = nullptr;
+        for (auto cell: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+        {
+            if (cell->candidatesExactMatch(virtualCellCandidates))
+            {
+                std::cout << "pair found" << cell->coord() << std::endl;
+                pair = cell;
+                break;
+            }
+        }
+        if (pair)
+        {
+            for (auto cell: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+            {
+                if (cell != pair)
+                {
+                    ret |= cell->removeCandidate(virtualCellCandidates);
+                }
+            }
+        }
     }
-    return false;
+    return ret;
 }
 
 UniqueRectangle::UniqueRectangle(Field& field, QObject* parent)
@@ -849,6 +887,7 @@ bool UniqueRectangle::runPerCell(Cell::Ptr pCell)
             ret |= rect.applyType2aCheck();
             ret |= rect.applyType2bCheck();
             ret |= rect.applyType2cCheck();
+            ret |= rect.applyType3aCheck();
         }
     }
     return ret;

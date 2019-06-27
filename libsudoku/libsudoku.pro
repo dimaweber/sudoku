@@ -9,7 +9,11 @@ QT       -= gui
 TARGET = sudoku
 TEMPLATE = lib
 
-CONFIG += c++14 staticlib
+CONFIG += c++14
+
+win {
+CONFIG += staticlib
+}
 
 DEFINES += SUDOKU_LIBRARY
 
@@ -46,11 +50,11 @@ HEADERS += \
 		technique.h
 
 unix {
-    target.path = /usr/lib
-    INSTALLS += target
+	target.path = /usr/lib
+	INSTALLS += target
 
-    LIBS += -lgsl -lgslcblas
-    QMAKE_CXXFLAGS += -Wall -Wpedantic
+	LIBS += -lgsl -lgslcblas
+	QMAKE_CXXFLAGS += -Wall -Wpedantic
 }
 
 

@@ -6,7 +6,7 @@
 #include <thread>
 #include <chrono>
 
-Resolver::Resolver(Field &field, QObject *parent)
+Resolver::Resolver(Field& field, QObject *parent)
     :QThread(parent), field(field), elaps(0), enabledTechniques(0xffff)
 {}
 
