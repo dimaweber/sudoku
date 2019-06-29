@@ -32,6 +32,7 @@ public:
 
     CellSet allCellsVisibleFromCell(Cell::CPtr c) ;
     CellSet allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2);
+    QVector<House::Ptr> commonHouses(Cell::CPtr c1, Cell::CPtr c2);
 
     void print() const;
 

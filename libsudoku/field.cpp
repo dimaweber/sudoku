@@ -185,6 +185,20 @@ CellSet Field::allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2)
     return vis1 / vis2;
 }
 
+QVector<House::Ptr> Field::commonHouses(Cell::CPtr c1, Cell::CPtr c2)
+{
+    QVector<House::Ptr> ret;
+    const Coord& coord1 = c1->coord();
+    const Coord& coord2 = c2->coord();
+    if (coord1.col() == coord2.col())
+        ret.append(&columns[coord1.col()-1]);
+    if (coord1.row() == coord2.row())
+        ret.append(&rows[coord2.row()-1]);
+    if (coord1.squareIdx() == coord2.squareIdx())
+        ret.append(&squares[coord1.squareIdx()]);
+    return ret;
+}
+
 void Field::print() const
 {
     std::cout << " C: ";

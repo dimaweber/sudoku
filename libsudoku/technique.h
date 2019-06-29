@@ -180,6 +180,7 @@ class UniqueRectangle : public PerCellTechnique
         bool applyType2bCheck();
         bool applyType2cCheck();
         bool applyType3aCheck();
+        bool applyType3bCheck();
     };
 
 public:

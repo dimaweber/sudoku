@@ -141,7 +141,7 @@ bool NakedSingleTechnique::runPerCell(Cell::Ptr pCell)
     bool changed = false;
     if (!pCell->isResolved() && pCell->candidatesCount() == 1)
     {
-        for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
+        for (CellValue j=1;j<=pCell->candidatesCapacity(); j++)
             if (pCell->hasCandidate(j))
             {
                 std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
@@ -800,31 +800,85 @@ bool UniqueRectangle::Rectangle::applyType3aCheck()
         QVector<CellValue> vals1 = diagonalCell->candidates();
         QVector<CellValue> vals2 = neigborCell->candidates();
         QVector<CellValue> baseValues = cell->candidates();
-        vals1.removeAll(baseValues[0]);
-        vals1.removeAll(baseValues[1]);
-        vals2.removeAll(baseValues[0]);
-        vals2.removeAll(baseValues[1]);
+        for (CellValue v: baseValues)
+        {
+            vals1.removeAll(v);
+            vals2.removeAll(v);
+        }
         std::cout << "virtual cell values from roof are " << (int)vals1[0] << " " << (int)vals2[0] <<std::endl;
         QBitArray virtualCellCandidates(cell->candidatesCapacity());
         virtualCellCandidates.setBit(vals1[0]-1);
         virtualCellCandidates.setBit(vals2[0]-1);
         Cell* pair = nullptr;
-        for (auto cell: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+        for (auto c: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
         {
-            if (cell->candidatesExactMatch(virtualCellCandidates))
+            if (c->candidatesExactMatch(virtualCellCandidates))
             {
-                std::cout << "pair found" << cell->coord() << std::endl;
-                pair = cell;
+                std::cout << "pair found" << c->coord() << std::endl;
+                pair = c;
                 break;
             }
         }
         if (pair)
         {
-            for (auto cell: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+            for (auto c: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
             {
-                if (cell != pair)
+                if (c != pair)
                 {
-                    ret |= cell->removeCandidate(virtualCellCandidates);
+                    ret |= c->removeCandidate(virtualCellCandidates);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+bool UniqueRectangle::Rectangle::applyType3bCheck()
+{
+    bool ret = false;
+    if (cell->candidatesExactMatch(neigborCell) &&
+        cell->commonCandidates(diagonalCell).count(true) == 2 &&
+        cell->commonCandidates(diagNeigborCell).count(true) == 2 &&
+        diagNeigborCell->candidatesCount() == 3 &&
+        diagonalCell->candidatesCount() == 3 &&
+        !diagonalCell->candidatesExactMatch(diagNeigborCell)
+       )
+    {
+        std::cout << "Unique rectangle type 3B" << *this << std::endl;
+        QVector<CellValue> vals1 = diagonalCell->candidates();
+        QVector<CellValue> vals2 = diagNeigborCell->candidates();
+        QVector<CellValue> baseValues = cell->candidates();
+        for (CellValue v: baseValues)
+        {
+            vals1.removeAll(v);
+            vals2.removeAll(v);
+        }
+        std::cout << "virtual cell values from roof are " << (int)vals1[0] << " " << (int)vals2[0] <<std::endl;
+        QBitArray virtualCellCandidates(cell->candidatesCapacity());
+        virtualCellCandidates.setBit(vals1[0]-1);
+        virtualCellCandidates.setBit(vals2[0]-1);
+        for (House::CPtr hs: field.commonHouses(diagonalCell, diagNeigborCell))
+        {
+            Cell* pair = nullptr;
+            for (auto c: *hs)
+            {
+                if (c == diagonalCell || c == diagNeigborCell)
+                    continue;
+                if (c->candidatesExactMatch(virtualCellCandidates))
+                {
+                    std::cout << "pair found" << c->coord() << std::endl;
+                    pair = c;
+                    break;
+                }
+            }
+            if (pair)
+            {
+                for (auto c: *hs)
+                {
+                    if (c != pair && c != diagonalCell && c != diagNeigborCell)
+                    {
+                        ret |= c->removeCandidate(virtualCellCandidates);
+                    }
                 }
             }
         }
@@ -888,6 +942,7 @@ bool UniqueRectangle::runPerCell(Cell::Ptr pCell)
             ret |= rect.applyType2bCheck();
             ret |= rect.applyType2cCheck();
             ret |= rect.applyType3aCheck();
+            ret |= rect.applyType3bCheck();
         }
     }
     return ret;
