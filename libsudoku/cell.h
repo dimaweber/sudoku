@@ -6,7 +6,9 @@
 #include <QBitArray>
 #include <QVector>
 #include <QObject>
-
+#ifdef MT
+#  include <QReadWriteLock>
+#endif
 class House;
 
 //class Value
@@ -39,12 +41,15 @@ class Cell: public QObject
     QVector<House*> houses;
     //Cell& operator = (const Cell& );
     bool useDelay{false};
+#ifdef MT
+    mutable QReadWriteLock accessLock;
+#endif
 public:
     typedef Cell* Ptr;
     typedef const Cell* CPtr;
     Cell(quint8 n = 0, QObject* parent = nullptr);
 
-    CellValue value() const {return val;}
+    CellValue value() const;
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
     bool removeCandidate(CellValue val);

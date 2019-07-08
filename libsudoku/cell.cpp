@@ -6,18 +6,34 @@
 
 Cell::Cell(quint8 n, QObject* parent)
     :QObject(parent)
+    #ifdef MT
+    , accessLock(QReadWriteLock::Recursive)
+    #endif
 {
     if (n>0)
         resetCandidates(n);
 }
 
+CellValue Cell::value() const
+{
+#ifdef MT
+    QReadLocker locker(&accessLock);
+#endif
+    return val;
+}
+
 void Cell::setValue(quint8 val, bool init_value)
 {
     this->val = val;
-    candidateMask.fill(false);
-    candidateMask.setBit(val-1, true);
+    {
+        #ifdef MT
+            QWriteLocker locker(&accessLock);
+        #endif
+        candidateMask.fill(false);
+        candidateMask.setBit(val-1, true);
+    }
     initial_value = init_value;
-    std::cout << "\tvalue " << (int)value() << " set into " << coord() << std::endl;
+    std::cout << "\tvalue " << (int)val << " set into " << coord() << std::endl;
     emit valueAboutToBeSet(val);
     if (useDelay)
     {
@@ -59,7 +75,14 @@ bool Cell::removeCandidate(CellValue guessVal)
         auto t0 = std::chrono::steady_clock::now() + 500ms;
 //        std::this_thread::sleep_until (t0);
     }
-    candidateMask.clearBit(guessVal-1);
+
+    {
+#ifdef MT
+        QWriteLocker locker(&accessLock);
+#endif
+        candidateMask.clearBit(guessVal-1);
+    }
+
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
@@ -89,7 +112,12 @@ bool Cell::removeCandidate(const QBitArray& candidate)
         auto t0 = std::chrono::steady_clock::now() + 500ms;
 //        std::this_thread::sleep_until (t0);
     }
-    candidateMask &= ~candidate;
+    {
+        #ifdef MT
+            QWriteLocker locker(&accessLock);
+        #endif
+        candidateMask &= ~candidate;
+    }
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
@@ -105,16 +133,25 @@ bool Cell::removeCandidate(const QBitArray& candidate)
 
 bool Cell::candidatesExactMatch(const QBitArray& mask) const
 {
+#ifdef MT
+    QReadLocker locker(&accessLock);
+#endif
     return (candidateMask & mask) == candidateMask;
 }
 
 bool Cell::candidatesExactMatch(Cell::CPtr o) const
 {
+#ifdef MT
+    QReadLocker locker(&accessLock);
+#endif
     return candidateMask == o->candidateMask;
 }
 
 bool Cell::hasCandidate(quint8 guessVal) const
 {
+#ifdef MT
+    QReadLocker locker(&accessLock);
+#endif
     if (guessVal > candidateMask.count() || guessVal < 1)
     {
         throw std::out_of_range("candidate is out of range");
@@ -125,6 +162,9 @@ bool Cell::hasCandidate(quint8 guessVal) const
 
 int Cell::hasAnyOfCandidates(const QBitArray& mask) const
 {
+#ifdef MT
+    QReadLocker locker(&accessLock);
+#endif
     return (candidateMask & mask).count(true);
 }
 
@@ -148,6 +188,9 @@ void Cell::registerInHouse(House& area)
 
 void Cell::resetCandidates(quint8 n)
 {
+#ifdef MT
+    QWriteLocker locker(&accessLock);
+#endif
     candidateMask.resize(n);
     candidateMask.fill(true);
 }
