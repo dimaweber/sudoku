@@ -19,7 +19,7 @@ public:
     Resolver(Field& field, QObject* parent = nullptr);
     ~Resolver();
     quint64 resolveTime() const;
-    template<class TECH> void registerTechnique() { techniques.append(new TECH(field, this)); }
+    template<class TECH> Technique* registerTechnique() { Technique* tech = new TECH(field, this); techniques.append(tech); return tech; }
     void process();
 public slots:
     void stop();
