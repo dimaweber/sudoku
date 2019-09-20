@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QSet>
 
+//#define DELAY_TECHNIQUE_RUN
+
 QSet<QBitArray> Technique::allCandidatesCombinationsMasks;
 
 #ifdef Q_OS_WIN
@@ -70,14 +72,11 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 #endif
 
 Technique::Technique(Field& field, const QString& name, QObject *parent)
-    :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
+    :QObject(parent), techniqueName(name), enabled(true), N(field.getN()), field(field)
 {
     if (Technique::allCandidatesCombinationsMasks.isEmpty())
         fillCandidatesCombinationsMasks(N);
 }
-
-Technique::~Technique()
-= default;
 
 void Technique::setEnabled(bool enabled)
 {
@@ -89,11 +88,13 @@ bool Technique::perform()
     if (!enabled)
         return false;
     emit started();
+#ifdef DELAY_TECHNIQUE_RUN
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
     bool res = run();
     if (res)
         emit applied();
@@ -451,9 +452,7 @@ QVector<BiLocationLink> BiLocationColoringTechnique::findBiLocationLinks(CellVal
 
 XWingTechnique::XWingTechnique(Field& field, QObject* parent)
     :Technique(field, "X-Wing", parent)
-{
-
-}
+{ }
 
 bool XWingTechnique::run()
 {

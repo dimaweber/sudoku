@@ -15,12 +15,12 @@ class Field;
 class Technique : public QObject
 {
     Q_OBJECT
-    bool enabled;
     const QString techniqueName;
+    bool enabled;
     static void fillCandidatesCombinationsMasks(quint8 n);
 public:
     Technique (Field& field, const QString& name, QObject* parent = nullptr);
-    virtual ~Technique();
+    virtual ~Technique() = default;
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
     virtual bool canBeDisabled() const { return true;}
@@ -36,8 +36,8 @@ protected:
     Cell::Ptr cell(const Coord& c);
 
     virtual bool run() = 0;
-    Field& field;
     quint8 N;
+    Field& field;
 signals:
     void started();
     void done();
