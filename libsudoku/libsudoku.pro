@@ -10,14 +10,14 @@ QT       -= gui
 TARGET = sudoku
 TEMPLATE = lib
 
-CONFIG += c++17
+CONFIG += c++17 silent
 
 win {
 CONFIG += staticlib
 }
 
 DEFINES += SUDOKU_LIBRARY \
-		  MT_
+		  MT
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

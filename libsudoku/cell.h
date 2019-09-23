@@ -56,7 +56,7 @@ public:
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
     bool isResolved() const {return value() != 0;}
-    bool hasCandidate(quint8 val) const;
+    bool hasCandidate(CellValue val) const;
     void print() const;
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}

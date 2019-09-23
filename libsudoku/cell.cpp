@@ -4,6 +4,8 @@
 #include <chrono>
 #include <thread>
 
+//#define DELAY_SET_VALUE
+
 Cell::Cell(quint8 n, QObject* parent)
     :QObject(parent)
     #ifdef MT
@@ -22,7 +24,7 @@ CellValue Cell::value() const
     return val;
 }
 
-void Cell::setValue(quint8 val, bool init_value)
+void Cell::setValue(CellValue val, bool init_value)
 {
     this->val = val;
     {
@@ -35,24 +37,27 @@ void Cell::setValue(quint8 val, bool init_value)
     initial_value = init_value;
     std::cout << "\tvalue " << (int)val << " set into " << coord() << std::endl;
     emit valueAboutToBeSet(val);
+#ifdef  DELAY_SET_VALUE
     if (useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-        //std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
 
     for(House::Ptr pArea: houses)
     {
         pArea->removeCandidate(val);
     }
-
+#ifdef  DELAY_SET_VALUE
     if(useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
     emit valueSet(val);
 }
 
@@ -69,13 +74,14 @@ bool Cell::removeCandidate(CellValue guessVal)
         return false;
     }
     emit candidateAboutToBeRemoved(guessVal);
+#ifdef  DELAY_SET_VALUE
     if (useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 500ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
-
+#endif
     {
 #ifdef MT
         QWriteLocker locker(&accessLock);
@@ -87,12 +93,14 @@ bool Cell::removeCandidate(CellValue guessVal)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
+#ifdef  DELAY_SET_VALUE
     if (useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 50ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
     return true;
 }
 
@@ -106,12 +114,14 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     if ((candidateMask & candidate).count(true) == 0)
         return false; // nothing will be removed
     emit candidatesAboutToBeRemoved(candidate);
+#ifdef  DELAY_SET_VALUE
     if (useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 500ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
     {
         #ifdef MT
             QWriteLocker locker(&accessLock);
@@ -122,12 +132,14 @@ bool Cell::removeCandidate(const QBitArray& candidate)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
     std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
     emit candidatesRemoved(candidate);
+#ifdef  DELAY_SET_VALUE
     if (useDelay)
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 50ms;
-//        std::this_thread::sleep_until (t0);
+        std::this_thread::sleep_until (t0);
     }
+#endif
     return true;
 }
 
@@ -147,7 +159,7 @@ bool Cell::candidatesExactMatch(Cell::CPtr o) const
     return candidateMask == o->candidateMask;
 }
 
-bool Cell::hasCandidate(quint8 guessVal) const
+bool Cell::hasCandidate(CellValue guessVal) const
 {
 #ifdef MT
     QReadLocker locker(&accessLock);
@@ -155,7 +167,7 @@ bool Cell::hasCandidate(quint8 guessVal) const
     if (guessVal > candidateMask.count() || guessVal < 1)
     {
         throw std::out_of_range("candidate is out of range");
-        return false;
+        //return false;
     }
     return candidateMask.testBit(guessVal-1);
 }
@@ -204,7 +216,7 @@ bool Cell::isValid() const
 QVector<CellValue> Cell::candidates() const
 {
     QVector<CellValue> ret;
-    for (int i=1; i<=candidatesCapacity(); i++)
+    for (CellValue i=1; i<=candidatesCapacity(); i++)
         if (hasCandidate(i))
             ret.append(i);
     return ret;

@@ -274,7 +274,6 @@ HiddenGroupTechnique::HiddenGroupTechnique(Field& field, QObject* parent)
 
 }
 
-#define MT
 #ifdef MT
 #  include <QtConcurrent>
 #endif
