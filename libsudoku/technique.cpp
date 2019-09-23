@@ -274,8 +274,21 @@ HiddenGroupTechnique::HiddenGroupTechnique(Field& field, QObject* parent)
 
 }
 
+#ifdef MT
+#  include <QtConcurrent>
+#endif
 bool PerHouseTechnique::run()
 {
+#ifdef MT
+    return QtConcurrent::blockingFilteredReduced<bool>(areas(), [this](House* area)
+    {
+        return runPerHouse(area);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
     bool newValuesSet = false;
     for(House* area: areas())
     {
@@ -284,6 +297,7 @@ bool PerHouseTechnique::run()
             break;
     }
     return newValuesSet;
+#endif
 }
 
 IntersectionsTechnique::IntersectionsTechnique(Field& field, QObject* parent)
@@ -344,12 +358,12 @@ BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, QObject* 
 bool BiLocationColoringTechnique::run()
 {
     bool changed = false;
-    QMap<int, QVector<BiLocationLink>> links;
     for (CellValue i=1; i<=N; i++)
     {
-        links[i] = findBiLocationLinks(i);
+        QVector<BiLocationLink> links;
+        links = findBiLocationLinks(i);
         ColoredLinksVault vault(i);
-        for (BiLocationLink& link: links[i])
+        for (BiLocationLink& link: links)
         {
             CellColor c1 = vault.getColor(link.first());
             CellColor c2 = vault.getColor(link.second());
@@ -376,7 +390,7 @@ bool BiLocationColoringTechnique::run()
                 }
             }
         }
-        for (BiLocationLink& link: links[i])
+        for (BiLocationLink& link: links)
         {
             std::cout << (int)i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
                       << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
