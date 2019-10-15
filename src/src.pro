@@ -1,6 +1,6 @@
-QT += gui widgets
+QT += gui widgets concurrent
 
-CONFIG += c++14 console
+CONFIG += c++17 console
 CONFIG -= app_bundle
 
 TARGET = sudoku
