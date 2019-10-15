@@ -12,7 +12,7 @@ TEMPLATE = lib
 
 CONFIG += c++17 silent
 
-win {
+win32 {
 CONFIG += staticlib
 }
 
