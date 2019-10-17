@@ -90,7 +90,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFrameStyle(QFrame::Box);
 
-    backgroundBrush = pal.brush(QPalette::Background);
+    backgroundBrush = pal.brush(QPalette::Window);
     hightlightBrush = QColor("tan");
 
     auto sublay = new QGridLayout(this);

@@ -48,6 +48,7 @@ public:
     typedef Cell* Ptr;
     typedef const Cell* CPtr;
     Cell(quint8 n = 0, QObject* parent = nullptr);
+    ~Cell();
 
     CellValue value() const;
     bool isInitialValue() const {return initial_value;}

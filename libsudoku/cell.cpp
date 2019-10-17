@@ -16,6 +16,11 @@ Cell::Cell(quint8 n, QObject* parent)
         resetCandidates(n);
 }
 
+Cell::~Cell()
+{
+    // unrigisterFromHouses();
+}
+
 CellValue Cell::value() const
 {
 #ifdef MT
@@ -26,11 +31,11 @@ CellValue Cell::value() const
 
 void Cell::setValue(CellValue val, bool init_value)
 {
-    this->val = val;
     {
         #ifdef MT
             QWriteLocker locker(&accessLock);
         #endif
+        this->val = val;
         candidateMask.fill(false);
         candidateMask.setBit(val-1, true);
     }

@@ -130,34 +130,34 @@ void CommonTest::Coord_same_house_tests()
 
 void CommonTest::Cell_test_candidates()
 {
-    Cell cell;
-    QVERIFY(!cell.isValid());
+    std::unique_ptr<Cell> cell (new Cell());
+    QVERIFY(!cell->isValid());
 
-    cell.resetCandidates(9);
-    QVERIFY(cell.isValid());
+    cell->resetCandidates(9);
+    QVERIFY(cell->isValid());
 
-    QVERIFY(cell.hasCandidate(1));
-    QVERIFY(cell.hasCandidate(3));
-    QVERIFY(cell.hasCandidate(5));
-    QVERIFY(cell.hasCandidate(7));
-    QVERIFY(cell.hasCandidate(9));
-    QVERIFY_EXCEPTION_THROWN(cell.hasCandidate(0), std::out_of_range);
-    QVERIFY_EXCEPTION_THROWN(cell.hasCandidate(10), std::out_of_range);
+    QVERIFY(cell->hasCandidate(1));
+    QVERIFY(cell->hasCandidate(3));
+    QVERIFY(cell->hasCandidate(5));
+    QVERIFY(cell->hasCandidate(7));
+    QVERIFY(cell->hasCandidate(9));
+    QVERIFY_EXCEPTION_THROWN(cell->hasCandidate(0),  std::out_of_range);
+    QVERIFY_EXCEPTION_THROWN(cell->hasCandidate(10), std::out_of_range);
 
     QBitArray evenBits(9);
     evenBits.setBit(1);
     evenBits.setBit(3);
     evenBits.setBit(5);
     evenBits.setBit(7);
-    QVERIFY(cell.hasAnyOfCandidates(evenBits));
+    QVERIFY(cell->hasAnyOfCandidates(evenBits));
 
-    QVERIFY(!cell.isResolved());
+    QVERIFY(!cell->isResolved());
 }
 
 void CommonTest::benchmark()
 {
     Field array;
-    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 1));
+    QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", 1));
     bool isResolved = false;
     bool isValid = false;
     Resolver resolver(array, nullptr);
