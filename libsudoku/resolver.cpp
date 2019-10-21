@@ -64,6 +64,7 @@ void Resolver::process()
                 break;
         }
     }while(changed);
+    std::cout << "No more processing could be done" << std::endl;
 }
 
 void Resolver::stop()

@@ -93,9 +93,6 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
     setN(n);
 
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
-        cell(coord)->resetCandidates(n);
-
-    for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
         QChar symbol = line[coord.rawIndex()];
         if (symbol.isDigit() && symbol.toLatin1() != '0')

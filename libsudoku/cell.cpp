@@ -208,6 +208,7 @@ void Cell::resetCandidates(quint8 n)
 #ifdef MT
     QWriteLocker locker(&accessLock);
 #endif
+    val = 0;
     candidateMask.resize(n);
     candidateMask.fill(true);
 }

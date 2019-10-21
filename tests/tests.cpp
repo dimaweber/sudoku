@@ -3,6 +3,7 @@
 #include "coord.h"
 #include "field.h"
 #include "resolver.h"
+#include <QRandomGenerator>
 
 class CommonTest : public QObject
 {
@@ -171,12 +172,12 @@ void CommonTest::benchmark()
     resolver.registerTechnique<YWingTechnique>();
     resolver.registerTechnique<XYZWingTechnique>();
 
+    QRandomGenerator rng(25121981);
+
     QBENCHMARK{
-//        for (size_t idx=1; idx<10; idx++)
-        {
-//            QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
-            resolver.process();
-        }
+        int idx = rng() % 2000 + 1;
+        QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
+        resolver.process();
     }
     isValid = array.isValid();
     isResolved = array.isResolved();
