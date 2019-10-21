@@ -3,7 +3,10 @@
 #include "coord.h"
 #include "field.h"
 #include "resolver.h"
-#include <QRandomGenerator>
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+#   include <QRandomGenerator>
+#endif
 
 class CommonTest : public QObject
 {
@@ -172,10 +175,18 @@ void CommonTest::benchmark()
     resolver.registerTechnique<YWingTechnique>();
     resolver.registerTechnique<XYZWingTechnique>();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QRandomGenerator rng(25121981);
+#else
+    qsrand(25121981);
+#endif
 
     QBENCHMARK{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         int idx = rng() % 2000 + 1;
+#else
+        int idx = qrand() % 2000 + 1;
+#endif
         QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
         resolver.process();
     }
