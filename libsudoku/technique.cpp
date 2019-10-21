@@ -710,6 +710,16 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
 bool PerCellTechnique::run()
 {
     bool ret = false;
+#ifdef MT
+    QtConcurrent::blockingFilteredReduced<bool>(cells(), [this](Cell::Ptr cell)
+    {
+        return runPerCell(cell);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
     for (Cell::Ptr pCell: cells())
     {
         emit cellAnalyzeStarted(pCell);
@@ -718,6 +728,7 @@ bool PerCellTechnique::run()
         if (ret)
             break;
     }
+#endif
     return ret;
 }
 

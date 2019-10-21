@@ -91,12 +91,16 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
     QString line = lines.at(qMin(num, lines.count()));
     auto n = static_cast<quint8>(qSqrt(line.count()));
     setN(n);
+
+    for(Coord coord = Coord::first(); coord.isValid(); coord++)
+        cell(coord)->resetCandidates(n);
+
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
         QChar symbol = line[coord.rawIndex()];
         if (symbol.isDigit() && symbol.toLatin1() != '0')
             cell(coord)->setValue(static_cast<CellValue>(symbol.digitValue()), true);
-        if (symbol.isLetter())
+        else if (symbol.isLetter())
         {
             QString s(symbol);
             quint8 v = s.toUInt(nullptr, 17);

@@ -6,9 +6,7 @@
 #include <QBitArray>
 #include <QVector>
 #include <QObject>
-#ifdef MT
-#  include <QReadWriteLock>
-#endif
+#include <QReadWriteLock>
 class House;
 
 //class Value
@@ -41,9 +39,9 @@ class Cell: public QObject
     QVector<House*> houses;
     //Cell& operator = (const Cell& );
     bool useDelay{false};
-#ifdef MT
+
     mutable QReadWriteLock accessLock;
-#endif
+
 public:
     typedef Cell* Ptr;
     typedef const Cell* CPtr;

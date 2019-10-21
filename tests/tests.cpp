@@ -172,7 +172,11 @@ void CommonTest::benchmark()
     resolver.registerTechnique<XYZWingTechnique>();
 
     QBENCHMARK{
-        resolver.process();
+//        for (size_t idx=1; idx<10; idx++)
+        {
+//            QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
+            resolver.process();
+        }
     }
     isValid = array.isValid();
     isResolved = array.isResolved();

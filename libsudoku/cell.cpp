@@ -95,7 +95,7 @@ bool Cell::removeCandidate(CellValue guessVal)
     }
 
     if (candidateMask.count(true) == 0)
-        throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
+        throw std::runtime_error("no guesses left -- something wrong with algorithm or puzzle");
     std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
 #ifdef  DELAY_SET_VALUE
