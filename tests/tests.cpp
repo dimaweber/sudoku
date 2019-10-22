@@ -16,12 +16,11 @@ public:
     CommonTest();
 
 private slots:
-
-    // Low-level api tests
     void initTestCase();
     void cleanupTestCase();
     void init();
 
+    // Low-level api tests
     void Coord_initialization_tests();
     void Coord_getters_tests();
     void Coord_operation_tests();
@@ -45,21 +44,29 @@ private slots:
 
 private:
     template<class TECH>
-    void lowLevelTechniqueTest(QString filename, int num, const std::list<std::pair<Coord, std::list<CellValue>>>& list)
+    void lowLevelTechniqueTest(const QString& filename, int num, const std::list<std::pair<Coord, std::list<CellValue>>>& list)
     {
         Field field;
         QVERIFY(field.readFromPlainTextFile(filename, num));
         TECH tech(field);
 
         for(auto c: list)
+        {
             for (auto a: c.second)
+            {
                 QCOMPARE(field.cell(c.first)->hasCandidate(a), true);
+            }
+        }
 
         while (tech.perform());
 
         for(auto c: list)
+        {
             for (auto a: c.second)
+            {
                 QCOMPARE(field.cell(c.first)->hasCandidate(a), false);
+            }
+        }
     }
 };
 
