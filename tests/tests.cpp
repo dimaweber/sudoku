@@ -16,6 +16,8 @@ public:
     CommonTest();
 
 private slots:
+
+    // Low-level api tests
     void initTestCase();
     void cleanupTestCase();
     void init();
@@ -28,6 +30,13 @@ private slots:
     void Cell_test_candidates();
 //    void Cell_test_removeCandidate();
 
+    // Hi-level techniques tests
+    void xyzwing_test();
+    void ywing_test();
+    void unique_rectangle_tests();
+    void coloring_test();
+
+    // Benchmarks
     void benchmark9x9();
     void benchmark16x16();
 
@@ -174,6 +183,8 @@ void CommonTest::benchmark16x16()
     resolver16x16.registerTechnique<XWingTechnique>();
     resolver16x16.registerTechnique<YWingTechnique>();
     resolver16x16.registerTechnique<XYZWingTechnique>();
+    resolver16x16.registerTechnique<UniqueRectangle>();
+
 
     QBENCHMARK {
         resolver16x16.process();
@@ -183,6 +194,105 @@ void CommonTest::benchmark16x16()
     QVERIFY(array16x16.isResolved());
 
 }
+
+void CommonTest::xyzwing_test()
+{
+    Field array9x9;
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/xyz-wing.sdm", 1));
+
+    Resolver resolver9x9(array9x9, nullptr);
+    resolver9x9.registerTechnique<NakedSingleTechnique>();
+    resolver9x9.registerTechnique<HiddenSingleTechnique>();
+    resolver9x9.registerTechnique<NakedGroupTechnique>();
+    resolver9x9.registerTechnique<HiddenGroupTechnique>();
+    resolver9x9.registerTechnique<IntersectionsTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<BiLocationColoringTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<XWingTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<YWingTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<XYZWingTechnique>();
+
+    resolver9x9.process();
+
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+}
+
+void CommonTest::ywing_test()
+{
+    Field array9x9;
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/ywing.sdm", 1));
+
+    Resolver resolver9x9(array9x9, nullptr);
+    resolver9x9.registerTechnique<NakedSingleTechnique>();
+    resolver9x9.registerTechnique<HiddenSingleTechnique>();
+    resolver9x9.registerTechnique<NakedGroupTechnique>();
+    resolver9x9.registerTechnique<HiddenGroupTechnique>();
+    resolver9x9.registerTechnique<IntersectionsTechnique>()     ->  setEnabled(false);
+    resolver9x9.registerTechnique<BiLocationColoringTechnique>()->  setEnabled(false);
+    resolver9x9.registerTechnique<XWingTechnique>()             ->  setEnabled(false);
+    resolver9x9.registerTechnique<YWingTechnique>();
+    resolver9x9.registerTechnique<XYZWingTechnique>()           ->  setEnabled(false);
+
+    resolver9x9.process();
+
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+}
+
+void CommonTest::unique_rectangle_tests()
+{
+    Field array9x9;
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/unique_rectangle_type1.sdm", 1));
+
+    Resolver resolver9x9(array9x9, nullptr);
+    resolver9x9.registerTechnique<NakedSingleTechnique>();
+    resolver9x9.registerTechnique<HiddenSingleTechnique>();
+    resolver9x9.registerTechnique<NakedGroupTechnique>();
+    resolver9x9.registerTechnique<HiddenGroupTechnique>();
+    resolver9x9.registerTechnique<IntersectionsTechnique>();
+    resolver9x9.registerTechnique<BiLocationColoringTechnique>()    ->  setEnabled(false);
+    resolver9x9.registerTechnique<XWingTechnique>()                 ->  setEnabled(false);
+    resolver9x9.registerTechnique<YWingTechnique>();
+    resolver9x9.registerTechnique<XYZWingTechnique>()               ->  setEnabled(false);
+    resolver9x9.registerTechnique<UniqueRectangle>();
+
+    resolver9x9.process();
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/unique_rectangle_type2.sdm", 1));
+    resolver9x9.process();
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/unique_rectangle_type3.sdm", 1));
+    resolver9x9.process();
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+}
+
+void CommonTest::coloring_test()
+{
+    Field array9x9;
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/coloring.sdm", 0));
+
+    Resolver resolver9x9(array9x9, nullptr);
+    resolver9x9.registerTechnique<NakedSingleTechnique>();
+    resolver9x9.registerTechnique<HiddenSingleTechnique>();
+    resolver9x9.registerTechnique<NakedGroupTechnique>();
+    resolver9x9.registerTechnique<HiddenGroupTechnique>();
+    resolver9x9.registerTechnique<IntersectionsTechnique>();
+    resolver9x9.registerTechnique<BiLocationColoringTechnique>();
+    resolver9x9.registerTechnique<XWingTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<YWingTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<XYZWingTechnique>()->setEnabled(false);
+    resolver9x9.registerTechnique<UniqueRectangle>()->setEnabled(false);
+
+    resolver9x9.process();
+    QVERIFY(array9x9.isValid());
+    QVERIFY(array9x9.isResolved());
+}
+
 void CommonTest::benchmark9x9()
 {
     Field array9x9;
@@ -201,6 +311,7 @@ void CommonTest::benchmark9x9()
     resolver9x9.registerTechnique<XWingTechnique>();
     resolver9x9.registerTechnique<YWingTechnique>();
     resolver9x9.registerTechnique<XYZWingTechnique>();
+    resolver9x9.registerTechnique<UniqueRectangle>();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QRandomGenerator rng(25121981);
