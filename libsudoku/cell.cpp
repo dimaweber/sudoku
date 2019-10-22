@@ -127,6 +127,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
         std::this_thread::sleep_until (t0);
     }
 #endif
+    QBitArray oldCandidates = candidateMask;
     {
         #ifdef MT
             QWriteLocker locker(&accessLock);
@@ -145,7 +146,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
         std::this_thread::sleep_until (t0);
     }
 #endif
-    return true;
+    return oldCandidates != candidateMask;
 }
 
 bool Cell::candidatesExactMatch(const QBitArray& mask) const

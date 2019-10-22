@@ -31,6 +31,7 @@ private slots:
 
     // Low-level technique tests (1 iteration)
     void naked_group_test();
+    void hidden_group_test();
 
     // Hi-level techniques tests (solve whole puzzle)
     void xyzwing_test();
@@ -247,6 +248,44 @@ void CommonTest::naked_group_test()
     checks.push_back({{2,3}, {5, 6, 8}});
     checks.push_back({{3,3}, {6}});
     lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 4, checks);
+}
+
+void CommonTest::hidden_group_test()
+{
+    std::list<std::pair<Coord, std::list<CellValue>>> checks;
+    checks.push_back({{1,8}, {2,3,4,5,9}});
+    checks.push_back({{1,9}, {3,4,5,9}});
+    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 0, checks);
+
+    checks.clear();
+    checks.push_back({ {4, 3}, {5, 6} });
+    checks.push_back({ {5, 2}, {9} });
+    checks.push_back({ {5, 3}, {3, 6, 7} });
+    checks.push_back({ {5, 7}, {6, 9} });
+    checks.push_back({ {6, 7}, {1, 5, 9} });
+    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 1, checks);
+
+    checks.clear();
+    checks.push_back({ {1,4}, {4,7,8}});
+    checks.push_back({ {1,7}, {4,9}});
+    checks.push_back({ {1,9}, {4,7,8,9}});
+    checks.push_back({ {2,9}, {5}});
+    checks.push_back({ {3,9}, {2,9}});
+    checks.push_back({ {6,9}, {2,9}});
+    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 2, checks);
+
+//    broken puzzle
+//    checks.clear();
+//    checks.push_back({ {7,7}, {6}});
+//    checks.push_back({ {8,7}, {6}});
+//    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 3, checks);
+
+    checks.clear();
+    checks.push_back({{ 4,4}, {3,7,8}});
+    checks.push_back({{ 4,6}, {3,7,8}});
+    checks.push_back({{ 4,4}, {3,7,8}});
+    checks.push_back({{ 6,6}, {3,5,7,8}});
+    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 4, checks);
 }
 
 void CommonTest::benchmark16x16()
