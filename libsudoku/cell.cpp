@@ -250,6 +250,14 @@ bool Cell::operator ==(const Cell& other) const
     return coord() == other.coord();
 }
 
+void Cell::reset(quint8 n, quint8 idx)
+{
+    houses.clear();
+    coord().setRawIndex(idx);
+    resetCandidates(n);
+    setDelay(false);
+}
+
 std::ostream& operator <<(std::ostream& stream, const QBitArray& arr)
 {
     stream << "{";

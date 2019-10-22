@@ -28,7 +28,8 @@ private slots:
     void Cell_test_candidates();
 //    void Cell_test_removeCandidate();
 
-    void benchmark();
+    void benchmark9x9();
+    void benchmark16x16();
 
 private:
 };
@@ -158,22 +159,48 @@ void CommonTest::Cell_test_candidates()
     QVERIFY(!cell->isResolved());
 }
 
-void CommonTest::benchmark()
+void CommonTest::benchmark16x16()
 {
-    Field array;
-    QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", 1));
+    Field array16x16;
+    QVERIFY(array16x16.readFromPlainTextFile("../puzzle/16x16.sdm", 1));
+
+    Resolver resolver16x16(array16x16, nullptr);
+    resolver16x16.registerTechnique<NakedSingleTechnique>();
+    resolver16x16.registerTechnique<HiddenSingleTechnique>();
+    resolver16x16.registerTechnique<NakedGroupTechnique>();
+    resolver16x16.registerTechnique<HiddenGroupTechnique>();
+    resolver16x16.registerTechnique<IntersectionsTechnique>();
+    resolver16x16.registerTechnique<BiLocationColoringTechnique>();
+    resolver16x16.registerTechnique<XWingTechnique>();
+    resolver16x16.registerTechnique<YWingTechnique>();
+    resolver16x16.registerTechnique<XYZWingTechnique>();
+
+    QBENCHMARK {
+        resolver16x16.process();
+    }
+
+    QVERIFY(array16x16.isValid());
+    QVERIFY(array16x16.isResolved());
+
+}
+void CommonTest::benchmark9x9()
+{
+    Field array9x9;
+    QVERIFY(array9x9.readFromPlainTextFile("../puzzle/learningcurve.sdm", 1));
+
     bool isResolved = false;
     bool isValid = false;
-    Resolver resolver(array, nullptr);
-    resolver.registerTechnique<NakedSingleTechnique>();
-    resolver.registerTechnique<HiddenSingleTechnique>();
-    resolver.registerTechnique<NakedGroupTechnique>();
-    resolver.registerTechnique<HiddenGroupTechnique>();
-    resolver.registerTechnique<IntersectionsTechnique>();
-    resolver.registerTechnique<BiLocationColoringTechnique>();
-    resolver.registerTechnique<XWingTechnique>();
-    resolver.registerTechnique<YWingTechnique>();
-    resolver.registerTechnique<XYZWingTechnique>();
+
+    Resolver resolver9x9(array9x9, nullptr);
+    resolver9x9.registerTechnique<NakedSingleTechnique>();
+    resolver9x9.registerTechnique<HiddenSingleTechnique>();
+    resolver9x9.registerTechnique<NakedGroupTechnique>();
+    resolver9x9.registerTechnique<HiddenGroupTechnique>();
+    resolver9x9.registerTechnique<IntersectionsTechnique>();
+    resolver9x9.registerTechnique<BiLocationColoringTechnique>();
+    resolver9x9.registerTechnique<XWingTechnique>();
+    resolver9x9.registerTechnique<YWingTechnique>();
+    resolver9x9.registerTechnique<XYZWingTechnique>();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QRandomGenerator rng(25121981);
@@ -187,11 +214,13 @@ void CommonTest::benchmark()
 #else
         int idx = qrand() % 2000 + 1;
 #endif
-        QVERIFY(array.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
-        resolver.process();
+        idx = 1;
+        QVERIFY(array9x9.readFromPlainTextFile("../puzzle/learningcurve.sdm", idx));
+        resolver9x9.process();
     }
-    isValid = array.isValid();
-    isResolved = array.isResolved();
+
+    isValid = array9x9.isValid();
+    isResolved = array9x9.isResolved();
     QVERIFY(isValid);
     QVERIFY(isResolved);
 }

@@ -73,6 +73,8 @@ public:
     int commonCandidatesCount(Cell::CPtr a) const;
 
     bool operator == (const Cell& other) const;
+
+    void reset(quint8 n, quint8 idx);
 signals:
     void valueSet(CellValue v);
     void valueAboutToBeSet(CellValue v);
