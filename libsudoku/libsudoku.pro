@@ -17,7 +17,7 @@ CONFIG += staticlib
 }
 
 DEFINES += SUDOKU_LIBRARY \
-		  MT_ \
+		  _MT \
 		  _DELAY_SET_VALUE \
 		  _DELAY_TECHNIQUE_RUN \
 		  LOG_STREAM=std::clog

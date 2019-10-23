@@ -350,98 +350,95 @@ bool IntersectionsTechnique::reduceIntersection(SquareHouse& square, LineHouse& 
 }
 
 BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, QObject* parent)
-    :Technique (field, "Bi-Location Coloring", parent)
+    :PerCandidateTechnique( field, "Bi-Location Coloring", parent)
 {
 
 }
 
-bool BiLocationColoringTechnique::run()
+bool BiLocationColoringTechnique::runPerCandidate(CellValue candidate)
 {
     bool changed = false;
-    for (CellValue i=1; i<=N; i++)
+    QVector<BiLocationLink> links;
+    links = findBiLocationLinks(candidate);
+    ColoredLinksVault vault(candidate);
+    for (BiLocationLink& link: links)
     {
-        QVector<BiLocationLink> links;
-        links = findBiLocationLinks(i);
-        ColoredLinksVault vault(i);
-        for (BiLocationLink& link: links)
-        {
-            CellColor c1 = vault.getColor(link.first());
-            CellColor c2 = vault.getColor(link.second());
+        CellColor c1 = vault.getColor(link.first());
+        CellColor c2 = vault.getColor(link.second());
 
-            if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
+        if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
+        {
+            ColorPair cp = ColorPair::newPair();
+            vault.addLink(link, cp);
+        }
+        else
+        {
+            if (c1 == ColorPair::UnknownColor)
+                vault.addCell(link.first(), ColorPair::antiColor(c2));
+            else if (c2 == ColorPair::UnknownColor)
+                vault.addCell(link.second(), ColorPair::antiColor(c1));
+            else if (c1 != ColorPair::antiColor(c2))
             {
-                ColorPair cp = ColorPair::newPair();
-                vault.addLink(link, cp);
+                vault.recolor(ColorPair::antiColor(c2), c1);
+                vault.recolor(c2, ColorPair::antiColor(c1));
             }
             else
             {
-                if (c1 == ColorPair::UnknownColor)
-                    vault.addCell(link.first(), ColorPair::antiColor(c2));
-                else if (c2 == ColorPair::UnknownColor)
-                    vault.addCell(link.second(), ColorPair::antiColor(c1));
-                else if (c1 != ColorPair::antiColor(c2))
-                {
-                    vault.recolor(ColorPair::antiColor(c2), c1);
-                    vault.recolor(c2, ColorPair::antiColor(c1));
-                }
-                else
-                {
-                    // loop
-                }
+                // loop
             }
         }
-        for (BiLocationLink& link: links)
+    }
+    for (BiLocationLink& link: links)
+    {
+        LOG_STREAM << (int)candidate << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
+                  << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
+    }
+    for(House* house: areas())
+    {
+        // check for houses with 2 cells of same color
+        CellSet cellsWithCandidate = house->cellsWithCandidate(candidate);
+        QMap<CellColor, int> presentColor;
+        for (Cell* cell: cellsWithCandidate)
         {
-            LOG_STREAM << (int)i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
-                      << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
-        }
-        for(House* house: areas())
-        {
-            // check for houses with 2 cells of same color
-            CellSet cellsWithCandidate = house->cellsWithCandidate(i);
-            QMap<CellColor, int> presentColor;
-            for (Cell* cell: cellsWithCandidate)
+            CellColor color = vault.getColor(cell);
+            if (color != ColorPair::UnknownColor)
             {
-                CellColor color = vault.getColor(cell);
-                if (color != ColorPair::UnknownColor)
+                presentColor[color]++;
+                if (presentColor[color]>1)
                 {
-                    presentColor[color]++;
-                    if (presentColor[color]>1)
-                    {
-                        // we've found house with 2 cells from same chain and same color
-                        // this mean -- all cells with this color in this chain are OFF
-                        LOG_STREAM << "two cells with same color in one house: this color is OFF" << std::endl;
-                        changed |= vault.removeCandidateForColor(color);
-                    }
+                    // we've found house with 2 cells from same chain and same color
+                    // this mean -- all cells with this color in this chain are OFF
+                    LOG_STREAM << "two cells with same color in one house: this color is OFF" << std::endl;
+                    changed |= vault.removeCandidateForColor(color);
                 }
             }
         }
-        for(Cell* c: cells())
+    }
+    for(Cell* c: cells())
+    {
+        if (!c->hasCandidate(candidate))
+            continue;
+
+        CellColor clr = vault.getColor(c);
+        if (clr != ColorPair::UnknownColor)
+            continue;
+
+        QVector<CellColor> visibleColors;
+        CellSet visibleCells = field.allCellsVisibleFromCell(c);
+        for (Cell* pCell: visibleCells)
         {
-            if (!c->hasCandidate(i))
+            CellColor color = vault.getColor(pCell);
+            if (color == ColorPair::UnknownColor)
                 continue;
-
-            CellColor clr = vault.getColor(c);
-            if (clr != ColorPair::UnknownColor)
-                continue;
-
-            QVector<CellColor> visibleColors;
-            CellSet visibleCells = field.allCellsVisibleFromCell(c);
-            for (Cell* pCell: visibleCells)
+            CellColor acolor = ColorPair::antiColor(color);
+            if (visibleColors.contains(acolor))
             {
-                CellColor color = vault.getColor(pCell);
-                if (color == ColorPair::UnknownColor)
-                    continue;
-                CellColor acolor = ColorPair::antiColor(color);
-                if (visibleColors.contains(acolor))
-                {
-                    LOG_STREAM << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
-                    changed |= c->removeCandidate(i);
-                    break;
-                }
-                else
-                    visibleColors.append(color);
+                LOG_STREAM << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
+                changed |= c->removeCandidate(candidate);
+                break;
             }
+            else
+                visibleColors.append(color);
         }
     }
 
@@ -969,5 +966,32 @@ bool UniqueRectangle::runPerCell(Cell::Ptr pCell)
             ret |= rect.applyType3bCheck();
         }
     }
+    return ret;
+}
+
+bool PerCandidateTechnique::run()
+{
+    bool ret = false;
+    static QList<CellValue> candidates;
+    if (field.getN() != candidates.count())
+        for(CellValue i=1; i<= field.getN(); i++)
+            candidates.append(i);
+#ifdef MT
+    QtConcurrent::blockingFilteredReduced<bool>(candidates, [this](CellValue candidate)
+    {
+        return runPerCandidate(candidate);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
+    for (CellValue candidate: candidates)
+    {
+        ret |= runPerCandidate(candidate);
+        if (ret)
+            break;
+    }
+#endif
     return ret;
 }

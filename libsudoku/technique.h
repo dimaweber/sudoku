@@ -71,6 +71,19 @@ protected:
     virtual bool run() final;
 };
 
+class PerCandidateTechnique: public Technique
+{
+    Q_OBJECT
+public:
+    PerCandidateTechnique(Field& field, const QString& name, QObject* parent = nullptr)
+        :Technique(field, name, parent)
+    {}
+protected:
+    virtual bool runPerCandidate(CellValue candidate) = 0;
+    virtual bool run() final;
+
+};
+
 class NakedSingleTechnique : public PerCellTechnique
 {
     Q_OBJECT
@@ -121,13 +134,13 @@ protected:
     virtual bool run() override;
 };
 
-class BiLocationColoringTechnique: public Technique
+class BiLocationColoringTechnique: public PerCandidateTechnique
 {
     Q_OBJECT
 public:
     BiLocationColoringTechnique(Field& field, QObject* parent = nullptr);
 protected:
-    bool run() override;
+    bool runPerCandidate(CellValue candidate) override;
     QVector<BiLocationLink> findBiLocationLinks(CellValue val);
 
 };
