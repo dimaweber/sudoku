@@ -56,7 +56,7 @@ public:
     int candidatesCount() const {return candidateMask.count(true);}
     bool isResolved() const {return value() != 0;}
     bool hasCandidate(CellValue val) const;
-    void print() const;
+    void print(std::ostream& stream) const;
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
@@ -85,6 +85,6 @@ signals:
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);
-
+std::ostream& operator << (std::ostream& stream, const Cell& cell);
 
 #endif // CELL_H

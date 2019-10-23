@@ -86,7 +86,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
         if (!line.startsWith('#'))
             lines.append(line);
     }while(!stream.atEnd());
-    QString line = lines.at(qMin(num, lines.count()));
+    QString line = lines.at(qMin(num, lines.count()-1));
     auto n = static_cast<quint8>(qSqrt(line.count()));
     setN(n);
 
@@ -98,10 +98,11 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
         else if (symbol.isLetter())
         {
             QString s(symbol);
-            quint8 v = s.toUInt(nullptr, 17);
+            quint8 v = s.toUShort(nullptr, 17);
             cell(coord)->setValue(static_cast<CellValue>(v), true);
         }
     }
+
     return true;
 }
 
@@ -198,19 +199,19 @@ QVector<House::Ptr> Field::commonHouses(Cell::CPtr c1, Cell::CPtr c2)
     return ret;
 }
 
-void Field::print() const
+void Field::print(std::ostream &stream) const
 {
-    std::cout << " C: ";
+    stream << " C: ";
     for (int col=1; col<=N;col++)
-        std::cout << col;
-    std::cout <<std::endl;
-    std::cout << "    ";
+        stream << col;
+    stream <<std::endl;
+    stream << "    ";
     for (int i=0; i<N; i++)
-        std::cout <<".";
-    std::cout << std::endl;
+        stream <<".";
+    stream << std::endl;
     for (quint8 row=1; row <= N; row ++)
     {
-        rows[row-1].print();
+        stream << rows[row-1] << std::endl;
     }
 }
 
@@ -247,3 +248,9 @@ bool Field::isResolved() const
     return !hasEmptyValues() && isValid();
 }
 
+
+std::ostream& operator << (std::ostream& stream, const Field& field)
+{
+    field.print(stream);
+    return stream;
+}

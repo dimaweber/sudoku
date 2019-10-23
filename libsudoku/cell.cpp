@@ -40,7 +40,7 @@ void Cell::setValue(CellValue val, bool init_value)
         candidateMask.setBit(val-1, true);
     }
     initial_value = init_value;
-    std::cout << "\tvalue " << (int)val << " set into " << coord() << std::endl;
+    LOG_STREAM << "\tvalue " << (int)val << " set into " << coord() << std::endl;
     emit valueAboutToBeSet(val);
 #ifdef  DELAY_SET_VALUE
     if (useDelay)
@@ -96,7 +96,7 @@ bool Cell::removeCandidate(CellValue guessVal)
 
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or puzzle");
-    std::cout << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
+    LOG_STREAM << "\tcandidate " << (int)guessVal << " removed from " << coord() << std::endl;
     emit candidateRemoved(guessVal);
 #ifdef  DELAY_SET_VALUE
     if (useDelay)
@@ -136,7 +136,7 @@ bool Cell::removeCandidate(const QBitArray& candidate)
     }
     if (candidateMask.count(true) == 0)
         throw std::runtime_error("no guesses left -- something wrong with algorithm or sudoku");
-    std::cout << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
+    LOG_STREAM << "\tcandidates " << candidate << "removed from " << coord() << std::endl;
     emit candidatesRemoved(candidate);
 #ifdef  DELAY_SET_VALUE
     if (useDelay)
@@ -186,14 +186,14 @@ int Cell::hasAnyOfCandidates(const QBitArray& mask) const
     return (candidateMask & mask).count(true);
 }
 
-void Cell::print() const
+void Cell::print(std::ostream& stream) const
 {
     if (!isResolved())
     {
-        std::cout << candidateMask;
+        stream << candidateMask;
     }
     else
-        std::cout << (int)value();
+        stream << (int)value();
 }
 
 void Cell::registerInHouse(House& area)
@@ -270,5 +270,11 @@ std::ostream& operator <<(std::ostream& stream, const QBitArray& arr)
         }
     }
     stream << "}";
+    return stream;
+}
+
+std::ostream& operator << (std::ostream& stream, const Cell& cell)
+{
+    cell.print(stream);
     return stream;
 }

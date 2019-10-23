@@ -16,7 +16,7 @@ public:
     void setName(const QString& name) {houseName = name;}
     const QString& name() const { return houseName;}
 
-    void print() const;
+    void print(std::ostream& stream) const;
 
     bool hasValue(CellValue val) const;
     int candidatesCount(CellValue val) const;
@@ -47,6 +47,8 @@ public:
     inline const_iterator cend() const { return cells.constEnd(); }
     inline const_iterator constEnd() const { return cells.constEnd(); }
 };
+
+std::ostream& operator << (std::ostream& stream, const CellSet& cellset);
 
 class House : public CellSet
 {

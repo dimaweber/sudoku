@@ -12,7 +12,6 @@ class Resolver : public QThread
     Q_OBJECT
     Field& field;
     quint64 elaps;
-    quint32 enabledTechniques;
 
 public:
     QVector<Technique*> techniques; /// TODO: make in private

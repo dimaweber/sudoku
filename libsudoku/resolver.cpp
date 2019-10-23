@@ -7,7 +7,7 @@
 #include <chrono>
 
 Resolver::Resolver(Field& field, QObject *parent)
-    :QThread(parent), field(field), elaps(0), enabledTechniques(0xffff)
+    :QThread(parent), field(field), elaps(0)
 {}
 
 Resolver::~Resolver()
@@ -32,19 +32,19 @@ void Resolver::run()
     {
         emit done(elaps);
         emit resolved(elaps);
-        std::cout << "resolved" << std::endl;
+        LOG_STREAM << "resolved" << std::endl;
     }
     else if (!field.isValid())
     {
         emit done(elaps);
         emit failed(elaps);
-        std::cout << "is INVALID" << std::endl;
+        LOG_STREAM << "is INVALID" << std::endl;
     }
     else if (field.hasEmptyValues())
     {
         emit done(elaps);
         emit unresolved(elaps);
-        std::cout << "NOT resolved" << std::endl;
+        LOG_STREAM << "NOT resolved" << std::endl;
     }
 }
 
@@ -64,7 +64,7 @@ void Resolver::process()
                 break;
         }
     }while(changed);
-    std::cout << "No more processing could be done" << std::endl;
+    LOG_STREAM << "No more processing could be done" << std::endl;
 }
 
 void Resolver::stop()

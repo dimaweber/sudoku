@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
                        {"no-naked-group", "Disable Naked Group technique"},
                        {"no-hidden-group", "Disable Hidden Group technique"},
                        {"no-intersections", "Disable Intersections technique"},
-                       {"no-bi-lication-coloring", "Disable Bi-Location Coloring technique"},
+                       {"no-bi-location-coloring", "Disable Bi-Location Coloring technique"},
                        {"no-xwing", "Disable Hidden X-Wing technique"},
                        {"no-ywing", "Disable Hidden Y-Wing technique"},
                        {"no-xyzwing", "Disable Hidden XYZ-Wing technique"},
@@ -66,11 +66,9 @@ int main(int argc, char *argv[])
     plainTextInputFileLineNum = args.at(1).toInt();
 
     Field array;
-    array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
-
-    if (!array.isValid())
+    if (!array.readFromPlainTextFile(filename, plainTextInputFileLineNum) || !array.isValid())
     {
-        std::cout << "Invalid sudoku read" << std::endl;
+        std::cerr << "Invalid sudoku read" << std::endl;
         return 1;
     }
 
@@ -80,7 +78,7 @@ int main(int argc, char *argv[])
     resolver.registerTechnique<NakedGroupTechnique>()->setEnabled(!parser.isSet("no-naked-group"));
     resolver.registerTechnique<HiddenGroupTechnique>()->setEnabled(!parser.isSet("no-hidden-group"));
     resolver.registerTechnique<IntersectionsTechnique>()->setEnabled(!parser.isSet("no-intersections"));
-    resolver.registerTechnique<BiLocationColoringTechnique>()->setEnabled(!parser.isSet("no-bi-lication-coloring"));
+    resolver.registerTechnique<BiLocationColoringTechnique>()->setEnabled(!parser.isSet("no-bi-location-coloring"));
     resolver.registerTechnique<XWingTechnique>()->setEnabled(!parser.isSet("no-xwing"));
     resolver.registerTechnique<YWingTechnique>()->setEnabled(!parser.isSet("no-ywing"));
     resolver.registerTechnique<XYZWingTechnique>()->setEnabled(!parser.isSet("no-xyzwing"));
@@ -94,7 +92,7 @@ int main(int argc, char *argv[])
         resolver.process();
         elaps = timer.elapsed();
 
-        array.print();
+        std::cout << array << std::endl;
 
         std::cout << qPrintable(filename) << "[" << plainTextInputFileLineNum << "] Done in " << elaps << " ms and is ";
         if (array.isResolved())

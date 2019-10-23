@@ -17,7 +17,10 @@ CONFIG += staticlib
 }
 
 DEFINES += SUDOKU_LIBRARY \
-		  MT_
+		  MT_ \
+		  _DELAY_SET_VALUE \
+		  _DELAY_TECHNIQUE_RUN \
+		  LOG_STREAM=std::clog
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
