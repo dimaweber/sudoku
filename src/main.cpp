@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
         QApplication::connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
         QApplication::connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
         {
-//            array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
+            array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
         });
         QApplication::connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::stop);
 

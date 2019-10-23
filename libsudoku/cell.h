@@ -77,6 +77,7 @@ public:
     void reset(quint8 n, quint8 idx);
 signals:
     void valueSet(CellValue v);
+    void reseted();
     void valueAboutToBeSet(CellValue v);
     void candidateRemoved(CellValue v);
     void candidateAboutToBeRemoved(CellValue v);

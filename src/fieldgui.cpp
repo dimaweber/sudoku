@@ -137,6 +137,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         pal.setColor(label->foregroundRole(), QColor("red"));
         label->setPalette(pal);
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::candidatesRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
@@ -148,6 +149,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::candidatesAboutToBeRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
@@ -162,12 +164,16 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue)
     {
         QPalette pal = this->palette();
         pal.setBrush(QPalette::Window, hightlightBrush);
         this->setPalette(pal);
     }, Qt::QueuedConnection);
+
+    connect(cell, &Cell::reseted, this, &CellGui::onCellReset, Qt::QueuedConnection);
+
 }
 
 void CellGui::highlightOn()
@@ -184,6 +190,20 @@ void CellGui::removeCandidate(CellValue bit)
 {
     QLabel* label = candidateLabel[bit-1];
     label->setText(" ");
+}
+
+void CellGui::onCellReset()
+{
+    QPalette pal = palette();
+    pal.setColor(foregroundRole(), QColor("blue"));
+
+    for(int i=0; i<candidateLabel.size(); i++)
+    {
+        candidateLabel[i]->show();
+        candidateLabel[i]->setText(QString::number(i+1));
+        candidateLabel[i]->setPalette(pal);
+    }
+    setText("");
 }
 
 void CellGui::setValue(CellValue v)

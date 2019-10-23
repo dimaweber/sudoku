@@ -257,6 +257,8 @@ void Cell::reset(quint8 n, quint8 idx)
     coord().setRawIndex(idx);
     resetCandidates(n);
     setDelay(false);
+
+    emit reseted();
 }
 
 std::ostream& operator <<(std::ostream& stream, const QBitArray& arr)
