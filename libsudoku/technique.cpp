@@ -510,7 +510,7 @@ bool XWingTechnique::run()
                         if (columnA.candidatesCount(value) == 2 && columnB.candidatesCount(value) == 2
                                 && (row1.candidatesCount(value) > 2 || row2.candidatesCount(value) > 2))
                         {
-                            std::cout << "columns x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            std::cout << "columns x-wing found for " << (int)value << " in " << A1 << A2 << B1 << B2 << std::endl;
                             for (quint8 col=1; col <= columns().count(); col++)
                             {
                                 if (col == colA_idx || col==colB_idx)
@@ -524,7 +524,7 @@ bool XWingTechnique::run()
                         if (row1.candidatesCount(value) == 2 && row2.candidatesCount(value) == 2
                                 && (columnA.candidatesCount(value)>2 || columnB.candidatesCount(value)>2))
                         {
-                            std::cout << "rows x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            std::cout << "rows x-wing found for " << (int)value << " in " << A1 << A2 << B1 << B2 << std::endl;
                             for (quint8 row=1; row <= rows().count(); row++)
                             {
                                 if (row == row1_idx || row==row2_idx)

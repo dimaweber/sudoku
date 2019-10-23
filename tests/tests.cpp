@@ -30,22 +30,25 @@ private slots:
 //    void Cell_test_removeCandidate();
 
     // Low-level technique tests (1 iteration)
-    void naked_group_test();
-    void hidden_group_test();
+    void naked_group_tech_test();
+    void hidden_group_tech_test();
+    void xwing_tech_test();
 
     // Hi-level techniques tests (solve whole puzzle)
-    void xyzwing_test();
-    void ywing_test();
-    void unique_rectangle_tests();
-    void coloring_test();
+    void xwing_solve_test();
+    void xyzwing_solve_test();
+    void ywing_solve_test();
+    void unique_rectangle_solve_tests();
+    void coloring_solve_test();
 
     // Benchmarks
     void benchmark9x9();
     void benchmark16x16();
 
 private:
+    using TechTestParams = std::list<std::pair<Coord, std::list<CellValue>>>;
     template<class TECH>
-    void lowLevelTechniqueTest(const QString& filename, int num, const std::list<std::pair<Coord, std::list<CellValue>>>& list)
+    void lowLevelTechniqueTest(const QString& filename, int num, const TechTestParams& list)
     {
         Field field;
         QVERIFY(field.readFromPlainTextFile(filename, num));
@@ -196,9 +199,9 @@ void CommonTest::Cell_test_candidates()
     QVERIFY(!cell->isResolved());
 }
 
-void CommonTest::naked_group_test()
+void CommonTest::naked_group_tech_test()
 {
-    std::list<std::pair<Coord, std::list<CellValue>>> checks;
+    TechTestParams checks;
 
     // Naked pair 1 test
     checks.push_back({{1,4},{1}});
@@ -250,9 +253,9 @@ void CommonTest::naked_group_test()
     lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 4, checks);
 }
 
-void CommonTest::hidden_group_test()
+void CommonTest::hidden_group_tech_test()
 {
-    std::list<std::pair<Coord, std::list<CellValue>>> checks;
+    TechTestParams checks;
     checks.push_back({{1,8}, {2,3,4,5,9}});
     checks.push_back({{1,9}, {3,4,5,9}});
     lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 0, checks);
@@ -288,6 +291,69 @@ void CommonTest::hidden_group_test()
     lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 4, checks);
 }
 
+void CommonTest::xwing_tech_test()
+{
+    TechTestParams checks;
+
+    checks.push_back( {{1,4},{7}});
+    checks.push_back( {{5,4},{7}});
+    checks.push_back( {{8,4},{7}});
+    checks.push_back( {{8,8},{7}});
+    checks.push_back( {{9,4},{7}});
+    checks.push_back( {{9,8},{7}});
+    lowLevelTechniqueTest<XWingTechnique>("../puzzle/x-wing.sdm", 0, checks);
+
+    checks.clear();
+    checks.push_back( {{5,2},{2}});
+    checks.push_back( {{5,3},{2}});
+    checks.push_back( {{5,7},{2}});
+    checks.push_back( {{5,9},{2}});
+    checks.push_back( {{9,4},{2}});
+    checks.push_back( {{9,9},{2}});
+    lowLevelTechniqueTest<XWingTechnique>("../puzzle/x-wing.sdm", 1, checks);}
+
+void CommonTest::xwing_solve_test()
+{
+    Field field9x9;
+    QVERIFY(field9x9.readFromPlainTextFile("../puzzle/x-wing.sdm", 2));
+
+    Resolver resolver(field9x9, nullptr);
+    resolver.registerTechnique<NakedSingleTechnique>();
+    resolver.registerTechnique<HiddenSingleTechnique>();
+    resolver.registerTechnique<NakedGroupTechnique>();
+    resolver.registerTechnique<HiddenGroupTechnique>();
+    resolver.registerTechnique<IntersectionsTechnique>()->setEnabled(false);
+    resolver.registerTechnique<BiLocationColoringTechnique>()->setEnabled(false);
+    resolver.registerTechnique<XWingTechnique>();
+    resolver.registerTechnique<YWingTechnique>()->setEnabled(false);
+    resolver.registerTechnique<XYZWingTechnique>()->setEnabled(false);
+    resolver.registerTechnique<UniqueRectangle>()->setEnabled(false);
+
+    resolver.process();
+
+    QVERIFY(field9x9.isValid());
+    QVERIFY(field9x9.isResolved());
+
+    QVERIFY(field9x9.readFromPlainTextFile("../puzzle/x-wing.sdm", 3));
+    resolver.process();
+
+    QVERIFY(field9x9.isValid());
+    QVERIFY(field9x9.isResolved());
+
+
+    QVERIFY(field9x9.readFromPlainTextFile("../puzzle/x-wing.sdm", 4));
+    resolver.process();
+
+    QVERIFY(field9x9.isValid());
+    QVERIFY(field9x9.isResolved());
+
+    QVERIFY(field9x9.readFromPlainTextFile("../puzzle/x-wing.sdm", 5));
+    resolver.process();
+
+    QVERIFY(field9x9.isValid());
+    QVERIFY(field9x9.isResolved());
+}
+
 void CommonTest::benchmark16x16()
 {
     Field array16x16;
@@ -315,7 +381,7 @@ void CommonTest::benchmark16x16()
 
 }
 
-void CommonTest::xyzwing_test()
+void CommonTest::xyzwing_solve_test()
 {
     Field array9x9;
     QVERIFY(array9x9.readFromPlainTextFile("../puzzle/xyz-wing.sdm", 1));
@@ -337,7 +403,7 @@ void CommonTest::xyzwing_test()
     QVERIFY(array9x9.isResolved());
 }
 
-void CommonTest::ywing_test()
+void CommonTest::ywing_solve_test()
 {
     Field array9x9;
     QVERIFY(array9x9.readFromPlainTextFile("../puzzle/ywing.sdm", 1));
@@ -359,7 +425,7 @@ void CommonTest::ywing_test()
     QVERIFY(array9x9.isResolved());
 }
 
-void CommonTest::unique_rectangle_tests()
+void CommonTest::unique_rectangle_solve_tests()
 {
     Field array9x9;
     QVERIFY(array9x9.readFromPlainTextFile("../puzzle/unique_rectangle_type1.sdm", 1));
@@ -391,7 +457,7 @@ void CommonTest::unique_rectangle_tests()
     QVERIFY(array9x9.isResolved());
 }
 
-void CommonTest::coloring_test()
+void CommonTest::coloring_solve_test()
 {
     Field array9x9;
     QVERIFY(array9x9.readFromPlainTextFile("../puzzle/coloring.sdm", 0));
