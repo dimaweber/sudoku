@@ -43,8 +43,8 @@ class Cell: public QObject
     mutable QReadWriteLock accessLock;
 
 public:
-    typedef Cell* Ptr;
-    typedef const Cell* CPtr;
+    using Ptr =  Cell*;
+    using CPtr = const Cell*;
     Cell(quint8 n = 0, QObject* parent = nullptr);
     ~Cell();
 

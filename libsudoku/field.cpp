@@ -98,7 +98,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
         else if (symbol.isLetter())
         {
             QString s(symbol);
-            quint8 v = s.toUShort(nullptr, 17);
+            quint8 v = s.toUShort(nullptr, 26);
             cell(coord)->setValue(static_cast<CellValue>(v), true);
         }
     }

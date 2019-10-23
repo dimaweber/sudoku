@@ -27,7 +27,8 @@ private slots:
     void Coord_same_house_tests();
 
     void Cell_test_candidates();
-//    void Cell_test_removeCandidate();
+    void Cell_test_removeCandidate();
+    void Cell_setValue_test();
 
     // Low-level technique tests (1 iteration)
     void naked_group_tech_test();
@@ -197,6 +198,69 @@ void CommonTest::Cell_test_candidates()
     QVERIFY(cell->hasAnyOfCandidates(evenBits));
 
     QVERIFY(!cell->isResolved());
+}
+
+void CommonTest::Cell_test_removeCandidate()
+{
+    const quint8 n = 9;
+    House row;
+    for (int i=0; i<n; i++)
+    {
+        Cell::Ptr p = new Cell(n);
+        p->resetCandidates(n);
+        p->registerInHouse(row);
+    }
+
+    for(Cell::Ptr pCell: row)
+        for(CellValue c=1;c<=n; c++)
+        {
+            QCOMPARE(pCell->hasCandidate(c), true);
+        }
+
+    CellValue c = 1;
+    for(Cell::Ptr pCell: row)
+    {
+        pCell->removeCandidate(c++);
+    }
+
+    quint8 cellNum = 1;
+    for(Cell::Ptr pCell: row)
+    {
+        for(CellValue c=1;c<=n; c++)
+        {
+            QCOMPARE(pCell->hasCandidate(c), cellNum != c);
+        }
+        cellNum++;
+    }
+}
+
+void CommonTest::Cell_setValue_test()
+{
+    const quint8 n = 9;
+    House row;
+    for (int i=0; i<n; i++)
+    {
+        Cell::Ptr p = new Cell(n);
+        p->resetCandidates(n);
+        p->registerInHouse(row);
+    }
+
+    CellValue c = 1;
+    for(Cell::Ptr pCell: row)
+    {
+        pCell->setValue(c++);
+    }
+
+    quint8 cellNum = 1;
+    for(Cell::Ptr pCell: row)
+    {
+        QCOMPARE(pCell->value(), cellNum);
+        for(CellValue c=1;c<=n; c++)
+        {
+            QCOMPARE(pCell->hasCandidate(c), cellNum == c);
+        }
+        cellNum++;
+    }
 }
 
 void CommonTest::naked_group_tech_test()
