@@ -31,6 +31,8 @@ private slots:
     void Cell_setValue_test();
 
     // Low-level technique tests (1 iteration)
+    void naked_single_tech_test();
+    void hidden_single_tech_test();
     void naked_group_tech_test();
     void hidden_group_tech_test();
     void xwing_tech_test();
@@ -47,9 +49,13 @@ private slots:
     void benchmark16x16();
 
 private:
-    using TechTestParams = std::list<std::pair<Coord, std::list<CellValue>>>;
+    using TechTestCandidatesParams = std::list<std::pair<Coord, std::list<CellValue>>>;
+    using TechTestValuesParams = std::list<std::pair<Coord, CellValue>>;
+
+
+    /*! \brief Checks candidates are removed*/
     template<class TECH>
-    void lowLevelTechniqueTest(const QString& filename, int num, const TechTestParams& list)
+    void lowLevelTechniqueCandidateTest(const QString& filename, int num, const TechTestCandidatesParams& list, uint itertionsNum = 0)
     {
         Field field;
         QVERIFY(field.readFromPlainTextFile(filename, num));
@@ -62,8 +68,11 @@ private:
                 QCOMPARE(field.cell(c.first)->hasCandidate(a), true);
             }
         }
-
-        while (tech.perform());
+        if (itertionsNum == 0)
+            while (tech.perform());
+        else
+            for(uint iter=0; iter<itertionsNum; iter++)
+                tech.perform();
 
         for(auto c: list)
         {
@@ -71,6 +80,30 @@ private:
             {
                 QCOMPARE(field.cell(c.first)->hasCandidate(a), false);
             }
+        }
+    }
+
+    /*! \brief Checks values are set */
+    template <class TECH>
+    void lowLevelTechniqueValuesTest(const QString& filename, int num, const TechTestValuesParams& list, uint itertionsNum = 0)
+    {
+        Field field;
+        QVERIFY(field.readFromPlainTextFile(filename, num));
+        TECH tech(field);
+
+        for(auto c: list)
+        {
+                QCOMPARE(field.cell(c.first)->value(), 0);
+        }
+        if (itertionsNum == 0)
+            while (tech.perform());
+        else
+            for(uint iter=0; iter<itertionsNum; iter++)
+                tech.perform();
+
+        for(auto c: list)
+        {
+                QCOMPARE(field.cell(c.first)->value(), c.second);
         }
     }
 };
@@ -263,9 +296,33 @@ void CommonTest::Cell_setValue_test()
     }
 }
 
+void CommonTest::naked_single_tech_test()
+{
+    TechTestValuesParams checks;
+
+    checks.push_back({{2,1}, 5});
+    checks.push_back({{6,1}, 6});
+    checks.push_back({{7,1}, 7});
+    checks.push_back({{4,1}, 4});
+
+    lowLevelTechniqueValuesTest<NakedSingleTechnique>("../puzzle/naked-single.sdm", 0, checks);
+}
+
+void CommonTest::hidden_single_tech_test()
+{
+    TechTestValuesParams checks;
+    checks.push_back({{2,2}, 8});
+    checks.push_back({{2,7}, 2});
+    checks.push_back({{9,7}, 8});
+    checks.push_back({{5,6}, 4});
+    checks.push_back({{4,1}, 4});
+    checks.push_back({{4,9}, 3});
+    lowLevelTechniqueValuesTest<HiddenSingleTechnique>("../puzzle/hidden-single.sdm", 0, checks);
+}
+
 void CommonTest::naked_group_tech_test()
 {
-    TechTestParams checks;
+    TechTestCandidatesParams checks;
 
     // Naked pair 1 test
     checks.push_back({{1,4},{1}});
@@ -273,7 +330,7 @@ void CommonTest::naked_group_tech_test()
     checks.push_back({{1,6},{6}});
     checks.push_back({{3,1},{1, 7}});
     checks.push_back({{3,5},{7, 6}});
-    lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 0, checks);
+    lowLevelTechniqueCandidateTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 0, checks);
 
     // Naked pair 2 test
     checks.clear();
@@ -284,7 +341,7 @@ void CommonTest::naked_group_tech_test()
     checks.push_back({{8,3},{7}});
     checks.push_back({{9,3},{7}});
     checks.push_back({{8,5},{3,7}});
-    lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 1, checks);
+    lowLevelTechniqueCandidateTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 1, checks);
 
     // Naked triple 1 test
     checks.clear();
@@ -292,7 +349,7 @@ void CommonTest::naked_group_tech_test()
     checks.push_back({{5,3},{5, 9}});
     checks.push_back({{5,7},{5, 8, 9}});
     checks.push_back({{5,8},{5, 8, 9}});
-    lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 2, checks);
+    lowLevelTechniqueCandidateTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 2, checks);
 
     // Naked triple 2 test
     checks.clear();
@@ -305,7 +362,7 @@ void CommonTest::naked_group_tech_test()
     checks.push_back({{6,3}, {1,5,8}});
     checks.push_back({{6,7}, {8}});
     checks.push_back({{6,8}, {2,8}});
-    lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 3, checks);
+    lowLevelTechniqueCandidateTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 3, checks);
 
     // Naked quad test
     checks.clear();
@@ -314,15 +371,15 @@ void CommonTest::naked_group_tech_test()
     checks.push_back({{2,3}, {5, 6, 8}});
     checks.push_back({{2,3}, {5, 6, 8}});
     checks.push_back({{3,3}, {6}});
-    lowLevelTechniqueTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 4, checks);
+    lowLevelTechniqueCandidateTest<NakedGroupTechnique>("../puzzle/naked_group.sdm", 4, checks);
 }
 
 void CommonTest::hidden_group_tech_test()
 {
-    TechTestParams checks;
+    TechTestCandidatesParams checks;
     checks.push_back({{1,8}, {2,3,4,5,9}});
     checks.push_back({{1,9}, {3,4,5,9}});
-    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 0, checks);
+    lowLevelTechniqueCandidateTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 0, checks);
 
     checks.clear();
     checks.push_back({ {4, 3}, {5, 6} });
@@ -330,7 +387,7 @@ void CommonTest::hidden_group_tech_test()
     checks.push_back({ {5, 3}, {3, 6, 7} });
     checks.push_back({ {5, 7}, {6, 9} });
     checks.push_back({ {6, 7}, {1, 5, 9} });
-    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 1, checks);
+    lowLevelTechniqueCandidateTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 1, checks);
 
     checks.clear();
     checks.push_back({ {1,4}, {4,7,8}});
@@ -339,7 +396,7 @@ void CommonTest::hidden_group_tech_test()
     checks.push_back({ {2,9}, {5}});
     checks.push_back({ {3,9}, {2,9}});
     checks.push_back({ {6,9}, {2,9}});
-    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 2, checks);
+    lowLevelTechniqueCandidateTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 2, checks);
 
 //    broken puzzle
 //    checks.clear();
@@ -352,12 +409,12 @@ void CommonTest::hidden_group_tech_test()
     checks.push_back({{ 4,6}, {3,7,8}});
     checks.push_back({{ 4,4}, {3,7,8}});
     checks.push_back({{ 6,6}, {3,5,7,8}});
-    lowLevelTechniqueTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 4, checks);
+    lowLevelTechniqueCandidateTest<HiddenGroupTechnique>("../puzzle/hidden_group.sdm", 4, checks);
 }
 
 void CommonTest::xwing_tech_test()
 {
-    TechTestParams checks;
+    TechTestCandidatesParams checks;
 
     checks.push_back( {{1,4},{7}});
     checks.push_back( {{5,4},{7}});
@@ -365,7 +422,7 @@ void CommonTest::xwing_tech_test()
     checks.push_back( {{8,8},{7}});
     checks.push_back( {{9,4},{7}});
     checks.push_back( {{9,8},{7}});
-    lowLevelTechniqueTest<XWingTechnique>("../puzzle/x-wing.sdm", 0, checks);
+    lowLevelTechniqueCandidateTest<XWingTechnique>("../puzzle/x-wing.sdm", 0, checks);
 
     checks.clear();
     checks.push_back( {{5,2},{2}});
@@ -374,7 +431,7 @@ void CommonTest::xwing_tech_test()
     checks.push_back( {{5,9},{2}});
     checks.push_back( {{9,4},{2}});
     checks.push_back( {{9,9},{2}});
-    lowLevelTechniqueTest<XWingTechnique>("../puzzle/x-wing.sdm", 1, checks);}
+    lowLevelTechniqueCandidateTest<XWingTechnique>("../puzzle/x-wing.sdm", 1, checks);}
 
 void CommonTest::xwing_solve_test()
 {
