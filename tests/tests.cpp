@@ -93,7 +93,7 @@ private:
 
         for(auto c: list)
         {
-                QCOMPARE(field.cell(c.first)->value(), 0);
+                QVERIFY(field.cell(c.first)->value() == 0);
         }
         if (itertionsNum == 0)
             while (tech.perform());
@@ -103,7 +103,7 @@ private:
 
         for(auto c: list)
         {
-                QCOMPARE(field.cell(c.first)->value(), c.second);
+                QVERIFY(field.cell(c.first)->value() == c.second);
         }
     }
 };
