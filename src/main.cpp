@@ -39,47 +39,16 @@ int main(int argc, char *argv[])
     if (argc > 2)
         plainTextInputFileLineNum = QString(argv[2]).toInt();
 
-    Field array;
-    array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
+    Field field;
+    field.readFromPlainTextFile(filename, plainTextInputFileLineNum);
 
-    if (!array.isValid())
+    if (!field.isValid())
     {
         std::cout << "Invalid sudoku read" << std::endl;
         return 1;
     }
 
-    bool noGui = false;
-    if (argc > 3)
-    {
-        for(int i=3; i< argc; i++)
-        {
-            QString arg = QString(argv[i]);
-            if (arg == "-no-gui")
-                noGui = true;
-            if (arg == "-gui")
-                noGui = false;
-            /*
-            if (arg == "-no-hidden-single")
-                array.enableTechnique(Field::HiddenSingle, false);
-            if (arg == "-no-naked-group")
-                array.enableTechnique(Field::NakedGroup, false);
-            if (arg == "-no-hidden-group")
-                array.enableTechnique(Field::HiddenGroup, false);
-            if (arg == "-no-intersections")
-                array.enableTechnique(Field::Intersections, false);
-            if (arg == "-no-xwing")
-                array.enableTechnique(Field::XWing, false);
-            if (arg == "-no-bi-location-coloring")
-                array.enableTechnique(Field::BiLocationColoring, false);
-            if (arg == "-no-ywing")
-                array.enableTechnique(Field::YWing, false);
-            if (arg == "-no-xyzwing")
-                array.enableTechnique(Field::XYZWing, false);
-            */
-        }
-    }
-
-    Resolver resolver(array);
+    Resolver resolver(field);
     resolver.registerTechnique<NakedSingleTechnique>();
     resolver.registerTechnique<HiddenSingleTechnique>();
     resolver.registerTechnique<NakedGroupTechnique>();
@@ -91,6 +60,37 @@ int main(int argc, char *argv[])
     resolver.registerTechnique<XYZWingTechnique>();
     resolver.registerTechnique<UniqueRectangle>();
 
+    bool noGui = false;
+    if (argc > 3)
+    {
+        for(int i=3; i< argc; i++)
+        {
+            QString arg = QString(argv[i]);
+            if (arg == "-no-gui")
+                noGui = true;
+            if (arg == "-gui")
+                noGui = false;
+
+            if (arg == "-no-hidden-single")
+                resolver.technique("Hidden Single")->setEnabled(false);
+            if (arg == "-no-naked-group")
+                resolver.technique("Naked Group")->setEnabled(false);
+            if (arg == "-no-hidden-group")
+                resolver.technique("Hidden Group")->setEnabled(false);
+            if (arg == "-no-intersections")
+                resolver.technique("Intersections")->setEnabled(false);
+/*            if (arg == "-no-xwing")
+                field.enableTechnique(Field::XWing, false);
+            if (arg == "-no-bi-location-coloring")
+                field.enableTechnique(Field::BiLocationColoring, false);
+            if (arg == "-no-ywing")
+                field.enableTechnique(Field::YWing, false);
+            if (arg == "-no-xyzwing")
+                field.enableTechnique(Field::XYZWing, false);
+                */
+        }
+    }
+
     if (noGui)
     {
         qint64 elaps;
@@ -99,14 +99,14 @@ int main(int argc, char *argv[])
         resolver.process();
         elaps = timer.elapsed();
 
-        array.print();
+        field.print();
 
         std::cout << qPrintable(filename) << "[" << plainTextInputFileLineNum << "] Done in " << elaps << " ms and is ";
-        if (array.isResolved())
+        if (field.isResolved())
             std::cout << "resolved" << std::endl;
-        else if (!array.isValid())
+        else if (!field.isValid())
             std::cout << "is INVALID" << std::endl;
-        else if (array.hasEmptyValues())
+        else if (field.hasEmptyValues())
             std::cout << "NOT resolved" << std::endl;
 
         return 0;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     else
     {
         QDialog diag;
-        FieldGui fgui_before(array, &diag);
+        FieldGui fgui_before(field, &diag);
         QPushButton goButton("Go", &diag);
         QPushButton reloadButton("Reload", &diag);
         QString windowTitle = QString("Sudoku [%1: %2]").arg(filename).arg(plainTextInputFileLineNum);
@@ -191,9 +191,9 @@ int main(int argc, char *argv[])
         }, Qt::QueuedConnection);
         QApplication::connect(&resolver, &Resolver::started, &app, [&goButton, &reloadButton](){goButton.setEnabled(false);reloadButton.setEnabled(false);}, Qt::QueuedConnection);
         QApplication::connect(&resolver, &Resolver::done, &app, [&goButton, &reloadButton](){reloadButton.setEnabled(true);goButton.setEnabled(true);}, Qt::QueuedConnection);
-        QApplication::connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &array]()
+        QApplication::connect(&reloadButton, &QPushButton::pressed, [filename, plainTextInputFileLineNum, &field]()
         {
-//            array.readFromPlainTextFile(filename, plainTextInputFileLineNum);
+            field.readFromPlainTextFile(filename, plainTextInputFileLineNum);
         });
         QApplication::connect(&app, &QApplication::aboutToQuit, &resolver, &Resolver::stop);
 

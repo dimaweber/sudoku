@@ -69,8 +69,8 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 }
 #endif
 
-Technique::Technique(Field& field, const QString& name, QObject *parent)
-    :QObject(parent), enabled(true), techniqueName(name), field(field), N(field.getN())
+Technique::Technique(Field& field, const QString& name, bool enabled, QObject *parent)
+    :QObject(parent), enabled(enabled), techniqueName(name), field(field), N(field.getN())
 {
     if (Technique::allCandidatesCombinationsMasks.isEmpty())
         fillCandidatesCombinationsMasks(N);
@@ -132,8 +132,8 @@ Cell::Ptr Technique::cell(const Coord& c)
     return field.cell(c);
 }
 
-NakedSingleTechnique::NakedSingleTechnique(Field& field, QObject *parent)
-    :PerCellTechnique(field, "Naked Single", parent)
+NakedSingleTechnique::NakedSingleTechnique(Field& field, bool enabled, QObject *parent)
+    :PerCellTechnique(field, "Naked Single", enabled, parent)
 {}
 
 bool NakedSingleTechnique::runPerCell(Cell::Ptr pCell)
@@ -193,8 +193,8 @@ bool HiddenSingleTechnique::runPerHouse(House* house)
     return newValueSet;
 }
 
-HiddenSingleTechnique::HiddenSingleTechnique(Field& field, QObject* parent)
-    :PerHouseTechnique(field, "Hidden Single", parent)
+HiddenSingleTechnique::HiddenSingleTechnique(Field& field, bool enabled, QObject* parent)
+    :PerHouseTechnique(field, "Hidden Single", enabled, parent)
 {
 
 }
@@ -224,8 +224,8 @@ bool NakedGroupTechnique::runPerHouse(House *house)
     return ret;
 }
 
-NakedGroupTechnique::NakedGroupTechnique(Field& field, QObject* parent)
-    :PerHouseTechnique(field, "Naked Group", parent)
+NakedGroupTechnique::NakedGroupTechnique(Field& field, bool enabled, QObject* parent)
+    :PerHouseTechnique(field, "Naked Group", enabled, parent)
 {
 
 }
@@ -267,8 +267,8 @@ bool HiddenGroupTechnique::runPerHouse(House* house)
 
 }
 
-HiddenGroupTechnique::HiddenGroupTechnique(Field& field, QObject* parent)
-    :PerHouseTechnique(field, "Hidden Group", parent)
+HiddenGroupTechnique::HiddenGroupTechnique(Field& field, bool enabled, QObject* parent)
+    :PerHouseTechnique(field, "Hidden Group", enabled, parent)
 {
 
 }
@@ -285,8 +285,8 @@ bool PerHouseTechnique::run()
     return newValuesSet;
 }
 
-IntersectionsTechnique::IntersectionsTechnique(Field& field, QObject* parent)
-    :Technique (field, "Intersections", parent)
+IntersectionsTechnique::IntersectionsTechnique(Field& field, bool enabled, QObject* parent)
+    :Technique (field, "Intersections", enabled, parent)
 {
 }
 
@@ -334,8 +334,8 @@ bool IntersectionsTechnique::reduceIntersection(SquareHouse& square, LineHouse& 
     return changed;
 }
 
-BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, QObject* parent)
-    :Technique (field, "Bi-Location Coloring", parent)
+BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, bool enabled, QObject* parent)
+    :Technique (field, "Bi-Location Coloring", enabled, parent)
 {
 
 }
@@ -449,8 +449,8 @@ QVector<BiLocationLink> BiLocationColoringTechnique::findBiLocationLinks(CellVal
     return ret;
 }
 
-XWingTechnique::XWingTechnique(Field& field, QObject* parent)
-    :Technique(field, "X-Wing", parent)
+XWingTechnique::XWingTechnique(Field& field, bool enabled, QObject* parent)
+    :Technique(field, "X-Wing", enabled, parent)
 {
 
 }
@@ -530,8 +530,8 @@ bool XWingTechnique::run()
     return changed;
 }
 
-YWingTechnique::YWingTechnique(Field &field, QObject* parent)
-    :PerCellTechnique(field, "Y-Wing", parent)
+YWingTechnique::YWingTechnique(Field &field, bool enabled, QObject* parent)
+    :PerCellTechnique(field, "Y-Wing", enabled, parent)
 {
 
 }
@@ -584,8 +584,8 @@ bool YWingTechnique::runPerCell(Cell::Ptr cellAB)
 
 }
 
-XYZWingTechnique::XYZWingTechnique(Field &field, QObject *parent)
-    :PerCellTechnique (field, "XYZ-Wing", parent)
+XYZWingTechnique::XYZWingTechnique(Field &field, bool enabled, QObject *parent)
+    :PerCellTechnique (field, "XYZ-Wing", enabled, parent)
 {
 
 }
@@ -794,8 +794,8 @@ bool UniqueRectangle::Rectangle::applyType3aCheck()
     return false;
 }
 
-UniqueRectangle::UniqueRectangle(Field& field, QObject* parent)
-    :PerCellTechnique (field, "Unique Rectangle", parent)
+UniqueRectangle::UniqueRectangle(Field& field, bool enabled, QObject* parent)
+    :PerCellTechnique (field, "Unique Rectangle", enabled, parent)
 {
 
 }

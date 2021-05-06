@@ -19,8 +19,14 @@ public:
     Resolver(Field& field, QObject* parent = nullptr);
     ~Resolver();
     quint64 resolveTime() const;
-    template<class TECH> void registerTechnique() { techniques.append(new TECH(field, this)); }
+    template<class TECH> TECH* registerTechnique(bool enabled = true)
+    {
+        TECH* ptr = new TECH(field, enabled, this);
+        techniques.append(ptr);
+        return ptr;
+    }
     void process();
+    Technique* technique(const QString& techName);
 public slots:
     void stop();
 protected:

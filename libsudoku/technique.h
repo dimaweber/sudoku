@@ -19,7 +19,7 @@ class Technique : public QObject
     const QString techniqueName;
     static void fillCandidatesCombinationsMasks(quint8 n);
 public:
-    Technique (Field& field, const QString& name, QObject* parent = nullptr);
+    Technique (Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr);
     virtual ~Technique();
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
@@ -51,8 +51,8 @@ class PerHouseTechnique: public Technique
 {
     Q_OBJECT
 public:
-    PerHouseTechnique (Field& field, const QString& name, QObject* parent = nullptr)
-        :Technique(field, name, parent)
+    PerHouseTechnique (Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr)
+        :Technique(field, name, enabled, parent)
     {}
 protected:
     virtual bool runPerHouse(House* ) =0;
@@ -63,8 +63,8 @@ class PerCellTechnique: public Technique
 {
     Q_OBJECT
 public:
-    PerCellTechnique (Field& field, const QString& name, QObject* parent = nullptr)
-        :Technique(field, name, parent)
+    PerCellTechnique (Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr)
+        :Technique(field, name, enabled, parent)
     {}
 protected:
     virtual bool runPerCell(Cell::Ptr ) =0;
@@ -75,7 +75,7 @@ class NakedSingleTechnique : public PerCellTechnique
 {
     Q_OBJECT
 public:
-    NakedSingleTechnique(Field& field, QObject* parent = nullptr);
+    NakedSingleTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
     virtual void setEnabled(bool enabled = true) override;
     virtual bool canBeDisabled() const override { return false;}
 protected:
@@ -88,7 +88,7 @@ class HiddenSingleTechnique : public PerHouseTechnique
 protected:
     bool runPerHouse(House* house) override;
 public:
-    HiddenSingleTechnique(Field& field, QObject* parent = nullptr);
+    HiddenSingleTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 };
 
 class NakedGroupTechnique : public PerHouseTechnique
@@ -97,7 +97,7 @@ class NakedGroupTechnique : public PerHouseTechnique
 protected:
     bool runPerHouse(House* house) override;
 public:
-    NakedGroupTechnique(Field& field, QObject* parent = nullptr);
+    NakedGroupTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 };
 
 class HiddenGroupTechnique: public PerHouseTechnique
@@ -106,7 +106,7 @@ class HiddenGroupTechnique: public PerHouseTechnique
 protected:
     bool runPerHouse(House* house) override;
 public:
-    HiddenGroupTechnique(Field& field, QObject* parent = nullptr);
+    HiddenGroupTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 };
 
 
@@ -116,7 +116,7 @@ class IntersectionsTechnique: public Technique
 private:
     bool reduceIntersection(SquareHouse& square, LineHouse& area);
 public:
-    IntersectionsTechnique(Field& field, QObject* parent = nullptr);
+    IntersectionsTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     virtual bool run() override;
 };
@@ -125,7 +125,7 @@ class BiLocationColoringTechnique: public Technique
 {
     Q_OBJECT
 public:
-    BiLocationColoringTechnique(Field& field, QObject* parent = nullptr);
+    BiLocationColoringTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     bool run() override;
     QVector<BiLocationLink> findBiLocationLinks(CellValue val);
@@ -137,7 +137,7 @@ class XWingTechnique : public Technique
 {
     Q_OBJECT
 public:
-    XWingTechnique(Field& field, QObject* parent = nullptr);
+    XWingTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     bool run() override;
 };
@@ -146,7 +146,7 @@ class YWingTechnique : public PerCellTechnique
 {
     Q_OBJECT
 public:
-    YWingTechnique(Field& field, QObject* parent = nullptr);
+    YWingTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     bool runPerCell(Cell::Ptr) override;
 };
@@ -155,7 +155,7 @@ class XYZWingTechnique: public PerCellTechnique
 {
     Q_OBJECT
 public:
-    XYZWingTechnique(Field& field, QObject* parent = nullptr);
+    XYZWingTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     bool runPerCell(Cell::Ptr) override;
 };
@@ -183,7 +183,7 @@ class UniqueRectangle : public PerCellTechnique
     };
 
 public:
-    UniqueRectangle(Field& field, QObject* parent = nullptr);
+    UniqueRectangle(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
     bool runPerCell(Cell::Ptr) override;
 

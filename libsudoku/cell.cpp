@@ -40,6 +40,12 @@ void Cell::setValue(quint8 val, bool init_value)
     emit valueSet(val);
 }
 
+void Cell::removeValue()
+{
+    val = 0;
+    emit valueRemoved();
+}
+
 bool Cell::removeCandidate(CellValue guessVal)
 {
     if (isResolved())
@@ -150,6 +156,8 @@ void Cell::resetCandidates(quint8 n)
 {
     candidateMask.resize(n);
     candidateMask.fill(true);
+    removeValue();
+    emit candidatesReset();
 }
 
 bool Cell::isValid() const

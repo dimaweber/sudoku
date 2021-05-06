@@ -101,8 +101,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     for (int bit = 1; bit <= cell->candidatesCapacity(); bit++)
     {
         QLabel* label = new QLabel(this);
-        QString text = QString("%1").arg(bit);
-        label->setText(text);
+        label->setNum(bit);
         candidateLabel[bit-1] = label;
         int subrow = (bit-1) / s_n;
         int subcol = (bit-1) % s_n;
@@ -137,6 +136,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         pal.setColor(label->foregroundRole(), QColor("red"));
         label->setPalette(pal);
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::candidatesRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
@@ -148,6 +148,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::candidatesAboutToBeRemoved, this, [this](QBitArray v)
     {
         for (int i=0; i<v.count(); i++)
@@ -162,11 +163,35 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
             }
         }
     }, Qt::QueuedConnection);
+
     connect (cell, &Cell::valueAboutToBeSet, this, [this](CellValue)
     {
         QPalette pal = this->palette();
         pal.setBrush(QPalette::Window, hightlightBrush);
         this->setPalette(pal);
+    }, Qt::QueuedConnection);
+
+
+    connect (cell, &Cell::candidatesReset, this, [this, cell]()
+    {
+        for(int i=0; i<candidateLabel.count(); i++)
+        {
+            QLabel* candidate =  candidateLabel[i];
+            candidate->show();
+            candidate->setNum(i+1);
+            QPalette pal = candidate->palette();
+            pal.setColor(candidate->foregroundRole(), QColor("blue"));
+            candidate->setPalette(pal);
+        }
+        setText("");
+    }, Qt::QueuedConnection);
+
+    connect (cell, &Cell::valueRemoved, this, [this]()
+    {
+        setText("");
+        QPalette pal = palette();
+        pal.setColor(foregroundRole(), QColor("blue"));
+        setPalette(pal);
     }, Qt::QueuedConnection);
 }
 
@@ -190,8 +215,7 @@ void CellGui::setValue(CellValue v)
 {
     for(QLabel* candidate: candidateLabel)
         candidate->hide();
-    QString text = QString("%1").arg(v);
-    setText(text);
+    setNum(v);
 
     QPalette pal = this->palette();
     pal.setBrush(QPalette::Window, backgroundBrush);

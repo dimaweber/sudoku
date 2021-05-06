@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/puzzle">
+        <file>learningcurve.sdm</file>
+    </qresource>
+</RCC>

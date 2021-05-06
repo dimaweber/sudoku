@@ -47,6 +47,7 @@ public:
     CellValue value() const {return val;}
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
+    void removeValue();
     bool removeCandidate(CellValue val);
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
@@ -70,6 +71,8 @@ public:
     bool operator == (const Cell& other) const;
 signals:
     void valueSet(CellValue v);
+    void candidatesReset();
+    void valueRemoved();
     void valueAboutToBeSet(CellValue v);
     void candidateRemoved(CellValue v);
     void candidateAboutToBeRemoved(CellValue v);

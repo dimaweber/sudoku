@@ -66,6 +66,14 @@ void Resolver::process()
     }while(changed);
 }
 
+Technique *Resolver::technique(const QString &techName)
+{
+    for(Technique* tech: techniques)
+        if (tech->name() == techName)
+            return tech;
+    return nullptr;
+}
+
 void Resolver::stop()
 {
     if (isRunning())

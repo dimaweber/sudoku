@@ -157,7 +157,7 @@ void CommonTest::Cell_test_candidates()
 void CommonTest::benchmark()
 {
     Field array;
-    QVERIFY(array.readFromPlainTextFile("puzzle/learningcurve.sdm", 1));
+    QVERIFY(array.readFromPlainTextFile(":/puzzle/learningcurve.sdm", 1));
     bool isResolved = false;
     bool isValid = false;
     Resolver resolver(array, nullptr);
