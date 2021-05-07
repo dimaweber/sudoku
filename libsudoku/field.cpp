@@ -28,9 +28,7 @@ void Field::setN(quint8 n)
         if (!cells[idx])
             cells[idx] = new Cell(n);
         Cell::Ptr pCell = cells[idx];
-        pCell->coord().setRawIndex(idx);
-        pCell->resetCandidates(n);
-        pCell->setDelay(false);
+        pCell->reset(n, idx);
     }
 
     prepareHouses(n);
@@ -88,21 +86,23 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
         if (!line.startsWith('#'))
             lines.append(line);
     }while(!stream.atEnd());
-    QString line = lines.at(qMin(num, lines.count()));
+    QString line = lines.at(qMin(num, lines.count()-1));
     auto n = static_cast<quint8>(qSqrt(line.count()));
     setN(n);
+
     for(Coord coord = Coord::first(); coord.isValid(); coord++)
     {
         QChar symbol = line[coord.rawIndex()];
         if (symbol.isDigit() && symbol.toLatin1() != '0')
             cell(coord)->setValue(static_cast<CellValue>(symbol.digitValue()), true);
-        if (symbol.isLetter())
+        else if (symbol.isLetter())
         {
             QString s(symbol);
-            quint8 v = s.toUInt(nullptr, 17);
+            quint8 v = s.toUShort(nullptr, 26);
             cell(coord)->setValue(static_cast<CellValue>(v), true);
         }
     }
+
     return true;
 }
 
@@ -185,19 +185,33 @@ CellSet Field::allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2)
     return vis1 / vis2;
 }
 
-void Field::print() const
+QVector<House::Ptr> Field::commonHouses(Cell::CPtr c1, Cell::CPtr c2)
 {
-    std::cout << " C: ";
+    QVector<House::Ptr> ret;
+    const Coord& coord1 = c1->coord();
+    const Coord& coord2 = c2->coord();
+    if (coord1.col() == coord2.col())
+        ret.append(&columns[coord1.col()-1]);
+    if (coord1.row() == coord2.row())
+        ret.append(&rows[coord2.row()-1]);
+    if (coord1.squareIdx() == coord2.squareIdx())
+        ret.append(&squares[coord1.squareIdx()]);
+    return ret;
+}
+
+void Field::print(std::ostream &stream) const
+{
+    stream << " C: ";
     for (int col=1; col<=N;col++)
-        std::cout << col;
-    std::cout <<std::endl;
-    std::cout << "    ";
+        stream << col;
+    stream <<std::endl;
+    stream << "    ";
     for (int i=0; i<N; i++)
-        std::cout <<".";
-    std::cout << std::endl;
+        stream <<".";
+    stream << std::endl;
     for (quint8 row=1; row <= N; row ++)
     {
-        rows[row-1].print();
+        stream << rows[row-1] << std::endl;
     }
 }
 
@@ -234,3 +248,9 @@ bool Field::isResolved() const
     return !hasEmptyValues() && isValid();
 }
 
+
+std::ostream& operator << (std::ostream& stream, const Field& field)
+{
+    field.print(stream);
+    return stream;
+}

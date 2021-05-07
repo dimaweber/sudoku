@@ -15,12 +15,12 @@ class Field;
 class Technique : public QObject
 {
     Q_OBJECT
-    bool enabled;
     const QString techniqueName;
+    bool enabled;
     static void fillCandidatesCombinationsMasks(quint8 n);
 public:
     Technique (Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr);
-    virtual ~Technique();
+    virtual ~Technique() = default;
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
     virtual bool canBeDisabled() const { return true;}
@@ -36,8 +36,8 @@ protected:
     Cell::Ptr cell(const Coord& c);
 
     virtual bool run() = 0;
-    Field& field;
     quint8 N;
+    Field& field;
 signals:
     void started();
     void done();
@@ -69,6 +69,19 @@ public:
 protected:
     virtual bool runPerCell(Cell::Ptr ) =0;
     virtual bool run() final;
+};
+
+class PerCandidateTechnique: public Technique
+{
+    Q_OBJECT
+public:
+    PerCandidateTechnique(Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr)
+        :Technique(field, name, enabled, parent)
+    {}
+protected:
+    virtual bool runPerCandidate(CellValue candidate) = 0;
+    virtual bool run() final;
+
 };
 
 class NakedSingleTechnique : public PerCellTechnique
@@ -121,13 +134,13 @@ protected:
     virtual bool run() override;
 };
 
-class BiLocationColoringTechnique: public Technique
+class BiLocationColoringTechnique: public PerCandidateTechnique
 {
     Q_OBJECT
 public:
     BiLocationColoringTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
-    bool run() override;
+    bool runPerCandidate(CellValue candidate) override;
     QVector<BiLocationLink> findBiLocationLinks(CellValue val);
 
 };
@@ -180,6 +193,7 @@ class UniqueRectangle : public PerCellTechnique
         bool applyType2bCheck();
         bool applyType2cCheck();
         bool applyType3aCheck();
+        bool applyType3bCheck();
     };
 
 public:

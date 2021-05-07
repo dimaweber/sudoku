@@ -12,7 +12,7 @@
 
 #include <QApplication>
 #include <QElapsedTimer>
-
+#include <QCommandLineParser>
 #include <QDialog>
 #include <QBoxLayout>
 #include <QPushButton>
@@ -20,76 +20,69 @@
 #include <QCheckBox>
 #include <iostream>
 
-
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<CellValue>("CellValue");
     QApplication app(argc, argv);
+    QCoreApplication::setApplicationName("QSudokuSolver");
+    QCoreApplication::setApplicationVersion("1.1");
 
-    if (argc<2)
-    {
-        std::cout << "supply input file name as first parameter" << std::endl;
-        return 1;
-    }
+    QCommandLineParser parser;
+    parser.setApplicationDescription("sudoku 3x3, 4x4, 5x5 puzzles solver");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("file", "The file to open");
+    parser.addPositionalArgument("puzzle", "The line  number with puzzle to solve");
+
+    QCommandLineOption noGuiOption (QStringList() << "n" << "no-gui", "Use text interface");
+    parser.addOption(noGuiOption);
+
+    parser.addOptions({
+                       {"no-hidden-single", "Disable Hidden Single technique"},
+                       {"no-naked-group", "Disable Naked Group technique"},
+                       {"no-hidden-group", "Disable Hidden Group technique"},
+                       {"no-intersections", "Disable Intersections technique"},
+                       {"no-bi-location-coloring", "Disable Bi-Location Coloring technique"},
+                       {"no-xwing", "Disable Hidden X-Wing technique"},
+                       {"no-ywing", "Disable Hidden Y-Wing technique"},
+                       {"no-xyzwing", "Disable Hidden XYZ-Wing technique"},
+                       {"unique-rectangle", "Disable Unique Rectangle technique"},
+                     });
+
+    parser.process(app);
 
     int plainTextInputFileLineNum = 1;
+    bool noGui = false;
+    noGui = parser.isSet(noGuiOption);
+    QStringList args = parser.positionalArguments();
+    if (args.size() != 2)
+    {
+        std::cerr << "filename or linenumber is missing. Exiting";
+        parser.showHelp(1);
+        Q_UNREACHABLE();
+    }
 
-    QString filename = argv[1];
-
-    if (argc > 2)
-        plainTextInputFileLineNum = QString(argv[2]).toInt();
+    QString filename = args.at(0);
+    plainTextInputFileLineNum = args.at(1).toInt();
 
     Field field;
-    field.readFromPlainTextFile(filename, plainTextInputFileLineNum);
-
-    if (!field.isValid())
+    if (!field.readFromPlainTextFile(filename, plainTextInputFileLineNum) || !field.isValid())
     {
-        std::cout << "Invalid sudoku read" << std::endl;
+        std::cerr << "Invalid sudoku read" << std::endl;
         return 1;
     }
 
     Resolver resolver(field);
     resolver.registerTechnique<NakedSingleTechnique>();
-    resolver.registerTechnique<HiddenSingleTechnique>();
-    resolver.registerTechnique<NakedGroupTechnique>();
-    resolver.registerTechnique<HiddenGroupTechnique>();
-    resolver.registerTechnique<IntersectionsTechnique>();
-    resolver.registerTechnique<BiLocationColoringTechnique>();
-    resolver.registerTechnique<XWingTechnique>();
-    resolver.registerTechnique<YWingTechnique>();
-    resolver.registerTechnique<XYZWingTechnique>();
-    resolver.registerTechnique<UniqueRectangle>();
-
-    bool noGui = false;
-    if (argc > 3)
-    {
-        for(int i=3; i< argc; i++)
-        {
-            QString arg = QString(argv[i]);
-            if (arg == "-no-gui")
-                noGui = true;
-            if (arg == "-gui")
-                noGui = false;
-
-            if (arg == "-no-hidden-single")
-                resolver.technique("Hidden Single")->setEnabled(false);
-            if (arg == "-no-naked-group")
-                resolver.technique("Naked Group")->setEnabled(false);
-            if (arg == "-no-hidden-group")
-                resolver.technique("Hidden Group")->setEnabled(false);
-            if (arg == "-no-intersections")
-                resolver.technique("Intersections")->setEnabled(false);
-/*            if (arg == "-no-xwing")
-                field.enableTechnique(Field::XWing, false);
-            if (arg == "-no-bi-location-coloring")
-                field.enableTechnique(Field::BiLocationColoring, false);
-            if (arg == "-no-ywing")
-                field.enableTechnique(Field::YWing, false);
-            if (arg == "-no-xyzwing")
-                field.enableTechnique(Field::XYZWing, false);
-                */
-        }
-    }
+    resolver.registerTechnique<HiddenSingleTechnique>()->setEnabled(!parser.isSet("no-hidden-single"));
+    resolver.registerTechnique<NakedGroupTechnique>()->setEnabled(!parser.isSet("no-naked-group"));
+    resolver.registerTechnique<HiddenGroupTechnique>()->setEnabled(!parser.isSet("no-hidden-group"));
+    resolver.registerTechnique<IntersectionsTechnique>()->setEnabled(!parser.isSet("no-intersections"));
+    resolver.registerTechnique<BiLocationColoringTechnique>()->setEnabled(!parser.isSet("no-bi-location-coloring"));
+    resolver.registerTechnique<XWingTechnique>()->setEnabled(!parser.isSet("no-xwing"));
+    resolver.registerTechnique<YWingTechnique>()->setEnabled(!parser.isSet("no-ywing"));
+    resolver.registerTechnique<XYZWingTechnique>()->setEnabled(!parser.isSet("no-xyzwing"));
+    resolver.registerTechnique<UniqueRectangle>()->setEnabled(!parser.isSet("unique-rectangle"));
 
     if (noGui)
     {
@@ -99,7 +92,7 @@ int main(int argc, char *argv[])
         resolver.process();
         elaps = timer.elapsed();
 
-        field.print();
+        std::cout << field << std::endl;
 
         std::cout << qPrintable(filename) << "[" << plainTextInputFileLineNum << "] Done in " << elaps << " ms and is ";
         if (field.isResolved())

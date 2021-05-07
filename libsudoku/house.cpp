@@ -27,12 +27,12 @@ House::House()
     cells.reserve(House::N);
 }
 
-void CellSet::print() const
+void CellSet::print(std::ostream &stream) const
 {
-    std::cout << qPrintable(name()) << ": ";
+    stream << qPrintable(name()) << ": ";
     for (Cell* pCell: cells)
-        pCell->print();
-    std::cout << std::endl;
+        stream << *pCell;
+    //stream << std::endl;
 }
 
 
@@ -48,9 +48,10 @@ bool CellSet::removeCandidate(CellValue val)
 
 int CellSet::unresolvedCellsCount() const
 {
-    return std::count_if(begin(), end(), [](const Cell* p)
-        {return !p->isResolved();}
-    );
+    return std::count_if(begin(), end(), [](Cell::CPtr p)
+    {
+        return !p->isResolved();
+    });
 }
 
 bool CellSet::hasValue(CellValue val) const
@@ -64,8 +65,9 @@ bool CellSet::hasValue(CellValue val) const
 int CellSet::candidatesCount(CellValue val) const
 {
     return std::count_if(begin(), end(), [val](Cell::CPtr p)
-        {return p->hasCandidate(val);}
-    );
+    {
+        return p->hasCandidate(val);
+    });
 }
 
 bool CellSet::hasUnresolvedCells() const
@@ -142,4 +144,10 @@ CellSet CellSet::operator/(const CellSet& a) const
         if (a.cells.contains(cell))
             ret.addCell(cell);
     return ret;
+}
+
+std::ostream& operator << (std::ostream& stream, const CellSet& cellset)
+{
+    cellset.print(stream);
+    return stream;
 }

@@ -4,14 +4,23 @@
 #
 #-------------------------------------------------
 
+QT		+= concurrent
 QT       -= gui
 
 TARGET = sudoku
 TEMPLATE = lib
 
-CONFIG += c++14 staticlib
+CONFIG += c++17 silent
 
-DEFINES += SUDOKU_LIBRARY
+win32 {
+CONFIG += staticlib
+}
+
+DEFINES += SUDOKU_LIBRARY \
+		  _MT \
+		  _DELAY_SET_VALUE \
+		  _DELAY_TECHNIQUE_RUN \
+		  LOG_STREAM=std::clog
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -46,11 +55,11 @@ HEADERS += \
 		technique.h
 
 unix {
-    target.path = /usr/lib
-    INSTALLS += target
+	target.path = /usr/lib
+	INSTALLS += target
 
-    LIBS += -lgsl -lgslcblas
-    QMAKE_CXXFLAGS += -Wall -Wpedantic
+	LIBS += -lgsl -lgslcblas
+	QMAKE_CXXFLAGS += -Wall -Wpedantic
 }
 
 

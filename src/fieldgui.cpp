@@ -90,7 +90,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFrameStyle(QFrame::Box);
 
-    backgroundBrush = pal.brush(QPalette::Background);
+    backgroundBrush = pal.brush(QPalette::Window);
     hightlightBrush = QColor("tan");
 
     auto sublay = new QGridLayout(this);
@@ -171,7 +171,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         this->setPalette(pal);
     }, Qt::QueuedConnection);
 
-
+/*
     connect (cell, &Cell::candidatesReset, this, [this, cell]()
     {
         for(int i=0; i<candidateLabel.count(); i++)
@@ -193,6 +193,8 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
         pal.setColor(foregroundRole(), QColor("blue"));
         setPalette(pal);
     }, Qt::QueuedConnection);
+*/
+    connect(cell, &Cell::reseted, this, &CellGui::onCellReset, Qt::QueuedConnection);
 }
 
 void CellGui::highlightOn()
@@ -209,6 +211,20 @@ void CellGui::removeCandidate(CellValue bit)
 {
     QLabel* label = candidateLabel[bit-1];
     label->setText(" ");
+}
+
+void CellGui::onCellReset()
+{
+    QPalette pal = palette();
+    pal.setColor(foregroundRole(), QColor("blue"));
+
+    for(int i=0; i<candidateLabel.size(); i++)
+    {
+        candidateLabel[i]->show();
+        candidateLabel[i]->setText(QString::number(i+1));
+        candidateLabel[i]->setPalette(pal);
+    }
+    setText("");
 }
 
 void CellGui::setValue(CellValue v)

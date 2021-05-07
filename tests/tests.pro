@@ -1,8 +1,8 @@
-QT       += testlib
+QT       += testlib concurrent
 QT       -= gui
 
 TARGET = unit_tests
-CONFIG   += console c++14
+CONFIG   += console c++17
 CONFIG   -= app_bundle
 
 TEMPLATE = app

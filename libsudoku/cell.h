@@ -6,7 +6,7 @@
 #include <QBitArray>
 #include <QVector>
 #include <QObject>
-
+#include <QReadWriteLock>
 class House;
 
 //class Value
@@ -39,12 +39,16 @@ class Cell: public QObject
     QVector<House*> houses;
     //Cell& operator = (const Cell& );
     bool useDelay{false};
-public:
-    typedef Cell* Ptr;
-    typedef const Cell* CPtr;
-    Cell(quint8 n = 0, QObject* parent = nullptr);
 
-    CellValue value() const {return val;}
+    mutable QReadWriteLock accessLock;
+
+public:
+    using Ptr =  Cell*;
+    using CPtr = const Cell*;
+    Cell(quint8 n = 0, QObject* parent = nullptr);
+    ~Cell();
+
+    CellValue value() const;
     bool isInitialValue() const {return initial_value;}
     void setValue(CellValue val, bool init_value = false);
     void removeValue();
@@ -52,8 +56,8 @@ public:
     int candidatesCapacity() const {return candidateMask.count();}
     int candidatesCount() const {return candidateMask.count(true);}
     bool isResolved() const {return value() != 0;}
-    bool hasCandidate(quint8 val) const;
-    void print() const;
+    bool hasCandidate(CellValue val) const;
+    void print(std::ostream& stream) const;
     void registerInHouse(House& house);
     Coord& coord() { return coordinate;}
     const Coord& coord() const { return coordinate;}
@@ -67,12 +71,16 @@ public:
     bool candidatesExactMatch(Cell::CPtr o) const;
     int hasAnyOfCandidates(const QBitArray& mask) const;
     QBitArray commonCandidates(Cell::CPtr a) const;
+    int commonCandidatesCount(Cell::CPtr a) const;
 
     bool operator == (const Cell& other) const;
+
+    void reset(quint8 n, quint8 idx);
 signals:
     void valueSet(CellValue v);
     void candidatesReset();
     void valueRemoved();
+    void reseted();
     void valueAboutToBeSet(CellValue v);
     void candidateRemoved(CellValue v);
     void candidateAboutToBeRemoved(CellValue v);
@@ -81,6 +89,6 @@ signals:
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);
-
+std::ostream& operator << (std::ostream& stream, const Cell& cell);
 
 #endif // CELL_H

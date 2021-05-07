@@ -34,7 +34,7 @@ public:
 public slots:
     void setValue(CellValue );
     void removeCandidate(CellValue bit);
-
+    void onCellReset();
 };
 
 class FieldGui : public QWidget

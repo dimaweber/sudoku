@@ -1,6 +1,6 @@
-QT += gui widgets
+QT += gui widgets concurrent
 
-CONFIG += c++14 console
+CONFIG += c++17 console
 CONFIG -= app_bundle
 
 TARGET = sudoku
@@ -13,7 +13,6 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 DEFINES += INVALID_COORD_EXCEPTION
-
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.

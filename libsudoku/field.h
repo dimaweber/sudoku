@@ -32,8 +32,9 @@ public:
 
     CellSet allCellsVisibleFromCell(Cell::CPtr c) ;
     CellSet allCellsVisibleFromBothCell(Cell::CPtr c1, Cell::CPtr c2);
+    QVector<House::Ptr> commonHouses(Cell::CPtr c1, Cell::CPtr c2);
 
-    void print() const;
+    void print(std::ostream& stream) const;
 
     bool isResolved() const;
     bool hasEmptyValues() const;
@@ -45,5 +46,7 @@ public:
 private:
     friend class Technique;
 };
+
+std::ostream& operator << (std::ostream& stream, const Field& field);
 
 #endif // FIELD_H

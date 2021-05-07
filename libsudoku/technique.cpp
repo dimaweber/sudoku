@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QSet>
 
+//#define DELAY_TECHNIQUE_RUN
+
 QSet<QBitArray> Technique::allCandidatesCombinationsMasks;
 
 #ifdef Q_OS_WIN
@@ -70,14 +72,11 @@ void Technique::fillCandidatesCombinationsMasks(quint8 n)
 #endif
 
 Technique::Technique(Field& field, const QString& name, bool enabled, QObject *parent)
-    :QObject(parent), enabled(enabled), techniqueName(name), field(field), N(field.getN())
+    :QObject(parent), techniqueName(name),enabled(enabled), N(field.getN()),  field(field)
 {
     if (Technique::allCandidatesCombinationsMasks.isEmpty())
         fillCandidatesCombinationsMasks(N);
 }
-
-Technique::~Technique()
-= default;
 
 void Technique::setEnabled(bool enabled)
 {
@@ -89,11 +88,17 @@ bool Technique::perform()
     if (!enabled)
         return false;
     emit started();
+#ifdef DELAY_TECHNIQUE_RUN
     {
         using namespace  std::chrono_literals;
         auto t0 = std::chrono::steady_clock::now() + 100ms;
+<<<<<<< HEAD
         //std::this_thread::sleep_until (t0);
+=======
+        std::this_thread::sleep_until (t0);
+>>>>>>> 9c8621a539c4b2047cfa7b05998d44d2e4cc6ace
     }
+#endif
     bool res = run();
     if (res)
         emit applied();
@@ -141,10 +146,10 @@ bool NakedSingleTechnique::runPerCell(Cell::Ptr pCell)
     bool changed = false;
     if (!pCell->isResolved() && pCell->candidatesCount() == 1)
     {
-        for (quint8 j=1;j<=pCell->candidatesCapacity(); j++)
+        for (CellValue j=1;j<=pCell->candidatesCapacity(); j++)
             if (pCell->hasCandidate(j))
             {
-                std::cout << "Naked single " << (int)j << " found in " << pCell->coord()
+                LOG_STREAM << "Naked single " << (int)j << " found in " << pCell->coord()
                           << std::endl;
                 pCell->setValue(j);
                 changed = true;
@@ -181,7 +186,7 @@ bool HiddenSingleTechnique::runPerHouse(House* house)
             {
                 if (pCell->hasCandidate(bit))
                 {
-                    std::cout << "Hidden single " << (int)bit << " found in " << pCell->coord()
+                    LOG_STREAM << "Hidden single " << (int)bit << " found in " << pCell->coord()
                               << std::endl;
                     pCell->setValue(bit);
                     newValueSet = true;
@@ -210,10 +215,10 @@ bool NakedGroupTechnique::runPerHouse(House *house)
                 indices.append(pCell);
         if (indices.count() == testMask.count(true) && house->unresolvedCellsCount() > indices.count())
         {
-            std::cout << "Naked combination " << testMask << " found in ";
+            LOG_STREAM << "Naked combination " << testMask << " found in ";
             for (Cell* pCell: indices)
-                std::cout << pCell->coord();
-            std::cout << std::endl;
+                LOG_STREAM << pCell->coord();
+            LOG_STREAM << std::endl;
             for(Cell* pCell: *house)
                 if (!indices.contains(pCell) && !pCell->isResolved())
                     ret |= pCell->removeCandidate(testMask);
@@ -252,13 +257,13 @@ bool HiddenGroupTechnique::runPerHouse(House* house)
         }
         if (indices.count() == testMask.count(true))
         {
-            std::cout << "Hidden combination " << testMask << " found in ";
+            LOG_STREAM << "Hidden combination " << testMask << " found in ";
             for (Cell* pCell: indices)
             {
-                std::cout << pCell->coord();
+                LOG_STREAM << pCell->coord();
                 ret |= pCell->removeCandidate(~testMask);
             }
-            std::cout << std::endl;
+            LOG_STREAM << std::endl;
             if (ret)
                 return true;
         }
@@ -273,8 +278,21 @@ HiddenGroupTechnique::HiddenGroupTechnique(Field& field, bool enabled, QObject* 
 
 }
 
+#ifdef MT
+#  include <QtConcurrent>
+#endif
 bool PerHouseTechnique::run()
 {
+#ifdef MT
+    return QtConcurrent::blockingFilteredReduced<bool>(areas(), [this](House* area)
+    {
+        return runPerHouse(area);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
     bool newValuesSet = false;
     for(House* area: areas())
     {
@@ -283,6 +301,7 @@ bool PerHouseTechnique::run()
             break;
     }
     return newValuesSet;
+#endif
 }
 
 IntersectionsTechnique::IntersectionsTechnique(Field& field, bool enabled, QObject* parent)
@@ -319,13 +338,13 @@ bool IntersectionsTechnique::reduceIntersection(SquareHouse& square, LineHouse& 
         {
             if (squareNoLine.candidatesCount(v) == 0 && lineNoSquare.candidatesCount(v) != 0)
             {
-                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
+                LOG_STREAM << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
                           << " intersection but no in any other cell of " << qPrintable(square.name()) << std::endl;
                 changed |= lineNoSquare.removeCandidate(v);
             }
             if (lineNoSquare.candidatesCount(v) == 0 && squareNoLine.candidatesCount(v) != 0)
             {
-                std::cout << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
+                LOG_STREAM << (int)v << " found in " << qPrintable(square.name()) << " and " << qPrintable(area.name())
                           << " intersection but no in any other cell of " << qPrintable(area.name()) << std::endl;
                 changed |= squareNoLine.removeCandidate(v);
             }
@@ -335,98 +354,95 @@ bool IntersectionsTechnique::reduceIntersection(SquareHouse& square, LineHouse& 
 }
 
 BiLocationColoringTechnique::BiLocationColoringTechnique(Field& field, bool enabled, QObject* parent)
-    :Technique (field, "Bi-Location Coloring", enabled, parent)
+    :PerCandidateTechnique( field, "Bi-Location Coloring", enabled, parent)
 {
 
 }
 
-bool BiLocationColoringTechnique::run()
+bool BiLocationColoringTechnique::runPerCandidate(CellValue candidate)
 {
     bool changed = false;
-    QMap<int, QVector<BiLocationLink>> links;
-    for (CellValue i=1; i<=N; i++)
+    QVector<BiLocationLink> links;
+    links = findBiLocationLinks(candidate);
+    ColoredLinksVault vault(candidate);
+    for (BiLocationLink& link: links)
     {
-        links[i] = findBiLocationLinks(i);
-        ColoredLinksVault vault(i);
-        for (BiLocationLink& link: links[i])
-        {
-            CellColor c1 = vault.getColor(link.first());
-            CellColor c2 = vault.getColor(link.second());
+        CellColor c1 = vault.getColor(link.first());
+        CellColor c2 = vault.getColor(link.second());
 
-            if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
+        if (c1 == ColorPair::UnknownColor && c2 == ColorPair::UnknownColor)
+        {
+            ColorPair cp = ColorPair::newPair();
+            vault.addLink(link, cp);
+        }
+        else
+        {
+            if (c1 == ColorPair::UnknownColor)
+                vault.addCell(link.first(), ColorPair::antiColor(c2));
+            else if (c2 == ColorPair::UnknownColor)
+                vault.addCell(link.second(), ColorPair::antiColor(c1));
+            else if (c1 != ColorPair::antiColor(c2))
             {
-                ColorPair cp = ColorPair::newPair();
-                vault.addLink(link, cp);
+                vault.recolor(ColorPair::antiColor(c2), c1);
+                vault.recolor(c2, ColorPair::antiColor(c1));
             }
             else
             {
-                if (c1 == ColorPair::UnknownColor)
-                    vault.addCell(link.first(), ColorPair::antiColor(c2));
-                else if (c2 == ColorPair::UnknownColor)
-                    vault.addCell(link.second(), ColorPair::antiColor(c1));
-                else if (c1 != ColorPair::antiColor(c2))
-                {
-                    vault.recolor(ColorPair::antiColor(c2), c1);
-                    vault.recolor(c2, ColorPair::antiColor(c1));
-                }
-                else
-                {
-                    // loop
-                }
+                // loop
             }
         }
-        for (BiLocationLink& link: links[i])
+    }
+    for (BiLocationLink& link: links)
+    {
+        LOG_STREAM << (int)candidate << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
+                  << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
+    }
+    for(House* house: areas())
+    {
+        // check for houses with 2 cells of same color
+        CellSet cellsWithCandidate = house->cellsWithCandidate(candidate);
+        QMap<CellColor, int> presentColor;
+        for (Cell* cell: cellsWithCandidate)
         {
-            std::cout << (int)i << "bi-location link: " << link.first()->coord() << vault.getColor(link.first())
-                      << link.second()->coord() << vault.getColor(link.second()) <<std::endl;
-        }
-        for(House* house: areas())
-        {
-            // check for houses with 2 cells of same color
-            CellSet cellsWithCandidate = house->cellsWithCandidate(i);
-            QMap<CellColor, int> presentColor;
-            for (Cell* cell: cellsWithCandidate)
+            CellColor color = vault.getColor(cell);
+            if (color != ColorPair::UnknownColor)
             {
-                CellColor color = vault.getColor(cell);
-                if (color != ColorPair::UnknownColor)
+                presentColor[color]++;
+                if (presentColor[color]>1)
                 {
-                    presentColor[color]++;
-                    if (presentColor[color]>1)
-                    {
-                        // we've found house with 2 cells from same chain and same color
-                        // this mean -- all cells with this color in this chain are OFF
-                        std::cout << "two cells with same color in one house: this color is OFF" << std::endl;
-                        changed |= vault.removeCandidateForColor(color);
-                    }
+                    // we've found house with 2 cells from same chain and same color
+                    // this mean -- all cells with this color in this chain are OFF
+                    LOG_STREAM << "two cells with same color in one house: this color is OFF" << std::endl;
+                    changed |= vault.removeCandidateForColor(color);
                 }
             }
         }
-        for(Cell* c: cells())
+    }
+    for(Cell* c: cells())
+    {
+        if (!c->hasCandidate(candidate))
+            continue;
+
+        CellColor clr = vault.getColor(c);
+        if (clr != ColorPair::UnknownColor)
+            continue;
+
+        QVector<CellColor> visibleColors;
+        CellSet visibleCells = field.allCellsVisibleFromCell(c);
+        for (Cell* pCell: visibleCells)
         {
-            if (!c->hasCandidate(i))
+            CellColor color = vault.getColor(pCell);
+            if (color == ColorPair::UnknownColor)
                 continue;
-
-            CellColor clr = vault.getColor(c);
-            if (clr != ColorPair::UnknownColor)
-                continue;
-
-            QVector<CellColor> visibleColors;
-            CellSet visibleCells = field.allCellsVisibleFromCell(c);
-            for (Cell* pCell: visibleCells)
+            CellColor acolor = ColorPair::antiColor(color);
+            if (visibleColors.contains(acolor))
             {
-                CellColor color = vault.getColor(pCell);
-                if (color == ColorPair::UnknownColor)
-                    continue;
-                CellColor acolor = ColorPair::antiColor(color);
-                if (visibleColors.contains(acolor))
-                {
-                    std::cout << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
-                    changed |= c->removeCandidate(i);
-                    break;
-                }
-                else
-                    visibleColors.append(color);
+                LOG_STREAM << "Non-colored cell " << c->coord() << " can see color " << color << " and its antiColor " << acolor << ": this cell is OFF" << std::endl;
+                changed |= c->removeCandidate(candidate);
+                break;
             }
+            else
+                visibleColors.append(color);
         }
     }
 
@@ -497,7 +513,7 @@ bool XWingTechnique::run()
                         if (columnA.candidatesCount(value) == 2 && columnB.candidatesCount(value) == 2
                                 && (row1.candidatesCount(value) > 2 || row2.candidatesCount(value) > 2))
                         {
-                            std::cout << "columns x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            LOG_STREAM << "columns x-wing found for " << (int)value << " in " << A1 << A2 << B1 << B2 << std::endl;
                             for (quint8 col=1; col <= columns().count(); col++)
                             {
                                 if (col == colA_idx || col==colB_idx)
@@ -511,7 +527,7 @@ bool XWingTechnique::run()
                         if (row1.candidatesCount(value) == 2 && row2.candidatesCount(value) == 2
                                 && (columnA.candidatesCount(value)>2 || columnB.candidatesCount(value)>2))
                         {
-                            std::cout << "rows x-wing found for " << value << " in " << A1 << A2 << B1 << B2 << std::endl;
+                            LOG_STREAM << "rows x-wing found for " << (int)value << " in " << A1 << A2 << B1 << B2 << std::endl;
                             for (quint8 row=1; row <= rows().count(); row++)
                             {
                                 if (row == row1_idx || row==row2_idx)
@@ -574,7 +590,7 @@ bool YWingTechnique::runPerCell(Cell::Ptr cellAB)
         for (Cell* ac: cellsAC)
             for(Cell* bc: cellsBC)
             {
-                std::cout << "Y-Wing found: " << cellAB->coord() << " " << ac->coord() << " " << bc->coord() << std::endl;
+                LOG_STREAM << "Y-Wing found: " << cellAB->coord() << " " << ac->coord() << " " << bc->coord() << std::endl;
                 CellSet visibleFromBoth = field.allCellsVisibleFromBothCell(ac, bc);
                 ret |= visibleFromBoth.removeCandidate(C);
             }
@@ -608,7 +624,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
     {
         Cell::Ptr sq_cell = cell(xz_co);
         if (sq_cell->candidatesCount() == 2 &&
-            xyzcell->commonCandidates(sq_cell).count(true) == 2)
+            xyzcell->commonCandidatesCount(sq_cell) == 2)
         {
             Cell::Ptr xzcell = sq_cell;
             CellValue y;
@@ -624,7 +640,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
             {
                 Cell::Ptr row_cell = cell(yz_co);
                 if (   row_cell->candidatesCount()==2
-                    && xyzcell->commonCandidates(row_cell).count(true)==2
+                    && xyzcell->commonCandidatesCount(row_cell)==2
                     && row_cell->hasCandidate(y))
                 {
                     Cell::Ptr yzcell = row_cell;
@@ -636,7 +652,10 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
                     else
                         z = v3;
 
-                    std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
+                    if (xz_co.row() == yz_co.row())
+                        continue;
+
+                    LOG_STREAM << "XYZ-Wing found with apex " << xyzcell->coord()
                               << " and wings " << xzcell->coord()
                               << " / " << yzcell->coord()
                               << " Z is " << (int)z << std::endl;
@@ -655,7 +674,7 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
             {
                 Cell::Ptr col_cell = cell(yz_co);
                 if (   col_cell->candidatesCount()==2
-                    && xyzcell->commonCandidates(col_cell).count(true)==2
+                    && xyzcell->commonCandidatesCount(col_cell)==2
                     && col_cell->hasCandidate(y))
                 {
                     Cell::Ptr yzcell = col_cell;
@@ -667,7 +686,10 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
                     else
                         z = v3;
 
-                    std::cout << "XYZ-Wing found with apex " << xyzcell->coord()
+                    if (xz_co.col() == yz_co.col())
+                        continue;
+
+                    LOG_STREAM << "XYZ-Wing found with apex " << xyzcell->coord()
                               << " and wings " << xzcell->coord()
                               << " / " << yzcell->coord()
                               << " Z is " << (int)z << std::endl;
@@ -691,6 +713,16 @@ bool XYZWingTechnique::runPerCell(Cell::Ptr xyzcell)
 bool PerCellTechnique::run()
 {
     bool ret = false;
+#ifdef MT
+    QtConcurrent::blockingFilteredReduced<bool>(cells(), [this](Cell::Ptr cell)
+    {
+        return runPerCell(cell);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
     for (Cell::Ptr pCell: cells())
     {
         emit cellAnalyzeStarted(pCell);
@@ -699,6 +731,7 @@ bool PerCellTechnique::run()
         if (ret)
             break;
     }
+#endif
     return ret;
 }
 
@@ -717,7 +750,7 @@ bool UniqueRectangle::Rectangle::applyType1Check()
         QBitArray commonCandidates = diagonalCell->commonCandidates(cell);
         if (commonCandidates.count(true) == 2)
         {
-            std::cout << "Unique Rectangle Type 1" << *this << std::endl;
+            LOG_STREAM << "Unique Rectangle Type 1" << *this << std::endl;
             return diagonalCell->removeCandidate(commonCandidates);
         }
     }
@@ -731,7 +764,7 @@ bool UniqueRectangle::Rectangle::applyType2aCheck()
          diagNeigborCell->candidatesExactMatch(diagonalCell) &&
          diagonalCell->candidatesCount() == 3)
     {
-        std::cout << "Unique Rectangle Type 2A" << *this << std::endl;
+        LOG_STREAM << "Unique Rectangle Type 2A" << *this << std::endl;
         QVector<CellValue> cellValues = cell->candidates();
         QVector<CellValue> diagValues = diagonalCell->candidates();
         for (CellValue v: cellValues)
@@ -749,7 +782,7 @@ bool UniqueRectangle::Rectangle::applyType2bCheck()
         neigborCell->candidatesExactMatch(diagonalCell) &&
         neigborCell->candidatesCount() == 3)
     {
-        std::cout << "Unique Rectangle Type 2B" << *this << std::endl;
+        LOG_STREAM << "Unique Rectangle Type 2B" << *this << std::endl;
         QVector<CellValue> cellValues = cell->candidates();
         QVector<CellValue> neigValues = neigborCell->candidates();
         for (CellValue v: cellValues)
@@ -768,7 +801,7 @@ bool UniqueRectangle::Rectangle::applyType2cCheck()
         neigborCell->candidatesCount() == 3
         )
     {
-        std::cout << "Unique Rectangle Type 2C" << *this << std::endl;
+        LOG_STREAM << "Unique Rectangle Type 2C" << *this << std::endl;
         QVector<CellValue> cellValues = cell->candidates();
         QVector<CellValue> neigValues = neigborCell->candidates();
         for (CellValue v: cellValues)
@@ -781,6 +814,7 @@ bool UniqueRectangle::Rectangle::applyType2cCheck()
 
 bool UniqueRectangle::Rectangle::applyType3aCheck()
 {
+    bool ret = false;
     if (cell->candidatesExactMatch(diagNeigborCell) &&
         cell->commonCandidates(neigborCell).count(true) == 2 &&
         cell->commonCandidates(diagonalCell).count(true) == 2 &&
@@ -789,9 +823,94 @@ bool UniqueRectangle::Rectangle::applyType3aCheck()
         !diagonalCell->candidatesExactMatch(neigborCell)
        )
     {
-
+        LOG_STREAM << "Unique rectangle type 3A" << *this << std::endl;
+        QVector<CellValue> vals1 = diagonalCell->candidates();
+        QVector<CellValue> vals2 = neigborCell->candidates();
+        QVector<CellValue> baseValues = cell->candidates();
+        for (CellValue v: baseValues)
+        {
+            vals1.removeAll(v);
+            vals2.removeAll(v);
+        }
+        LOG_STREAM << "virtual cell values from roof are " << (int)vals1[0] << " " << (int)vals2[0] <<std::endl;
+        QBitArray virtualCellCandidates(cell->candidatesCapacity());
+        virtualCellCandidates.setBit(vals1[0]-1);
+        virtualCellCandidates.setBit(vals2[0]-1);
+        Cell* pair = nullptr;
+        for (auto c: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+        {
+            if (c->candidatesExactMatch(virtualCellCandidates))
+            {
+                LOG_STREAM << "pair found" << c->coord() << std::endl;
+                pair = c;
+                break;
+            }
+        }
+        if (pair)
+        {
+            for (auto c: field.allCellsVisibleFromBothCell(diagonalCell, neigborCell))
+            {
+                if (c != pair)
+                {
+                    ret |= c->removeCandidate(virtualCellCandidates);
+                }
+            }
+        }
     }
-    return false;
+    return ret;
+}
+
+bool UniqueRectangle::Rectangle::applyType3bCheck()
+{
+    bool ret = false;
+    if (cell->candidatesExactMatch(neigborCell) &&
+        cell->commonCandidates(diagonalCell).count(true) == 2 &&
+        cell->commonCandidates(diagNeigborCell).count(true) == 2 &&
+        diagNeigborCell->candidatesCount() == 3 &&
+        diagonalCell->candidatesCount() == 3 &&
+        !diagonalCell->candidatesExactMatch(diagNeigborCell)
+       )
+    {
+        LOG_STREAM << "Unique rectangle type 3B" << *this << std::endl;
+        QVector<CellValue> vals1 = diagonalCell->candidates();
+        QVector<CellValue> vals2 = diagNeigborCell->candidates();
+        QVector<CellValue> baseValues = cell->candidates();
+        for (CellValue v: baseValues)
+        {
+            vals1.removeAll(v);
+            vals2.removeAll(v);
+        }
+        LOG_STREAM << "virtual cell values from roof are " << (int)vals1[0] << " " << (int)vals2[0] <<std::endl;
+        QBitArray virtualCellCandidates(cell->candidatesCapacity());
+        virtualCellCandidates.setBit(vals1[0]-1);
+        virtualCellCandidates.setBit(vals2[0]-1);
+        for (House::CPtr hs: field.commonHouses(diagonalCell, diagNeigborCell))
+        {
+            Cell* pair = nullptr;
+            for (auto c: *hs)
+            {
+                if (c == diagonalCell || c == diagNeigborCell)
+                    continue;
+                if (c->candidatesExactMatch(virtualCellCandidates))
+                {
+                    LOG_STREAM << "pair found" << c->coord() << std::endl;
+                    pair = c;
+                    break;
+                }
+            }
+            if (pair)
+            {
+                for (auto c: *hs)
+                {
+                    if (c != pair && c != diagonalCell && c != diagNeigborCell)
+                    {
+                        ret |= c->removeCandidate(virtualCellCandidates);
+                    }
+                }
+            }
+        }
+    }
+    return ret;
 }
 
 UniqueRectangle::UniqueRectangle(Field& field, bool enabled, QObject* parent)
@@ -849,7 +968,36 @@ bool UniqueRectangle::runPerCell(Cell::Ptr pCell)
             ret |= rect.applyType2aCheck();
             ret |= rect.applyType2bCheck();
             ret |= rect.applyType2cCheck();
+            ret |= rect.applyType3aCheck();
+            ret |= rect.applyType3bCheck();
         }
     }
+    return ret;
+}
+
+bool PerCandidateTechnique::run()
+{
+    bool ret = false;
+    static QList<CellValue> candidates;
+    if (field.getN() != candidates.count())
+        for(CellValue i=1; i<= field.getN(); i++)
+            candidates.append(i);
+#ifdef MT
+    QtConcurrent::blockingFilteredReduced<bool>(candidates, [this](CellValue candidate)
+    {
+        return runPerCandidate(candidate);
+    },
+    [](bool& result, const bool& intermediate)
+    {
+        result |= intermediate;
+    });
+#else
+    for (CellValue candidate: candidates)
+    {
+        ret |= runPerCandidate(candidate);
+        if (ret)
+            break;
+    }
+#endif
     return ret;
 }
