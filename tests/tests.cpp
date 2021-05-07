@@ -24,6 +24,8 @@ private slots:
     void Cell_test_candidates();
 //    void Cell_test_removeCandidate();
 
+    void ywing_test();
+
     void benchmark();
 
 private:
@@ -152,6 +154,32 @@ void CommonTest::Cell_test_candidates()
     QVERIFY(cell.hasAnyOfCandidates(evenBits));
 
     QVERIFY(!cell.isResolved());
+}
+
+void CommonTest::ywing_test()
+{
+    Field array;
+    QVERIFY(array.readFromPlainTextFile(":/puzzle/ywing.sdm", 1));
+    bool isResolved = false;
+    bool isValid = false;
+    Resolver resolver(array, nullptr);
+    resolver.registerTechnique<NakedSingleTechnique>();
+    resolver.registerTechnique<HiddenSingleTechnique>();
+    resolver.registerTechnique<NakedGroupTechnique>();
+    resolver.registerTechnique<HiddenGroupTechnique>();
+    resolver.registerTechnique<IntersectionsTechnique>();
+    resolver.registerTechnique<BiLocationColoringTechnique>();
+    resolver.registerTechnique<XWingTechnique>();
+    resolver.registerTechnique<YWingTechnique>();
+    resolver.registerTechnique<XYZWingTechnique>();
+
+    QBENCHMARK{
+        resolver.process();
+    }
+    isValid = array.isValid();
+    isResolved = array.isResolved();
+    QVERIFY(isValid);
+    QVERIFY(isResolved);
 }
 
 void CommonTest::benchmark()
