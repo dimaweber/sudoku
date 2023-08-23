@@ -14,7 +14,7 @@ FieldGui::FieldGui(Field& field, QWidget* parent)
     :QWidget (parent)
 {
     layout = new QGridLayout(this);
-    layout->setMargin(0);
+//    layout->setMargin(0);
     layout->setSpacing(0);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for (quint8 i=1; i<=field.getN(); i++)
@@ -94,7 +94,7 @@ CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
     hightlightBrush = QColor("tan");
 
     auto sublay = new QGridLayout(this);
-    sublay->setMargin(0);
+//    sublay->setMargin(0);
     sublay->setSpacing(0);
     setLayout(sublay);
     int s_n = static_cast<int>(qSqrt(cell->candidatesCapacity()));
