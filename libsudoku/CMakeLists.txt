@@ -18,8 +18,8 @@ add_compile_definitions(LOG_STREAM=std::clog)
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent)
 qt_standard_project_setup()
 
-qt_add_library(libsudoku ${SOURCES})
+qt_add_library(solver ${SOURCES})
 
-target_link_libraries(libsudoku PRIVATE Qt6::Core Qt6::Concurrent)
+target_link_libraries(solver PRIVATE Qt6::Core Qt6::Concurrent)
 
-install(TARGETS libsudoku LIBRARY)
+install(TARGETS solver LIBRARY)

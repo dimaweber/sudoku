@@ -11,6 +11,6 @@ include_directories(../libsudoku)
 
 qt_add_executable(sudoku ${SOURCES})
 
-target_link_libraries(sudoku PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets libsudoku -lgsl)
+target_link_libraries(sudoku PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets solver -lgsl)
 
 install(TARGETS sudoku RUNTIME)
