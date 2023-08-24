@@ -37,7 +37,7 @@ readability-use-anyofallof
 # readability-identifier-naming
 # google-readability-casting
 HeaderFilterRegex: '.*.h'
-WarningsAsErrors: '*,-readability-identifier-naming,-google-readability-casting'
+WarningsAsErrors: '*,-readability-identifier-naming,-google-readability-casting,-readability-redundant-access-specifiers'
 UseColor: 'Yes'
 FormatStyle: file
 CheckOptions:

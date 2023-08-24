@@ -52,7 +52,7 @@ void FieldGui::highlightCellOff(Cell::Ptr pCell)
 }
 
 CellGui::CellGui(Cell::CPtr cell, QWidget* parent)
-    :QLabel(parent), cell(cell), candidatesLayout(nullptr)
+    :QLabel(parent), cell(cell)
 {
     quint8 n = sqrt(cell->candidatesCapacity());
     QFont fnt = font();

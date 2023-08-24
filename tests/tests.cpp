@@ -13,40 +13,7 @@ class CommonTest : public QObject
     Q_OBJECT
 
 public:
-    CommonTest();
-
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
-    void init();
-
-    // Low-level api tests
-    void Coord_initialization_tests();
-    void Coord_getters_tests();
-    void Coord_operation_tests();
-    void Coord_same_house_tests();
-
-    void Cell_test_candidates();
-    void Cell_test_removeCandidate();
-    void Cell_setValue_test();
-
-    // Low-level technique tests (1 iteration)
-    void naked_single_tech_test();
-    void hidden_single_tech_test();
-    void naked_group_tech_test();
-    void hidden_group_tech_test();
-    void xwing_tech_test();
-
-    // Hi-level techniques tests (solve whole puzzle)
-    void xwing_solve_test();
-    void xyzwing_solve_test();
-    void ywing_solve_test();
-    void unique_rectangle_solve_tests();
-    void coloring_solve_test();
-
-    // Benchmarks
-    void benchmark9x9();
-    void benchmark16x16();
+    CommonTest() = default;
 
 private:
     using TechTestCandidatesParams = std::list<std::pair<Coord, std::list<CellValue>>>;
@@ -106,11 +73,40 @@ private:
                 QVERIFY(field.cell(c.first)->value() == c.second);
         }
     }
+//private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void init();
+
+    // Low-level api tests
+    void Coord_initialization_tests();
+    void Coord_getters_tests();
+    void Coord_operation_tests();
+    void Coord_same_house_tests();
+
+    void Cell_test_candidates();
+    void Cell_test_removeCandidate();
+    void Cell_setValue_test();
+
+    // Low-level technique tests (1 iteration)
+    void naked_single_tech_test();
+    void hidden_single_tech_test();
+    void naked_group_tech_test();
+    void hidden_group_tech_test();
+    void xwing_tech_test();
+
+    // Hi-level techniques tests (solve whole puzzle)
+    void xwing_solve_test();
+    void xyzwing_solve_test();
+    void ywing_solve_test();
+    void unique_rectangle_solve_tests();
+    void coloring_solve_test();
+
+    // Benchmarks
+    void benchmark9x9();
+    void benchmark16x16();
 };
 
-CommonTest::CommonTest()
-{
-}
 
 void CommonTest::initTestCase()
 {
@@ -220,8 +216,8 @@ void CommonTest::Cell_test_candidates()
     QVERIFY(cell->hasCandidate(5));
     QVERIFY(cell->hasCandidate(7));
     QVERIFY(cell->hasCandidate(9));
-    QVERIFY_EXCEPTION_THROWN(cell->hasCandidate(0),  std::out_of_range);
-    QVERIFY_EXCEPTION_THROWN(cell->hasCandidate(10), std::out_of_range);
+    QVERIFY_THROWS_EXCEPTION(std::out_of_range, cell->hasCandidate(0));
+    QVERIFY_THROWS_EXCEPTION(std::out_of_range, cell->hasCandidate(10));
 
     QBitArray evenBits(9);
     evenBits.setBit(1);

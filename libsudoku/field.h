@@ -10,14 +10,14 @@
 
 class Field
 {
-    quint8 N;
+    quint8 N{0};
     QVector<ColumnHouse> columns;
     QVector<RowHouse> rows;
     QVector<SquareHouse> squares;
     QVector<House::Ptr> areas;
-    QVector<Cell::Ptr> cells;
+    QVector<Cell::Ptr> cells{nullptr};
 public:
-    Field();
+    Field() = default;
     ~Field();
 
     quint8 getN() const {return N;}

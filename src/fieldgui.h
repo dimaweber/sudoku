@@ -1,5 +1,4 @@
-#ifndef FIELDGUI_H
-#define FIELDGUI_H
+#pragma once
 
 #include <QtCore/qglobal.h>
 #if QT_VERSION >= 0x050000
@@ -19,7 +18,7 @@ class CellGui : public QLabel
 {
     Q_OBJECT
     Cell::CPtr cell;
-    QLayout* candidatesLayout;
+    QLayout* candidatesLayout{nullptr};
     QMap<int, QLabel*> candidateLabel;
     QBrush backgroundBrush;
     QBrush hightlightBrush;
@@ -52,5 +51,3 @@ signals:
 private:
     void setCellWidgetValue(const Cell& cell);
 };
-
-#endif // FIELDGUI_H

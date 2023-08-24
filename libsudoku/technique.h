@@ -41,7 +41,6 @@ signals:
     void started();
     void done();
     void applied();
-
     void cellAnalyzeStarted(Cell::Ptr);
     void cellAnalyzeFinished(Cell::Ptr);
 };
