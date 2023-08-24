@@ -34,4 +34,4 @@ set(CMAKE_INSTALL_LIBDIR bin)
 
 add_subdirectory(src)
 add_subdirectory(libsudoku)
-#add_subdirectory(tests)
+add_subdirectory(tests)
