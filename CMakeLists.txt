@@ -16,8 +16,8 @@ endif (CCACHE_FOUND)
 
 add_compile_options(
         -Werror
-#        -Wall
-#        -Wextra
+        -Wall
+        -Wextra
 )
 
 option(TIDY_CHECKS "Run clang-tidy for statis analyze" OFF)

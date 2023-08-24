@@ -6,7 +6,7 @@
 
 class BiLocationLink
 {
-    CellValue candidate {0};
+//    CellValue candidate {0};
     Cell* cell1   {nullptr};
     Cell* cell2   {nullptr};
 public:
