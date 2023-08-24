@@ -1,6 +1,4 @@
-#ifndef CELL_H
-#define CELL_H
-
+#pragma once
 #include "coord.h"
 #include <iostream>
 #include <QBitArray>
@@ -46,7 +44,6 @@ public:
     using Ptr =  Cell*;
     using CPtr = const Cell*;
     Cell(quint8 n = 0, QObject* parent = nullptr);
-    ~Cell();
 
     CellValue value() const;
     bool isInitialValue() const {return initial_value;}
@@ -77,18 +74,16 @@ public:
 
     void reset(quint8 n, quint8 idx);
 signals:
-    void valueSet(CellValue v);
+    void valueSet(CellValue);
     void candidatesReset();
     void valueRemoved();
     void reseted();
-    void valueAboutToBeSet(CellValue v);
-    void candidateRemoved(CellValue v);
-    void candidateAboutToBeRemoved(CellValue v);
-    void candidatesRemoved(QBitArray v);
-    void candidatesAboutToBeRemoved(QBitArray v);
+    void valueAboutToBeSet(CellValue);
+    void candidateRemoved(CellValue);
+    void candidateAboutToBeRemoved(CellValue);
+    void candidatesRemoved(QBitArray);
+    void candidatesAboutToBeRemoved(QBitArray);
 };
 
 std::ostream& operator << (std::ostream& stream, const QBitArray& arr);
 std::ostream& operator << (std::ostream& stream, const Cell& cell);
-
-#endif // CELL_H

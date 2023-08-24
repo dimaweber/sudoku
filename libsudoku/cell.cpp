@@ -16,11 +16,6 @@ Cell::Cell(quint8 n, QObject* parent)
         resetCandidates(n);
 }
 
-Cell::~Cell()
-{
-    // unrigisterFromHouses();
-}
-
 CellValue Cell::value() const
 {
 #ifdef MT
@@ -202,12 +197,10 @@ void Cell::print(std::ostream& stream) const
         stream << (int)value();
 }
 
-void Cell::registerInHouse(House& area)
+void Cell::registerInHouse(House& house)
 {
-    houses.append(&area);
-    area.addCell(this);
-//    if (value > 0)
-    //        area.removeGuess(value);
+    houses.append(&house);
+    house.addCell(this);
 }
 
 void Cell::resetCandidates(quint8 n)

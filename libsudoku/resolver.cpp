@@ -7,7 +7,7 @@
 #include <chrono>
 
 Resolver::Resolver(Field& field, QObject *parent)
-    :QThread(parent), field(field), elaps(0)
+    :QThread(parent), field(field)
 {}
 
 Resolver::~Resolver()

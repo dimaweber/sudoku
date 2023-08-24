@@ -11,20 +11,20 @@ class Resolver : public QThread
 {
     Q_OBJECT
     Field& field;
-    quint64 elaps;
+    quint64 elaps{0};
 
 public:
     QVector<Technique*> techniques; /// TODO: make in private
     Resolver(Field& field, QObject* parent = nullptr);
-    ~Resolver();
+    ~Resolver() override;
     quint64 resolveTime() const;
     template<class TECH> Technique* registerTechnique() { Technique* tech = new TECH(field, this); techniques.append(tech); return tech; }
     void process();
     Technique* technique(const QString& techName);
-public slots:
+//public slots:
     void stop();
 protected:
-    void run();
+    void run() override;
 signals:
     void done(quint64);
     void resolved(quint64);

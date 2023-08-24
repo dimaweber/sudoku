@@ -20,7 +20,6 @@ class Technique : public QObject
     static void fillCandidatesCombinationsMasks(quint8 n);
 public:
     Technique (Field& field, const QString& name, bool enabled = true, QObject* parent = nullptr);
-    virtual ~Technique() = default;
     const QString& name() const {return techniqueName;}
     virtual void setEnabled(bool enabled = true);
     virtual bool canBeDisabled() const { return true;}
@@ -56,7 +55,7 @@ public:
     {}
 protected:
     virtual bool runPerHouse(House* ) =0;
-    virtual bool run() final;
+    bool run() final;
 };
 
 class PerCellTechnique: public Technique
@@ -68,7 +67,7 @@ public:
     {}
 protected:
     virtual bool runPerCell(Cell::Ptr ) =0;
-    virtual bool run() final;
+    bool run() final;
 };
 
 class PerCandidateTechnique: public Technique
@@ -80,7 +79,7 @@ public:
     {}
 protected:
     virtual bool runPerCandidate(CellValue candidate) = 0;
-    virtual bool run() final;
+    bool run() final;
 
 };
 
@@ -89,10 +88,10 @@ class NakedSingleTechnique : public PerCellTechnique
     Q_OBJECT
 public:
     NakedSingleTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
-    virtual void setEnabled(bool enabled = true) override;
-    virtual bool canBeDisabled() const override { return false;}
+    void setEnabled(bool enabled = true) override;
+    bool canBeDisabled() const override { return false;}
 protected:
-    virtual bool runPerCell(Cell::Ptr) override;
+    bool runPerCell(Cell::Ptr) override;
 };
 
 class HiddenSingleTechnique : public PerHouseTechnique
@@ -131,7 +130,7 @@ private:
 public:
     IntersectionsTechnique(Field& field, bool enabled = true, QObject* parent = nullptr);
 protected:
-    virtual bool run() override;
+    bool run() override;
 };
 
 class BiLocationColoringTechnique: public PerCandidateTechnique
