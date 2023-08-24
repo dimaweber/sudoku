@@ -27,6 +27,7 @@ if (TIDY_CHECKS)
     )
 endif ()
 
+include(CPack)
 include(GNUInstallDirs)
 
 set(CMAKE_INSTALL_BINDIR bin)
@@ -47,3 +48,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 add_subdirectory(src)
 add_subdirectory(libsudoku)
 add_subdirectory(tests)
+
+file(GLOB_RECURSE sdm_files "puzzle/*.sdm")
+install(FILES ${sdm_files} DESTINATION puzzle/)
