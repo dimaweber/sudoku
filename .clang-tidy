@@ -1,0 +1,57 @@
+Checks: '-*,
+bugprone-argument-comment,
+bugprone-assert-side-effect,
+bugprone-bool-pointer-implicit-conversion,
+-bugprone-exception-escape,
+bugprone-misplaced-operator-in-strlen-in-alloc,
+bugprone-parent-virtual-call,
+bugprone-sizeof-expression,
+bugprone-standalone-empty,
+bugprone-string-constructor,
+bugprone-stringview-nullptr,
+bugprone-undefined-memory-manipulation,
+bugprone-unused-return-value,
+bugprone-virtual-near-miss,
+clang-diagnostic-unused-variable,
+-cppcoreguidelines-init-variables,
+cppcoreguidelines-virtual-class-destructor,
+modernize-deprecated-headers,
+modernize-redundant-void-arg,
+modernize-use-bool-literals,
+modernize-use-default-member-init,
+modernize-use-emplace,
+modernize-use-equals-default,
+modernize-use-override,
+readability-delete-null-pointer,
+readability-else-after-return,modernize-use-nullptr,
+readability-inconsistent-declaration-parameter-name,
+readability-make-member-function-const,
+readability-redundant-access-specifiers,
+readability-redundant-declaration,
+readability-simplify-boolean-expr,
+readability-static-accessed-through-instance,
+readability-use-anyofallof
+'
+# bugprone-reserved-identifier
+# misc-const-correctness
+# readability-identifier-naming
+# google-readability-casting
+HeaderFilterRegex: '.*.h'
+WarningsAsErrors: '*,-readability-identifier-naming,-google-readability-casting'
+UseColor: 'Yes'
+FormatStyle: file
+CheckOptions:
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '3'
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: 'true'
+  - key: readability-identifier-naming.EnumCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.EnumPrefix
+    value: 'E_'
+  - key: readability-identifier-naming.EnumConstantCase
+    value: 'CamelCase'
+  - key: modernize-deprecated-headers.CheckHeaderFile
+    value: 'true'
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'fASSERT'

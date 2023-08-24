@@ -87,7 +87,7 @@ bool Field::readFromPlainTextFile(const QString& filename, int num)
             lines.append(line);
     }while(!stream.atEnd());
     QString line = lines.at(qMin(num, lines.count()-1));
-    auto n = static_cast<quint8>(qSqrt(line.count()));
+    auto n = static_cast<quint8>(qSqrt(line.length()));
     setN(n);
 
     for(Coord coord = Coord::first(); coord.isValid(); coord++)

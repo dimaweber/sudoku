@@ -30,7 +30,7 @@ public:
     void highlightOff();
 
     void resetCandidates();
-    
+
 public slots:
     void setValue(CellValue );
     void removeCandidate(CellValue bit);
