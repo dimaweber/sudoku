@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 
 include_directories(../libsudoku)
 
-qt_add_executable(tests ${SOURCES} resource.qrc)
+qt_add_executable(unit_tests ${SOURCES} resource.qrc)
 
-target_link_libraries(tests PRIVATE Qt6::Core Qt6::Test libsudoku -lgsl)
+target_link_libraries(unit_tests PRIVATE Qt6::Core Qt6::Test libsudoku -lgsl)
 
-install(TARGETS tests RUNTIME)
+install(TARGETS unit_tests RUNTIME)
